@@ -28,6 +28,10 @@ export function templateFor(settings) {
 export function isContinuousTemplate(settings) {
   return settings.mode === 'adaptive' && ['guided-v2', 'guided-v3'].includes(settings.template);
 }
+export function defaultGenerationInstruction(settings, composition = false) {
+  if (settings.mode === 'translation') return '完整、忠实翻译当前章节，保留题面、公式与条件；不额外作答或加入教学内容。';
+  return `在当前${composition ? '规划小节及所分配来源' : '章节'}范围内实际完成学习目标要求的成果，用所选模板表达。目标要求解题时给出题号对应的过程与答案，不以讲解代替作答；要求提示而不作答时尊重限制。保留原资料的重要条件、公式和证据边界。`;
+}
 export function defaultEditInstruction(settings, action) {
   if (settings.mode === 'adaptive' && settings.writingTemplate) return action === 'explain'
     ? '沿用当前笔记已选定的模板，补足此处理解所需的概念、推理与例子，保持条件准确，不展开成整份新笔记。'

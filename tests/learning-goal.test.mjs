@@ -1,10 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createDemo } from '../src/demo.ts';
-import { buildMessages, runModel, splitSource } from '../server/harness.mjs';
-import { templateSettings } from '../shared/learning-templates.mjs';
+import { buildMessages, runModel, splitSource, validateResult } from '../server/harness.mjs';
+import { templateSettings, defaultGenerationInstruction } from '../shared/learning-templates.mjs';
 import { learningGoalPrompt } from '../shared/learning-goal.mjs';
 import { defaultKnowledge } from '../shared/learning.mjs';
+import { freshTemplateLibrary, templateSnapshot } from '../shared/writing-templates.mjs';
+import { templateRoutingRequest } from '../shared/template-routing.mjs';
+import { parseMaterial } from '../server/material-import.mjs';
+import { applyResult, textOf } from '../shared/document.mjs';
 
 function request(action = 'generate', mode = 'adaptive') {
   const document = createDemo(), chapter = document.chapters[0];
@@ -50,4 +54,48 @@ test('split generation and bounded format repair retain the full goal contract i
   assert.equal(calls.length, segments.length + 1);
   assert.equal(JSON.parse(raw).blocks.length, segments.length);
   assert.match(calls[1].messages.at(-1).content, /修复 JSON/);
+});
+
+test('HTML exercise task reaches routing and generation; new derivations render with question anchors without requiring an original answer',async()=>{
+  const html='<main><h1>原创练习</h1><form><p>第1题：计算观测 2、4、6 的均值。</p></form></main>';
+  const parsed=await parseMaterial({name:'exercise.html',data:Buffer.from(html).toString('base64')});
+  const input=request(),chapter=input.document.chapters[0];
+  input.document.intent='给我每道题的手写过程和答案';
+  input.document.pages=[{number:1,text:parsed.sections[0].text}];chapter.sourcePages=[1];
+  const library=freshTemplateLibrary();
+  const routing=buildMessages(templateRoutingRequest(input.document,library));
+  assert.equal(JSON.parse(routing[1].content).document.intent,input.document.intent);
+  assert.match(routing[0].content,/不能撤销明确的作答/);
+  for(const id of ['narrative','lecture']){
+    input.learning={...templateSettings('adaptive'),writingTemplate:templateSnapshot(library,id)};
+    input.instruction=defaultGenerationInstruction(input.learning);
+    let calls=0;
+    const raw=await runModel({baseUrl:'https://example.invalid/v1',apiKey:'test-only',model:'test'},buildMessages(input),undefined,async(_url,options)=>{
+      calls++;const body=JSON.parse(options.body),context=JSON.parse(body.messages[1].content);
+      assert.equal(context.learningIntent,input.document.intent);assert.equal(context.writingTemplate.id,id);
+      assert.match(context.source[0].text,/第1题/);assert.match(context.instruction,/过程与答案/);
+      assert.match(body.messages[0].content,/原文没附答案不代表不能求解/);
+      assert.match(body.messages[0].content,/手写字体/);assert.match(body.messages[0].content,/仅要求答案/);
+      return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify({blocks:[
+        {type:'heading',text:'第1题',sourcePages:[1],sourceQuote:'第1题：计算观测 2、4、6 的均值。'},
+        {type:'paragraph',text:String.raw`共三个观测，\(\bar{x}=(2+4+6)/3=4\)。答案为 4。`,sourcePages:[1],sourceQuote:''}
+      ]})}}]}));
+    },{action:'generate'});
+    const updated=applyResult(input.document,input,validateResult(input,raw));
+    assert.equal(calls,1);assert.match(textOf(updated.chapters[0].content),/答案为 4/);
+    assert.equal(updated.chapters[0].content.content[0].attrs.sourceQuote,'第1题：计算观测 2、4、6 的均值。');
+    assert.doesNotMatch(input.document.pages[0].text,/答案为 4/,'Derived answers must not be copied back into source evidence');
+  }
+});
+
+test('explicit translation and local editing keep their scope even when the document goal asks for solutions',()=>{
+  const input=request('generate','translation');input.document.intent='给我手写过程和答案';
+  input.instruction=defaultGenerationInstruction(input.learning);
+  const messages=buildMessages(input);
+  assert.match(messages[0].content,/纯翻译的约束/);assert.doesNotMatch(messages[0].content,/worked-solutions-v1/);
+  assert.match(JSON.parse(messages[1].content).instruction,/不额外作答/);
+  const local=request('rewrite');local.document.intent=input.document.intent;
+  local.instruction='只改写这一句，暂时不要答案';
+  const edit=buildMessages(local);assert.equal(JSON.parse(edit[1].content).instruction,local.instruction);
+  assert.match(edit[0].content,/只在 selection 内/);assert.doesNotMatch(edit[0].content,/worked-solutions-v1/);
 });

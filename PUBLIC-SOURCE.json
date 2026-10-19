@@ -1,13 +1,13 @@
 {
   "schema": "candlelight-public-source-v1",
-  "version": "0.1.16",
-  "sourceRevision": "0ddeb68b91bd1ad4590ee72e84de764e557b83db",
-  "applicationRevision": "d04e49b8dded50276e6a3532bbba07b07756e303",
+  "version": "0.1.17",
+  "sourceRevision": "614b3f76fb470e929494422a45312dc105137073",
+  "applicationRevision": "5d32d346b4a9eb39206de13a3a55f378c20e3f2f",
   "applicationFilesVerified": 129,
   "installer": {
-    "file": "Candlelight-Notes-0.1.16-Setup-x64.exe",
-    "bytes": 138086361,
-    "sha256": "359381748e195f645bea9594e30ea497c88389201ea14f5bc91594c2d433df8b"
+    "file": "Candlelight-Notes-0.1.17-Setup-x64.exe",
+    "bytes": 138088279,
+    "sha256": "7d0afec8c5779067d7b715c25f27f5f5728d33c848951c5cf725f0ffe70f6af6"
   },
   "gitHistoryIncluded": false,
   "personalDataIncluded": false,
@@ -97,8 +97,8 @@
     },
     {
       "path": "docs/architecture.md",
-      "bytes": 11483,
-      "sha256": "9839f5063009f90f9f8bc5c3e79b45873378b1e033de4c55dd35e3df3ae9af7f"
+      "bytes": 11846,
+      "sha256": "01e5b44596a0f7341245dd7eba0301615d313a4586ca8528e634d92c1e2f4b49"
     },
     {
       "path": "docs/bundle-notes.md",
@@ -112,8 +112,13 @@
     },
     {
       "path": "docs/import-formats.md",
-      "bytes": 3229,
-      "sha256": "da9e8eca068e619e6385288b141ae47f6c26f15ae34e10a4b9c5076f1593bb33"
+      "bytes": 3747,
+      "sha256": "a0e6b5a0bc95db54a9bf559d3dcdfbdfae00f9ff21064ff24647c21da9efa795"
+    },
+    {
+      "path": "docs/learning-tasks.md",
+      "bytes": 2499,
+      "sha256": "17a3e25d25026c9a0393b7f82c19117b86e8aae5b9a84ed50b316bfd56309503"
     },
     {
       "path": "docs/product-quality.md",
@@ -181,6 +186,11 @@
       "sha256": "a17d1b3e6623ace89bcd29a1eae7108b08ac374e04e370fbd37fbd3eb5c1bda1"
     },
     {
+      "path": "docs/releases/v0.1.17.json",
+      "bytes": 5824,
+      "sha256": "ef838a68bbce4e899adc05c36296efacfd1a3a25459795cd97f0cdaf2ebb2bb8"
+    },
+    {
       "path": "docs/releases/v0.1.2-desktop.json",
       "bytes": 2536,
       "sha256": "1596c5dde41a0dddb8c246edbefd968bff3cd2d20f6f7885906e2d2323fbfb66"
@@ -229,6 +239,11 @@
       "path": "docs/reviews/2026-10-19-engineering.md",
       "bytes": 12400,
       "sha256": "c1c056788789bc525d7e39767029557eb853f7c36f13ea2c1d34ecefcb5fec3a"
+    },
+    {
+      "path": "docs/reviews/2026-10-19-exercise-goals-0.1.17.md",
+      "bytes": 3365,
+      "sha256": "a68b9f442c43fd34a273c9490e46d777f901cf14267d5b6a2f0cccc9706f576f"
     },
     {
       "path": "docs/reviews/2026-10-19-file-storage.md",
@@ -733,12 +748,12 @@
     {
       "path": "package-lock.json",
       "bytes": 230191,
-      "sha256": "ab241bf87c9cb6e2c45d9012e2f1ccd727443c655fe91e64a5dcedfcdb9d1f87"
+      "sha256": "6dfe2dd46c22953b0dcd844c374ed6b16fd054b7d988f4713b376036197380ad"
     },
     {
       "path": "package.json",
       "bytes": 2371,
-      "sha256": "8f1e39b39f63f718eb648a3f1a41dc2046d6b868646ccbf3b3c9107ff50eb830"
+      "sha256": "089208d48f82b5c81dff379313501097e82050f68f74eb25f89b06695dc59277"
     },
     {
       "path": "packaging/desktop/使用说明.txt",
@@ -762,13 +777,13 @@
     },
     {
       "path": "packaging/source/PUBLICATION.public.md",
-      "bytes": 3202,
-      "sha256": "13c1d55f117f0ca8404a4f395cd2cae44e9ca0e693404384997f49f3b3486ba1"
+      "bytes": 3861,
+      "sha256": "16b0750134aefd52de901acb844540af32770146507551f614cd29117d24dc3c"
     },
     {
       "path": "packaging/source/README.public.md",
-      "bytes": 5570,
-      "sha256": "8ffdb504d7eb0b8337442157a9e0f463532799d026499fe80875e0c7061e59bf"
+      "bytes": 6065,
+      "sha256": "dc1e3bf7b174fc51e8ff4cffe692c2b4ce595c62fe1aa0cf6d81d67a52c94552"
     },
     {
       "path": "packaging/windows/使用说明.txt",
@@ -827,13 +842,13 @@
     },
     {
       "path": "PUBLICATION.md",
-      "bytes": 3202,
-      "sha256": "13c1d55f117f0ca8404a4f395cd2cae44e9ca0e693404384997f49f3b3486ba1"
+      "bytes": 3861,
+      "sha256": "16b0750134aefd52de901acb844540af32770146507551f614cd29117d24dc3c"
     },
     {
       "path": "README.md",
-      "bytes": 5570,
-      "sha256": "8ffdb504d7eb0b8337442157a9e0f463532799d026499fe80875e0c7061e59bf"
+      "bytes": 6065,
+      "sha256": "dc1e3bf7b174fc51e8ff4cffe692c2b4ce595c62fe1aa0cf6d81d67a52c94552"
     },
     {
       "path": "scripts/audit-desktop.mjs",
@@ -1107,8 +1122,8 @@
     },
     {
       "path": "server/material-import.mjs",
-      "bytes": 12755,
-      "sha256": "29b6ff22da0f4e48579597cab9bff677287e62e9139f10a149f37337b2da1f47"
+      "bytes": 13941,
+      "sha256": "f8318c913f7e2d545b1660e84f2ec637c66b22ff48ddc4bffd3581622a3fa61c"
     },
     {
       "path": "server/material-worker.mjs",
@@ -1152,8 +1167,8 @@
     },
     {
       "path": "server/template-harness.mjs",
-      "bytes": 12881,
-      "sha256": "80b125e4bdf72e30b28ff7ef43d3ff90e119fd1c99e694c10db9ccb211482038"
+      "bytes": 13344,
+      "sha256": "f0ab7be81828cf44343cb0f0103c53a77beaa526407e4a022795e1f5a8f232cf"
     },
     {
       "path": "server/workspace-backup.mjs",
@@ -1262,8 +1277,8 @@
     },
     {
       "path": "shared/learning-goal.mjs",
-      "bytes": 3213,
-      "sha256": "48619049b6d8df4ae77a2a1c7b3fb485fefde8eb45a11b444e572e8a591285c0"
+      "bytes": 5994,
+      "sha256": "e4628a89cf87d724479fe4cbb88cfd99f4b490310a4f75f501b50f54ab24fd0f"
     },
     {
       "path": "shared/learning-intent.mjs",
@@ -1272,8 +1287,8 @@
     },
     {
       "path": "shared/learning-templates.mjs",
-      "bytes": 6774,
-      "sha256": "33e856485809e7f9bbc56bdc1febf69e1a76f53f3c8d44cbec3d90921ede0483"
+      "bytes": 7355,
+      "sha256": "3080baf9737488cb6c5edc049d3d42c5e2e4a0a4ab172ff441a727315b6db5d5"
     },
     {
       "path": "shared/learning.mjs",
@@ -1357,13 +1372,13 @@
     },
     {
       "path": "shared/writing-templates.mjs",
-      "bytes": 13257,
-      "sha256": "2797521966a2ca83c7fea0848e5bc44a5553ce692d31a1f213d595cff6f9e12e"
+      "bytes": 13746,
+      "sha256": "53f43f56007a1ee98e62b383c8c72263e66a2a97abd5ec452cfa2731be1b8720"
     },
     {
       "path": "src/App.tsx",
-      "bytes": 78828,
-      "sha256": "bc518026e3188634d90a3a9c2a31833f63e8d6e89b0bb775de49029981703865"
+      "bytes": 78666,
+      "sha256": "4d81ad2e3b128e75827e5781a060c3f6a8e5be1b8ebefc3fce45c7754fc32382"
     },
     {
       "path": "src/collection.css",
@@ -1627,13 +1642,13 @@
     },
     {
       "path": "tests/adaptive-evidence.test.mjs",
-      "bytes": 4520,
-      "sha256": "ef06ed49ca00fe12a0bc90dfd3f1387efb3876204bcef6cfc814c7e29f4cb999"
+      "bytes": 4528,
+      "sha256": "d90e666246c19b223ac834de83a6857af11224646ce3f6549d66e7cfaed23b16"
     },
     {
       "path": "tests/api.test.mjs",
       "bytes": 9575,
-      "sha256": "793b3dad154fa4c4c97217262f15ad8a82b2c1492f075ff8a2ed78d62fa4d77f"
+      "sha256": "7925cf1d51c443ccebf320beeb05b20cc65ff4c9bb9d9228f290c608d9f6dfa2"
     },
     {
       "path": "tests/browser/bundles.mjs",
@@ -1752,8 +1767,8 @@
     },
     {
       "path": "tests/field-review.test.mjs",
-      "bytes": 13028,
-      "sha256": "5cf8be8799b13ebdf5b8b83c70dbdc758d1513ab969f814b528683db9b443491"
+      "bytes": 13036,
+      "sha256": "79f2f8d80cc2a0a84493dbe78409eb3ea5d69c3d5a51b4a17a430afb1abfcae7"
     },
     {
       "path": "tests/file-library.test.mjs",
@@ -1797,8 +1812,8 @@
     },
     {
       "path": "tests/learning-goal.test.mjs",
-      "bytes": 3660,
-      "sha256": "acba8f3fc3a78e4ed98c276e084352f4c66581b23f6e4017b8df63f0ade9ba5d"
+      "bytes": 7487,
+      "sha256": "c53359a89054c041192c03ab589502cf076ee753075bcbe4e7d296dfe39578cd"
     },
     {
       "path": "tests/learning-intent.test.mjs",
@@ -1817,8 +1832,8 @@
     },
     {
       "path": "tests/material-import.test.mjs",
-      "bytes": 6831,
-      "sha256": "4585ca3a6f6499f94388156e9e7507adc53073525350095c682b62e210c3e681"
+      "bytes": 8262,
+      "sha256": "0328864862879c102e02441546439d20254d44efae1b98ff2299254ac9716bb0"
     },
     {
       "path": "tests/math.test.mjs",
@@ -1937,8 +1952,8 @@
     },
     {
       "path": "tests/support/prompt-history.mjs",
-      "bytes": 1254,
-      "sha256": "916a4b600cc8e5d880a7d7bdbb378f0307928c2a6abd61f5ccaab569a490efd8"
+      "bytes": 3324,
+      "sha256": "fd117923cf1dc9e7937b13f49b01b5c0f2815942a148d57450beb0dd540837e8"
     },
     {
       "path": "tests/support/server.mjs",

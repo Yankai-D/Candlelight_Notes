@@ -48,6 +48,7 @@ export function buildTemplateOperation(value) {
     messages[0].content += '\n样稿协议优先说明：rules 只写可复用的教学组织与表达偏好，不包含占位符、JSON转义、编译或返回字段等执行细节。需要重排论述单元时，可额外返回 order（全部已有单元id的完整有序数组，不遗漏、不重复）；仍通过 edits 修改单元正文。';
     if (request.action === 'create-template') messages[0].content += '\n创建模板时，原素材只提供事实与算例，不继承其长文组织习惯。必须让样稿正文实际体现 definition.organization：重排单元、设置知识标题或重写段落分工，不能仅更新 rules 而返回原样稿。重排必须遵守概念先修关系，并修正“上面/前述/这个区别”等指代；独立单元需要就地交代所引用的定义与口径。知识标题使用 ## 或 ###，正文内的重点才使用加粗。';
   }
+  if (request.action === 'select-template') messages[0].content += '\n任务与文风分离：学习目标要求解答已有练习、给出过程或答案时，选择能清楚保留题号与小问的组织方式，通常是结构化讲义，或目录中更匹配的自定义模板。不要因为题面属于某个学科而把任务解释成讲授该学科。模板只决定表达方式，不能撤销明确的作答、仅提示、答案详略等交付要求。';
   requests.set(messages, request); return messages;
 }
 // A model sometimes typesetting-wraps a protected token. Only remove an exact

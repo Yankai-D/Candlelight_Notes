@@ -86,7 +86,7 @@ test('local server round trip: config, authenticated requests, mock upstream, or
     assert.deepEqual(JSON.parse(upstreamBody.messages[1].content).source.map(p => p.number), [2, 3]);
     assert.equal(JSON.parse(upstreamBody.messages[1].content).learningIntent, doc.intent);
     assert.deepEqual(JSON.parse(upstreamBody.messages[1].content).learning, { mode: 'adaptive', template: 'guided-v3' });
-    assert.match(upstreamBody.messages[0].content, /学习目标约束 learning-goal-v1/);
+    assert.match(upstreamBody.messages[0].content, /学习目标约束 learning-goal-v2/);
     assert.match(upstreamBody.messages[0].content, /小纸条的约束/);
     assert.equal((await fetch(base + '/api/organize', { method: 'POST', body: '{}' })).status, 403);
     assert.equal((await fetch(base + '/api/organize', { method: 'POST', headers, body: JSON.stringify({ ...organizationInput([doc]), instruction: 'extra prompt' }) })).status, 400);

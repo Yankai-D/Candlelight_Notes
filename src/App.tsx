@@ -34,7 +34,7 @@ import { mergeLibrary, orderLibraryDocuments } from '../shared/library.mjs'
 import { defaultKnowledge, learnerProfile } from '../shared/learning.mjs'
 import { collectionSchema, reconcileCollection, updateCollectionItem } from '../shared/collection.mjs'
 import { organizationInput, treeFingerprint, validateTree } from '../shared/study-tree.mjs'
-import { defaultEditInstruction } from '../shared/learning-templates.mjs'
+import { defaultEditInstruction, defaultGenerationInstruction } from '../shared/learning-templates.mjs'
 import { defaultLearningIntent, normalizeLearningIntent } from '../shared/learning-intent.mjs'
 import { commitNotebook, ensureNotebooks, selectNotebook, regenerateNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
 import { prepareDocument, remainingChapters } from '../shared/preparation.mjs'
@@ -611,7 +611,7 @@ export default function App() {
         save: persist, signal,
         onProgress: ({ chapter, done, total }: { chapter: { title: string }; done: number; total: number }) => setBusy(`${notebookLabel(current)} · 已完成 ${done}/${total} · ${chapter.title}`),
         request: async (latest: LearningDocument, chapterId: string, settings: LearningSettings, background: LearnerProfile, requestSignal: AbortSignal) => {
-          const request = makeRequest(latest, 'generate', 'chapter', latest.entryType === 'note' ? '按学习目标及本节分工整合所分配的来源全文，写成完整正文；保留关键知识、公式与条件。' : '按所选阅读方式完整处理目标章节，忠实保留原文的全部实质内容、公式和论证。', chapterId, settings, background)
+          const request = makeRequest(latest, 'generate', 'chapter', defaultGenerationInstruction(settings, latest.entryType === 'note'), chapterId, settings, background)
           return (await api('/api/edit', request, requestSignal)).result
         },
       })
@@ -807,6 +807,6 @@ function ImportModal({ configured, onClose, onImport }: { configured: boolean; o
 
 function IntentModal({ intent, onClose, onSave }: { intent: string; onClose: () => void; onSave: (intent: string) => void }) {
   const [value, setValue] = useState(intent)
-  return <Modal title="带着目标去阅读" subtitle="学习目标决定讲解重点与推理深度，文风保持一致。" onClose={onClose}><div className="intent-form"><label>我的学习目标<textarea aria-label="我的学习目标" autoFocus value={value} rows={6} onChange={e => setValue(e.target.value)} maxLength={4000} /></label><p className="field-help">保存后用于后续生成、讲解和编辑；调整现有全文请使用「重新生成」。纯翻译保留完整原文，目标仅用于术语与语境判断。</p><div className="modal-actions"><button className="primary" disabled={!value.trim()} onClick={() => onSave(value.trim())}>保存学习目标</button></div></div></Modal>
+  return <Modal title="带着目标去阅读" subtitle="说明想得到的成果：读懂原理、逐题解答或整理复习讲义。" onClose={onClose}><div className="intent-form"><label>我的学习目标<textarea aria-label="我的学习目标" autoFocus value={value} rows={6} onChange={e => setValue(e.target.value)} maxLength={4000} /></label><p className="field-help">保存后用于后续生成、讲解和编辑；调整现有全文请使用「重新生成」。纯翻译保留完整原文，目标仅用于术语与语境判断。</p><div className="modal-actions"><button className="primary" disabled={!value.trim()} onClick={() => onSave(value.trim())}>保存学习目标</button></div></div></Modal>
 }
 

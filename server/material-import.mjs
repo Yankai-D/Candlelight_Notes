@@ -128,13 +128,21 @@ function html(bytes, warnings) {
   try {
     const doc = dom.window.document;
     if (doc.getElementsByTagName('*').length > 150000) throw new Error('网页结构过于复杂，请保存正文部分再导入。');
-    doc.querySelectorAll('script,style,noscript,iframe,object,embed,form,nav,footer,aside,template,[hidden],[aria-hidden="true"]').forEach(node => node.remove());
+    // Legacy MathJax stores TeX as inert script data, not executable JavaScript.
+    doc.querySelectorAll('script[type]').forEach(node => {
+      const type = node.getAttribute('type').trim();
+      if (/^math\/tex(?:\s*;\s*mode\s*=\s*display)?$/i.test(type)) node.replaceWith(/display/i.test(type) ? `\\[${node.textContent}\\]` : `\\(${node.textContent}\\)`);
+    });
+    // Quiz questions and options often live INSIDE forms. Drop controls and
+    // scripts, not their surrounding authored content. Never submit a form.
+    if (doc.querySelector('form,input,select,textarea,button')) warnings.add('网页交互控件仅保留静态题干和文字选项；未执行脚本或提交表单，动态加载的题目需核对原网页。');
+    doc.querySelectorAll('script,style,noscript,iframe,object,embed,input,button,nav,footer,aside,template,[hidden],[aria-hidden="true"]').forEach(node => node.remove());
     const root = doc.querySelector('main,article') || doc.body;
     if (root.querySelector('img,svg,canvas,video,audio')) warnings.add('网页图片、图表及音视频未转换；图片替代文字会保留，未访问外部链接。');
     root.querySelectorAll('img').forEach(node => node.replaceWith(node.getAttribute('alt') ? `[图片：${node.getAttribute('alt')}]` : ''));
     root.querySelectorAll('svg,canvas,video,audio').forEach(node => node.remove());
     root.querySelectorAll('math').forEach(node => { const tex = node.querySelector('annotation[encoding="application/x-tex"]'); if (tex) node.replaceWith(`$${tex.textContent}$`); else { warnings.add('网页含未转换的 MathML 公式，请对照原网页核查。'); node.replaceWith(`[公式原文：${node.textContent}]`); } });
-    const sections = []; let title = doc.title.trim().slice(0,100) || '网页正文', text = '';
+    const sections = [], listPositions = new WeakMap(); let title = doc.title.trim().slice(0,100) || '网页正文', text = '';
     const flush = () => { const content = compact(text); if (content) sections.push({ title, text: content }); text = ''; };
     function walk(node) {
       if (node.nodeType === 3) { text += node.textContent; return; }
@@ -142,11 +150,18 @@ function html(bytes, warnings) {
       const tag = node.localName;
       if (/^h[12]$/.test(tag)) { flush(); title = compact(node.textContent).slice(0,100) || title; }
       if (/^h[1-6]$/.test(tag)) text += '\n\n' + '#'.repeat(Number(tag[1])) + ' ';
-      if (tag === 'li') text += '\n- ';
+      if (tag === 'li') {
+        const list = node.parentElement;
+        let number = Number(node.getAttribute('value') ?? listPositions.get(list) ?? list.getAttribute('start') ?? 1);
+        if (!Number.isSafeInteger(number)) number = 1;
+        listPositions.set(list, number + 1);
+        text += list.localName === 'ol' ? `\n${number}. ` : '\n- ';
+      }
+      if (tag === 'option') text += '\n- ';
       if (['td','th'].includes(tag)) text += ' | ';
       if (tag === 'br') text += '\n';
       for (const part of node.childNodes) walk(part);
-      if (/^(p|div|section|article|blockquote|pre|table|tr|h[1-6])$/.test(tag)) text += '\n\n';
+      if (/^(p|div|section|article|blockquote|pre|table|tr|form|fieldset|legend|label|select|textarea|h[1-6])$/.test(tag)) text += '\n\n';
     }
     walk(root); flush(); return sections;
   } finally { dom.window.close(); }

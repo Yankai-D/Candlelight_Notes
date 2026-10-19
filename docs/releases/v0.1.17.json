@@ -1,0 +1,111 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.17",
+  "status": "verified-local-candidate",
+  "codeRevision": "5d32d346b4a9eb39206de13a3a55f378c20e3f2f",
+  "sourceFingerprint": "40657e4dcb88e18ac26ff7e3361d045b24e1330435f69db10e4f57166c8347ee",
+  "changes": [
+    "Prioritize requested outcomes over default note organization, with scoped worked solutions and explicit missing inputs",
+    "Keep existing templates, personal samples, translation behavior and local edit boundaries",
+    "Preserve static HTML form questions, choices, numbered lists and inert MathJax TeX",
+    "Pin reviewed goal-v1 to goal-v2 prompt migrations without changing archived experiments"
+  ],
+  "validation": {
+    "tests": 363,
+    "browserSuites": 10,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "actualModelCalls": 2,
+    "fullCheckActualModelCalls": 0,
+    "liveReview": {
+      "status": "pass-on-two-small-author-authored-cases",
+      "reviewer": "same-collaborator",
+      "checks": [
+        "Mean derivation and result 4 are correct",
+        "Quadratic roots 2 and 3 and their derivation are correct",
+        "Incomplete regression source is explicitly insufficient; no fitted numeric coefficients invented",
+        "Hints request does not reveal final numeric answers"
+      ],
+      "actualModelCalls": 2,
+      "completionTokens": 1699,
+      "transportMaxTokensPerCall": 6000,
+      "privateMaterialsSent": false,
+      "limitations": [
+        "No live retest of the private reported chapter",
+        "No baseline comparison or broad teaching-quality claim",
+        "No execution of external datasets or statistical code"
+      ]
+    },
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.16",
+        "asarSha256": "536d0f04f7ff99348ca84a100c307444ab0f2dcccfeeb0c905b7492d5e3686f7"
+      },
+      "to": {
+        "version": "0.1.17",
+        "asarSha256": "ba792f6a36d6963d7116158c77b6a50ca1c74bbf9ec27b75c5febeda1c68fa99"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ]
+    },
+    "payloadFilesVerified": 12076,
+    "dependencyGraphUnchanged": true,
+    "checkReportSha256": "26a35d3b9e5de7597931bdde8eebd307798fb4a35f2c528eb7dc25a105ed69e2"
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.17-Setup-x64.exe",
+      "bytes": 138088279,
+      "sha256": "7d0afec8c5779067d7b715c25f27f5f5728d33c848951c5cf725f0ffe70f6af6",
+      "path": "output/releases/pangzhu-desktop-0.1.17-verified/installer/Candlelight-Notes-0.1.17-Setup-x64.exe"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.17-verified/Candlelight-Notes-0.1.17-Windows-x64.zip",
+      "bytes": 138135451,
+      "sha256": "188c7437c60e7c764a83fc0d9ce20cba13397c471ecbade9927e68a7a56a2c3f"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": {
+    "installerLifecycle": "not-run-in-blank-Windows-account",
+    "remoteCI": "not-run",
+    "currentDependencyAuditRun": false,
+    "priorDependencyAudit": "docs/releases/v0.1.16.json",
+    "missingInputs": "No automatic retrieval of exercise data dependencies or execution of R/Python; incomplete data cannot yield verified numerical answers",
+    "privateLiveRetest": "Blocked by automatic approval review; only authored synthetic material sent to the configured provider",
+    "assessment": "Same-collaborator review of two small cases; not an independent or general teaching-quality evaluation"
+  },
+  "review": "docs/reviews/2026-10-19-exercise-goals-0.1.17.md",
+  "evidenceManifest": "artifacts/release-0.1.17/evidence/MANIFEST.json",
+  "evidenceManifestSha256": "b2859f331c113b02dd410525751799e53498abb7d752206936cc1379164a73e5",
+  "githubPushed": false
+}

@@ -20,6 +20,13 @@ test('HTML reads semantic text without scripts, navigation or external fetch; pl
   assert.deepEqual(result.sections.map(s=>s.title),['概率入门','期望']);assert.ok(text.includes('0.5'));assert.ok(text.includes('只有链接文字'));assert.ok(text.includes('分布图'));
   assert.ok(!text.includes('UNWANTED'));assert.ok(!text.includes('fetch('));assert.equal(globalThis.importExecuted,undefined);assert.ok(result.warnings.length);
 });
+test('HTML exercises retain form questions, answer choices, numbering and inert MathJax without executing controls',async()=>{
+  const html=String.raw`<title>原创练习</title><main><h1>练习</h1><form action="https://invalid.example/submit"><fieldset><legend>题一：计算平均数</legend><p>观测为 2、4、6。</p><label><input type="radio" name="q">A. 4</label><label><input type="radio" name="q">B. 6</label><input type="hidden" value="SECRET_TOKEN"><button>SUBMIT_BUTTON</button><select><option>选择理由</option><option>总和除以个数</option></select></fieldset><ol start="3"><li>求 <script type="math/tex">x^2</script>。</li><li value="7">写出公式 <script type="math/tex; mode=display">\bar{x}=\frac{1}{n}\sum_i x_i</script></li><li>说明条件。</li></ol></form><script>globalThis.quizExecuted=true;fetch('https://invalid.example')</script></main>`;
+  const result=await parseMaterial(input('quiz.html',Buffer.from(html))),text=result.sections.map(s=>s.text).join('\n');
+  for(const value of ['题一：计算平均数','观测为 2、4、6','A. 4','B. 6','总和除以个数',String.raw`3. 求 \(x^2\)`,String.raw`7. 写出公式 \[\bar{x}`, '8. 说明条件'])assert.ok(text.includes(value),value);
+  assert.doesNotMatch(text,/SECRET_TOKEN|SUBMIT_BUTTON|quizExecuted|fetch\(/);assert.equal(globalThis.quizExecuted,undefined);
+  assert.ok(result.warnings.some(w=>w.includes('静态题干')));
+});
 test('PowerPoint follows presentation relationship order rather than slide file numbers',async()=>{
   const result=await parseMaterial(input('lecture.pptx',pptxFixture()));assert.equal(result.sections.length,2);assert.match(result.sections[0].title,/第一张/);assert.match(result.sections[1].title,/第二张/);assert.ok(result.warnings.length);
 });
