@@ -1,7 +1,7 @@
 {
   "schema": "candlelight-public-source-v1",
   "version": "0.1.14",
-  "sourceRevision": "259afecff429e44ad0d7f0c2bd8d954e8d0e8dfe",
+  "sourceRevision": "c310273cf843b032b75a630e8732491e74e5e2fa",
   "applicationRevision": "da777bf0e3a9311bbe2692332ebd70fda6d83697",
   "applicationFilesVerified": 124,
   "installer": {
@@ -48,6 +48,11 @@
       "path": "tests/support/server.mjs",
       "operation": "canonical-temporary-paths-for-Windows-CI",
       "originalSha256": "3b46a1ff592278466085e08091137e56c45bf7c143c2facf8b0eece6b689d6e4"
+    },
+    {
+      "path": "tests/browser/calibration.mjs",
+      "operation": "reviewed-cross-platform-CI-test-fix",
+      "originalSha256": "b3064356a8970d8e95ee6ef7a1e8c0493fed94b0c1a73078c035850303ab1356"
     }
   ],
   "files": [
@@ -1603,8 +1608,8 @@
     },
     {
       "path": "tests/browser/calibration.mjs",
-      "bytes": 5118,
-      "sha256": "b3064356a8970d8e95ee6ef7a1e8c0493fed94b0c1a73078c035850303ab1356"
+      "bytes": 5648,
+      "sha256": "ea5b3de700b8c30d226282018e56eefff049cc179fabdab85cc9fc88ab61c802"
     },
     {
       "path": "tests/browser/field-review.mjs",

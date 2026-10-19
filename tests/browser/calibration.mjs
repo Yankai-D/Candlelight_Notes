@@ -26,6 +26,13 @@ try {
   await page.reload({waitUntil:'load'});assert.equal(await page.$eval('#reviewer',el=>el.value),'Browser reviewer');
   assert.equal(await page.$eval(`${selector} [data-field="quote"]`,el=>el.value),answer.quote);
   assert.match(await page.$eval('#progress',el=>el.textContent),/^1 \/ 16/);
+  // Different system fonts can leave the reveal button partly behind the fixed footer.
+  // Scroll as a reader would, then verify the real pointer target before clicking.
+  await page.$eval('[data-reveal="math-purpose"]',el=>el.scrollIntoView({block:'center',behavior:'instant'}));
+  await page.waitForFunction(()=>{
+    const button=document.querySelector('[data-reveal="math-purpose"]'),rect=button.getBoundingClientRect();
+    return button.contains(document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2));
+  });
   await page.click('[data-reveal="math-purpose"]');await page.waitForSelector('[data-answers="math-purpose"]',{visible:true});
   await page.reload({waitUntil:'load'});assert.equal(await page.$eval('[data-answers="math-purpose"]',el=>el.hidden),false);
   await page.evaluate(()=>{
