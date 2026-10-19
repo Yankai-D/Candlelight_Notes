@@ -37,6 +37,14 @@ jobs:
           sudo apt-get install -y fonts-noto-cjk
       - name: Install locked dependencies
         run: npm ci
+      - name: Select and probe the runner's stable Chrome on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          test -x /usr/bin/google-chrome
+          /usr/bin/google-chrome --version
+          /usr/bin/google-chrome --headless --dump-dom about:blank
+          echo "READING_TREE_PDF_BROWSER=/usr/bin/google-chrome" >> "$GITHUB_ENV"
       - name: Verify build, behavior and harness execution
         run: npm run check
       - name: Keep reports and browser screenshots

@@ -1,7 +1,7 @@
 {
   "schema": "candlelight-public-source-v1",
   "version": "0.1.14",
-  "sourceRevision": "65278ced16fdee64c48a68f2348d99175021f63f",
+  "sourceRevision": "502299dc459d6c3d4d1d73f859c6cbb9bd09d719",
   "applicationRevision": "da777bf0e3a9311bbe2692332ebd70fda6d83697",
   "applicationFilesVerified": 124,
   "installer": {
@@ -33,6 +33,11 @@
       "path": "README.md",
       "operation": "public-distribution-readme",
       "originalSha256": "f6f8bb98d837dffe2bf2c711bd9df497edb0036c8383a1b0617271b44b2da05e"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "operation": "select-native-Chrome-for-Linux-CI",
+      "originalSha256": "3c9144bb79b8a3c3f4e99ac7e79e4026bcdccfbea59137a19fcd1b87c6433711"
     }
   ],
   "files": [
@@ -48,8 +53,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "bytes": 1195,
-      "sha256": "3c9144bb79b8a3c3f4e99ac7e79e4026bcdccfbea59137a19fcd1b87c6433711"
+      "bytes": 1563,
+      "sha256": "e0824f8250207152e8535cc7638cdce779a0731d7c2dfa47a6dd396f77e0e0c1"
     },
     {
       "path": ".gitignore",
