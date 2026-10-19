@@ -1,12 +1,13 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export async function startTestServer(overrides = {}, {envText, entry = 'server/index.mjs'} = {}) {
-  const directory = await mkdtemp(join(tmpdir(), 'pangzhu-test-'));
+  const temporaryRoot = await realpath(tmpdir());
+  const directory = await mkdtemp(join(temporaryRoot, 'pangzhu-test-'));
   const root = fileURLToPath(new URL('../../', import.meta.url));
   await mkdir(join(directory, 'library')); await mkdir(join(directory, 'ideal'));
   if(envText!==undefined)await writeFile(join(directory,'.env'),envText,{mode:0o600});
@@ -25,7 +26,7 @@ export async function startTestServer(overrides = {}, {envText, entry = 'server/
       try { await exited; } finally { clearTimeout(timer); }
     }
     // Only remove the exact temporary directory created above.
-    if(dirname(resolve(directory)) !== resolve(tmpdir()) || !directory.includes('pangzhu-test-')) throw new Error('Unexpected test directory');
+    if(dirname(resolve(directory)) !== temporaryRoot || !directory.includes('pangzhu-test-')) throw new Error('Unexpected test directory');
     await rm(directory,{recursive:true,force:true,maxRetries:3,retryDelay:100});
   }
   try {

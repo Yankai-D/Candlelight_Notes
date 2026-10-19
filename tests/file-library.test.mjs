@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile, unlink, rm, symlink, readdir, rename } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, unlink, rm, symlink, readdir, rename, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { FileLibrary } from '../server/file-library.mjs';
@@ -13,7 +13,9 @@ import { freshTemplateLibrary } from '../shared/writing-templates.mjs';
 
 function document(id = 'fixture-1') { const doc = createDemo(); return ensureNotebooks({ ...doc, id, title: '文件资料库验收', demo: false, library: undefined, kind: 'text', filename: 'test.txt' }); }
 async function fixture(t) {
-  const root = await mkdtemp(join(tmpdir(), 'candlelight-files-')); t.after(() => rm(root, { recursive: true, force: true }));
+  // Windows runners may expose TEMP through an 8.3 alias. Compare canonical
+  // fixture paths with the canonical paths deliberately returned by storage.
+  const root = await mkdtemp(join(await realpath(tmpdir()), 'candlelight-files-')); t.after(() => rm(root, { recursive: true, force: true }));
   const options = { profile: join(root, 'profile'), defaultDirectory: join(root, 'Documents', '烛光笔记'), programDirectory: join(root, 'program') };
   await mkdir(options.programDirectory);
   const store = new FileLibrary(options); const command = input => store.command(input);

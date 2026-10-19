@@ -1,7 +1,7 @@
 {
   "schema": "candlelight-public-source-v1",
   "version": "0.1.14",
-  "sourceRevision": "502299dc459d6c3d4d1d73f859c6cbb9bd09d719",
+  "sourceRevision": "259afecff429e44ad0d7f0c2bd8d954e8d0e8dfe",
   "applicationRevision": "da777bf0e3a9311bbe2692332ebd70fda6d83697",
   "applicationFilesVerified": 124,
   "installer": {
@@ -38,6 +38,16 @@
       "path": ".github/workflows/ci.yml",
       "operation": "select-native-Chrome-for-Linux-CI",
       "originalSha256": "3c9144bb79b8a3c3f4e99ac7e79e4026bcdccfbea59137a19fcd1b87c6433711"
+    },
+    {
+      "path": "tests/file-library.test.mjs",
+      "operation": "canonical-temporary-paths-for-Windows-CI",
+      "originalSha256": "1cc96133dd152248a28bc14b586fc3fbb4a33bf1b605cebdc0f080fe0ffa3a5b"
+    },
+    {
+      "path": "tests/support/server.mjs",
+      "operation": "canonical-temporary-paths-for-Windows-CI",
+      "originalSha256": "3b46a1ff592278466085e08091137e56c45bf7c143c2facf8b0eece6b689d6e4"
     }
   ],
   "files": [
@@ -1708,8 +1718,8 @@
     },
     {
       "path": "tests/file-library.test.mjs",
-      "bytes": 20828,
-      "sha256": "1cc96133dd152248a28bc14b586fc3fbb4a33bf1b605cebdc0f080fe0ffa3a5b"
+      "bytes": 21009,
+      "sha256": "161925c1a4170a2a06e406fd61f9d826b86bb80503a37469232208d570755628"
     },
     {
       "path": "tests/file-storage-api.test.mjs",
@@ -1883,8 +1893,8 @@
     },
     {
       "path": "tests/support/server.mjs",
-      "bytes": 2973,
-      "sha256": "3b46a1ff592278466085e08091137e56c45bf7c143c2facf8b0eece6b689d6e4"
+      "bytes": 3034,
+      "sha256": "f731a30280af50e631bcfecf93b88a9bdbe2b7f34bcf11250bf113752505a76f"
     },
     {
       "path": "tests/tree-layout.test.mjs",
