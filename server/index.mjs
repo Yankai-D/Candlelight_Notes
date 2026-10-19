@@ -70,17 +70,17 @@ const server = http.createServer(async (req, res) => {
         const input = await body(req, 96 * 1024 * 1024);
         if (maintaining) return send(res, 409, { error: '资料库正在备份或恢复，请等待完成。' });
         if (input.workspaceToken && input.workspaceToken !== workspaceToken) return send(res, 409, { error: '学习空间已切换，请刷新窗口后再操作。当前窗口未覆盖任何文件。' });
-        const exclusive = ['workspace-backup', 'workspace-preview', 'workspace-restore', 'workspace-undo', 'retired-purge'].includes(input.action);
+        const exclusive = ['workspace-backup', 'workspace-preview', 'workspace-restore', 'workspace-undo', 'retired-purge', 'workspace-move-preview', 'workspace-move'].includes(input.action);
         if (['retire', 'retired-purge'].includes(input.action) && serviceActivity()) return send(res, 409, { error: '请先暂停生成任务，再移除资料。' });
         if (exclusive && serviceActivity()) return send(res, 409, { error: '请先暂停当前生成或学习树任务，再备份或恢复。' });
-        let result;
+        let result; const beforeDirectory = files.index?.directory;
         try {
           if (exclusive) maintaining = true;
           result = await fileCommand(input);
         } finally {
           // Even an interrupted two-file commit can complete from its journal
           // on the next command. Old windows must not write into that space.
-          if (['workspace-restore', 'workspace-undo'].includes(input.action)) workspaceToken = randomBytes(16).toString('hex');
+          if (['workspace-restore', 'workspace-undo'].includes(input.action) || input.action === 'workspace-move' && files.index?.directory !== beforeDirectory) workspaceToken = randomBytes(16).toString('hex');
           if (exclusive) maintaining = false;
         }
         if (input.action === 'file' && result) { res.writeHead(200, { 'Content-Type': result.type, 'Cache-Control': 'no-store' }); res.end(result.data); return; }
@@ -141,7 +141,7 @@ const server = http.createServer(async (req, res) => {
         if (input?.action === 'ideal-tree' && process.env.READING_TREE_FILE_STORAGE !== '0') await fileCommand({ action: 'status' });
         if (maintaining) return send(res, 409, { error: '资料库正在备份或恢复，请等待完成。' });
         const activeConfig=path==='/api/test'?{...config,...connectionPatchSchema.parse(input)}:{...config};
-        const localIdealCommand = input?.action === 'ideal-tree' && ['list', 'get', 'pause', 'export', 'resource'].includes(input.command);
+        const localIdealCommand = input?.action === 'ideal-tree' && ['list', 'get', 'pause', 'export', 'resource', 'delete'].includes(input.command);
         if (!activeConfig.apiKey && !localIdealCommand) return send(res, 400, { error: '请先在模型设置中填写 DeepSeek API Key。' });
         const controller = new AbortController();
         controllers.add(controller);

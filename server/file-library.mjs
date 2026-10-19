@@ -12,6 +12,7 @@ import { scanNoteFiles, fileHash } from './file-discovery.mjs';
 import { atomicJSON, recoverWorkspaceState, commitWorkspaceState } from './workspace-state.mjs';
 import { createWorkspaceBackup, inspectWorkspaceBackup, restoreWorkspaceBackup, undoWorkspaceRestore } from './workspace-backup.mjs';
 import { readGenerationRecords, generationRecordFiles } from './generation-records.mjs';
+import { previewWorkspaceMove, moveWorkspace, recoverWorkspaceMove } from './workspace-move.mjs';
 export { atomicJSON } from './workspace-state.mjs';
 
 const idSchema = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/);
@@ -55,6 +56,7 @@ export class FileLibrary {
       this.index = { version: 1, directory, systemDirectory: join(directory, '.candlelight'), entries: [] };
       await mkdir(this.index.systemDirectory, { recursive: true }); await atomicJSON(this.indexPath, this.index);
     }
+    await recoverWorkspaceMove(this);
     const preferences = await json(join(this.profile, 'preferences.json'), {});
     this.removedIds = new Set([...(this.index.retired || []).map(item => item.entry.id), ...(Array.isArray(preferences['removed-library-papers']) ? preferences['removed-library-papers'] : [])]);
     // Ideal trees include downloaded material and therefore belong alongside
@@ -190,6 +192,47 @@ export class FileLibrary {
     if (entry.builtinId && (!builtin || !await exists(builtin.path))) missing.push(builtin?.path || '内置原文');
     return { id: entry.id, missing, notePath: entry.notePath, sourcePath: entry.sourcePath || builtin?.path || null };
   }
+  async localizeSources() {
+    const entries = [];
+    this.sourceIssues = [];
+    const originals = [...this.index.entries, ...(this.index.retired || []).map(item => item.entry)];
+    for (const original of originals) {
+      let entry = original;
+      if (entry.kind === 'pdf' && entry.entryType !== 'note' && (!entry.sourcePath || entry.builtinId || entry.sourcePath.endsWith('.json'))) {
+        try {
+          const sourcePath = join(entry.directory, 'source.pdf');
+          if (!await this.owned(entry, entry.notePath, true)) { entries.push(entry); continue; }
+          if (!entry.sourcePath && !entry.builtinId && (await json(entry.notePath)).demo) { entries.push(entry); continue; }
+          let present = await this.owned(entry, sourcePath, true);
+          if (!present && entry.builtinId) {
+            const builtin = await this.builtin(entry.id);
+            if (builtin && await exists(builtin.path)) {
+              const bytes = await this.builtinBytes(builtin);
+              await this.withNoteWrite(entry, async () => {
+                try { await writeFile(sourcePath, bytes, { flag: 'wx' }); }
+                catch (error) { if (error.code !== 'EEXIST') throw error; }
+                await this.owned(entry, sourcePath);
+                if (digest(await readFile(sourcePath)) !== digest(bytes)) throw new Error('配套原文已有不同内容，未覆盖。');
+              });
+              present = true;
+            }
+          }
+          const { builtinId: _builtin, ...local } = entry;
+          entry = { ...local, sourcePath, sourceType: 'application/pdf', ...(!present && original.builtinId ? { builtinId: original.builtinId } : {}) };
+        } catch (error) { this.sourceIssues.push({ id: entry.id, reason: error.message }); }
+      }
+      entries.push(entry);
+    }
+    if (JSON.stringify(entries) !== JSON.stringify(originals)) await this.persist({ ...this.index, entries: entries.slice(0,this.index.entries.length),
+      retired:(this.index.retired || []).map((item,index)=>({...item,entry:entries[this.index.entries.length+index]})) });
+  }
+  async builtinBytes(builtin) {
+    const info = await lstat(builtin.path);
+    if (!info.isFile() || info.isSymbolicLink() || info.size > 50 * 1024 * 1024) throw new Error('旧资料原文无法安全读取，请重新选择原文。');
+    const bytes = await readFile(builtin.path);
+    if (bytes.subarray(0,5).toString() !== '%PDF-') throw new Error('旧资料原文不是有效的 PDF。');
+    return bytes;
+  }
   async readEntry(entry) {
     const status = await this.inspect(entry);
     let document;
@@ -209,16 +252,19 @@ export class FileLibrary {
       if (input.migration && existing.migrationDigest === hash) return { id, verified: true };
       throw new Error('资料编号已存在，原笔记已保留。请重新导入文件。');
     }
-    const bytes = input.source ? Buffer.from(z.string().max(72 * 1024 * 1024).parse(input.source.data), 'base64') : null;
+    const backup = /\.json$/i.test(input.source?.name || '');
+    let bytes = input.source && !backup ? Buffer.from(z.string().max(72 * 1024 * 1024).parse(input.source.data), 'base64') : null;
     if (bytes && bytes.length > 50 * 1024 * 1024) throw new Error('资料文件不能超过 50 MB。');
     const directory = await this.checkDirectory(input.directory || this.index.directory);
     const folder = join(directory, `资料-${id}`);
     const builtin = await this.builtin(id);
-    const extension = input.source?.name?.match(/\.(pdf|txt|md|markdown|json)$/i)?.[1]?.toLowerCase() || (document.kind === 'pdf' ? 'pdf' : 'txt');
-    const sourcePath = builtin || !bytes ? null : join(folder, `source.${extension === 'markdown' ? 'md' : extension}`);
+    if (!bytes && builtin) bytes = await this.builtinBytes(builtin);
+    if (bytes && document.kind === 'pdf' && bytes.subarray(0,5).toString() !== '%PDF-') throw new Error('原文不是有效的 PDF，未保存这份资料。');
+    const extension = document.kind === 'pdf' ? 'pdf' : input.source?.name?.match(/\.(txt|md|markdown)$/i)?.[1]?.toLowerCase() || 'txt';
+    const sourcePath = bytes || document.kind === 'pdf' && document.entryType !== 'note' && !document.demo ? join(folder, `source.${extension === 'markdown' ? 'md' : extension}`) : null;
     const entry = { id, title: document.title, kind: document.kind, filename: document.filename, ...(document.entryType ? { entryType: document.entryType } : {}), createdAt: document.createdAt,
       directory: folder, notePath: join(folder, 'note.candlelight.json'), sourcePath, sourceType: sourcePath?.endsWith('.pdf') ? 'application/pdf' : 'text/plain',
-      ...(builtin ? { builtinId: builtin.id } : {}), ...(input.migration ? { migrationDigest: hash } : {}) };
+      ...(input.migration ? { migrationDigest: hash } : {}) };
     let created = false;
     try { await mkdir(folder); created = true; }
     catch (error) {
@@ -230,11 +276,11 @@ export class FileLibrary {
       const allowed = [basename(entry.notePath), ...(sourcePath ? [basename(sourcePath)] : [])];
       if ((await readdir(folder)).some(name => !allowed.includes(name))) throw new Error('目标资料文件夹已有其他内容，请选择另一保存位置。');
       if (await exists(entry.notePath)) { await this.owned(entry, entry.notePath); if (digest(JSON.stringify(await json(entry.notePath))) !== hash) throw new Error('目标位置已有不同笔记，原文件已保留。'); }
-      if (sourcePath && await exists(sourcePath)) { await this.owned(entry, sourcePath); if (digest(await readFile(sourcePath)) !== digest(bytes)) throw new Error('目标位置已有不同原文，原文件已保留。'); }
+      if (sourcePath && bytes && await exists(sourcePath)) { await this.owned(entry, sourcePath); if (digest(await readFile(sourcePath)) !== digest(bytes)) throw new Error('目标位置已有不同原文，原文件已保留。'); }
     }
     let committed = false;
     try {
-      if (sourcePath) { if (!await exists(sourcePath)) await writeFile(sourcePath, bytes, { flag: 'wx' }); if (digest(await readFile(sourcePath)) !== digest(bytes)) throw new Error('原文文件校验失败。'); }
+      if (sourcePath && bytes) { if (!await exists(sourcePath)) await writeFile(sourcePath, bytes, { flag: 'wx' }); if (digest(await readFile(sourcePath)) !== digest(bytes)) throw new Error('原文文件校验失败。'); }
       if (!await exists(entry.notePath)) await atomicJSON(entry.notePath, document);
       if (digest(JSON.stringify(await json(entry.notePath))) !== hash) throw new Error('笔记文件校验失败。');
       await this.persist({ ...this.index, directory: input.remember ? directory : this.index.directory, entries: [...this.index.entries, entry] }); committed = true;
@@ -255,7 +301,18 @@ export class FileLibrary {
   }
   command(command) { return this.run(async () => {
     await this.initialize();
+    if (['status', 'list', 'file', 'inspect', 'workspace-backup', 'workspace-move-preview'].includes(command.action)) await this.localizeSources();
     switch (command.action) {
+      case 'workspace-move-preview': {
+        await this.autoDiscover(); await this.localizeSources();
+        this.movePreview = await previewWorkspaceMove(this,command.directory);
+        return {id:this.movePreview.id,...this.movePreview.summary};
+      }
+      case 'workspace-move': {
+        if(command.confirm!==true||!this.movePreview||command.previewId!==this.movePreview.id)throw new Error('请先预览并确认迁移现有资料。');
+        const preview=this.movePreview;this.movePreview=null;
+        return moveWorkspace(this,preview);
+      }
       case 'conflict-read': {
         const entry = this.index.entries.find(entry => entry.id === idSchema.parse(command.id)); if (!entry) throw new Error('资料记录已不存在。');
         await this.owned(entry, entry.notePath); return { document: storedDocumentSchema.parse(await json(entry.notePath)), path: entry.notePath };
@@ -330,7 +387,7 @@ export class FileLibrary {
         for (const path of records) await unlink(path);
         await this.persist({ ...this.index, retired: this.index.retired.filter(entry => entry.id !== item.id) }); return {};
       }
-      case 'status': return { enabled: true, discovery: true, maintenance: true, previousWorkspaceAvailable: await exists(join(this.profile, 'workspace-previous.json')), directory: this.index.directory, systemDirectory: this.index.systemDirectory, migrationComplete: !!this.index.migrationComplete, discoveryIssues: this.discoveryIssues || [] };
+      case 'status': return { enabled: true, discovery: true, maintenance: true, previousWorkspaceAvailable: await exists(join(this.profile, 'workspace-previous.json')), directory: this.index.directory, systemDirectory: this.index.systemDirectory, migrationComplete: !!this.index.migrationComplete, discoveryIssues: this.discoveryIssues || [], sourceIssues: this.sourceIssues || [] };
       case 'directory': { const directory = await this.checkDirectory(command.directory); await this.persist({ ...this.index, directory }); return { directory }; }
       case 'list': await this.autoDiscover(); return Promise.all(this.index.entries.map(entry => this.readEntry(entry)));
       case 'scan': {

@@ -50,6 +50,27 @@ const create = runner => ({ action: 'ideal-tree', command: 'create', input, requ
 const rebuild = job => ({ action:'ideal-tree', command:'rebuild', id:job.id, revision:job.revision, requestId:randomUUID(),
   suggestion:'加强评价标准并保留原有基础内容', reason:'我希望用具体成果检验是否真正理解', includeReview:false });
 
+test('deleting a tree requires confirmation, stops pending generation and cannot resurrect after restart',async()=>{
+  const {runner,directory}=await setup();let started;const ready=new Promise(resolve=>{started=resolve});
+  const {job}=await runner.command(create(runner),async(_messages,task)=>{started();return new Promise((_,reject)=>task.signal.addEventListener('abort',()=>reject(task.signal.reason),{once:true}));},'fixture');
+  await ready;
+  await assert.rejects(runner.command({command:'delete',id:job.id}),/./);
+  assert.equal(runner.active.has(job.id),true);
+  await assert.rejects(runner.command({command:'delete',id:'../invalid',confirm:true}),/./);
+  assert.deepEqual(await runner.command({command:'delete',id:job.id,confirm:true}),{deletedId:job.id});
+  assert.equal(runner.active.size,0);await assert.rejects(runner.store.read(job.id),{code:'ENOENT'});
+  assert.deepEqual((await new IdealRunner({directory,tools:tools()}).command({command:'list'})).trees,[]);
+  await runner.command({command:'delete',id:job.id,confirm:true});
+});
+
+test('deleting one completed edition preserves other trees and the rebuilt edition',async()=>{
+  const {runner}=await setup();const first=await runner.command(create(runner),provider(),'fixture'),original=await finish(runner,first.job.id);
+  const second=await runner.command(rebuild(original),provider(),'fixture'),next=await finish(runner,second.job.id);
+  await runner.command({command:'delete',id:original.id,confirm:true});
+  assert.deepEqual(await runner.store.read(next.id),next);
+  assert.deepEqual((await runner.command({command:'list'})).trees.map(t=>t.id),[next.id]);
+});
+
 test('explicit rebuild is an idempotent new version with feedback carried through every planning stage', async()=>{
   const {runner}=await setup(); const first=await runner.command(create(runner),provider(),'fixture');
   const source=await finish(runner,first.job.id), before=structuredClone(source), request=rebuild(source), log=[];

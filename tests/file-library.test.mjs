@@ -88,15 +88,42 @@ test('directory choices cannot place user files under installation/config or fol
   await assert.rejects(f.command({ action: 'directory', directory: link }), /不能位于/);
   assert.equal((await f.command({ action: 'status' })).directory, original.directory);
 });
-test('built-in sources are read from bundled resources and never copied or deleted with user notes', async t => {
-  const f = await fixture(t), builtinDirectory = join(f.root, 'builtins'), doc = document('builtin');
+test('catalog originals are paired with notes and survive a separate installation without the old catalog', async t => {
+  const f = await fixture(t), builtinDirectory = join(f.root, 'builtins'), doc = {...document('builtin'),kind:'pdf',filename:'sample.pdf'};
   await mkdir(builtinDirectory); await writeFile(join(builtinDirectory, 'catalog.json'), JSON.stringify({ documents: [{ id: doc.id, library: { id: 'sample' } }] }));
-  await writeFile(join(builtinDirectory, 'sample.pdf'), 'BUNDLED PDF');
+  await writeFile(join(builtinDirectory, 'sample.pdf'), '%PDF-1.7\nBUNDLED PDF');
   const store = new FileLibrary({ ...f.options, builtinDirectory });
   await store.command({ action: 'save', document: doc });
-  const entry = (await f.index()).entries[0]; assert.equal(entry.sourcePath, null);
-  assert.equal((await store.command({ action: 'file', id: doc.id })).data.toString(), 'BUNDLED PDF');
-  await store.command({ action: 'remove', id: doc.id }); assert.equal(await readFile(join(builtinDirectory, 'sample.pdf'), 'utf8'), 'BUNDLED PDF');
+  const entry = (await f.index()).entries[0]; assert.equal(entry.sourcePath, join(entry.directory,'source.pdf'));assert.equal(entry.builtinId,undefined);
+  const other = new FileLibrary({...f.options,profile:join(f.root,'second-install')});
+  assert.equal((await other.command({action:'list'}))[0].storageIssue,undefined);
+  assert.equal((await other.command({ action: 'file', id: doc.id })).data.toString(), '%PDF-1.7\nBUNDLED PDF');
+  await store.command({ action: 'remove', id: doc.id }); assert.equal(await readFile(join(builtinDirectory, 'sample.pdf'), 'utf8'), '%PDF-1.7\nBUNDLED PDF');
+});
+
+test('legacy catalog-only originals are repaired without rewriting a notebook and without overwriting existing source files', async t=>{
+  const f=await fixture(t),builtinDirectory=join(f.root,'legacy'),doc={...document('legacy-pdf'),kind:'pdf',filename:'paper.pdf'};
+  await mkdir(builtinDirectory);await writeFile(join(builtinDirectory,'catalog.json'),JSON.stringify({documents:[{id:doc.id,library:{id:'paper'}}]}));
+  const bytes=Buffer.from('%PDF-1.7\noriginal');await writeFile(join(builtinDirectory,'paper.pdf'),bytes);
+  await f.command({action:'import',document:doc,migration:true});
+  const index=await f.index(),entry=index.entries[0],before=await readFile(entry.notePath);
+  entry.sourcePath=null;entry.builtinId='paper';await writeFile(f.store.indexPath,JSON.stringify(index));
+  const store=new FileLibrary({...f.options,builtinDirectory});await store.command({action:'status'});
+  assert.deepEqual(await readFile(join(entry.directory,'source.pdf')),bytes);assert.deepEqual(await readFile(entry.notePath),before);
+  const portable=new FileLibrary({...f.options,profile:join(f.root,'installed')});assert.equal((await portable.command({action:'list'}))[0].storageIssue,undefined);
+  assert.deepEqual((await portable.command({action:'file',id:doc.id})).data,bytes);
+  await writeFile(join(entry.directory,'source.pdf'),'%PDF-1.7\nuser replacement');
+  await store.command({action:'status'});assert.equal(await readFile(join(entry.directory,'source.pdf'),'utf8'),'%PDF-1.7\nuser replacement');
+});
+
+test('JSON note backups never masquerade as the original PDF and missing originals remain repairable', async t=>{
+  const f=await fixture(t),doc={...document('restored-pdf'),kind:'pdf',filename:'paper.pdf'};
+  await f.command({action:'import',document:doc,source:{name:'backup.json',data:Buffer.from(JSON.stringify({format:'reading-tree-v1',document:doc})).toString('base64')}});
+  assert.equal((await f.command({action:'list'}))[0].storageIssue.missing.length,1);
+  const entry=(await f.index()).entries[0];assert.equal(entry.sourcePath,join(entry.directory,'source.pdf'));
+  await f.command({action:'source-restore',id:doc.id,source:{data:Buffer.from('%PDF-1.7\nrestored source').toString('base64')}});
+  assert.equal((await f.command({action:'list'}))[0].storageIssue,undefined);
+  assert.equal((await f.command({action:'file',id:doc.id})).data.toString(),'%PDF-1.7\nrestored source');
 });
 test('profile/setup and template revision checks survive browser cleanup and restart', async t => {
   const f = await fixture(t);

@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile, rename } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile, rename, unlink } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -28,6 +28,11 @@ export class IdealStore {
       await mkdir(this.directory, { recursive: true }); await writeFile(temporary, snapshot, { mode: 0o600 }); await rename(temporary, path);
     });
     this.writes = write; return write;
+  }
+  async remove(id) {
+    const path = this.path(id);
+    const operation = this.writes.catch(() => {}).then(() => unlink(path).catch(error => { if (error.code !== 'ENOENT') throw error; }));
+    this.writes = operation; return operation;
   }
 }
 export function publicJob(job) {
@@ -65,6 +70,17 @@ export class IdealRunner {
     return job;
   }
   async dispatch(request, complete, model) {
+    if (request.command === 'delete') {
+      request = idealCommandSchema.parse({ ...request, action: 'ideal-tree' });
+      // Stop both writers and wait for their final checkpoint before removal.
+      // Research assets are shared; imported documents belong to the library.
+      for (const tasks of [this.active, this.paperActive]) {
+        const task = tasks.get(request.id);
+        if (task) { task.controller.abort(); await task.promise; }
+      }
+      await this.store.remove(request.id);
+      return { deletedId: request.id };
+    }
     if (request.command === 'list') return { trees: await Promise.all((await this.store.list()).map(async j => summary(await this.recover(j)))) };
     if (request.command === 'create') {
       const previous = (await this.store.list()).find(j => j.requestId === request.requestId);

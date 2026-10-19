@@ -85,7 +85,7 @@ export function saveDocument(doc: LearningDocument) { return track((async () => 
 export function importDocument(doc: LearningDocument, file?: File, directory?: string) { return track((async () => {
   if (await fileStorage()) return request({ action: 'import', document: commitNotebook(doc), directory, remember: true, ...(file ? { source: await encoded(file) } : {}) })
   const db = await database, tx = db.transaction(['documents', 'files'], 'readwrite')
-  await tx.objectStore('documents').put(commitNotebook(doc)); if (file && /\.pdf$/i.test(file.name)) await tx.objectStore('files').put(file, doc.id); await tx.done
+  await tx.objectStore('documents').put(commitNotebook(doc)); if (file && !/\.json$/i.test(file.name)) await tx.objectStore('files').put(file, doc.id); await tx.done
 })()) }
 export function saveDocumentInCollection(doc: LearningDocument, collection: Collection) { return track((async () => {
   if (await fileStorage()) { await request({ action: 'save', document: commitNotebook(doc) }); await request({ action: 'preference-set', key: 'collection', value: collection }); return }

@@ -82,6 +82,13 @@ test('paper research can be paused and process interruption does not leave an en
   stopped.paperResearch.B1.K1.status='running';await runner.store.save(stopped);
   const fresh=new IdealRunner({store:runner.store});const recovered=await fresh.command({command:'get',id:job.id});assert.equal(recovered.job.paperResearch.B1.K1.status,'failed');assert.match(recovered.job.paperResearch.B1.K1.error,/中断/);
 });
+
+test('deleting a tree aborts node paper research before removing the last checkpoint',async()=>{
+  const {runner,job}=await setup();let ready;const begun=new Promise(r=>{ready=r});
+  await runner.command(request(job),async(_messages,task)=>{ready();return new Promise((_,reject)=>task.signal.addEventListener('abort',()=>reject(task.signal.reason),{once:true}));},'fixture');await begun;
+  await runner.command({command:'delete',id:job.id,confirm:true});
+  assert.equal(runner.paperActive.size,0);await assert.rejects(runner.store.read(job.id),{code:'ENOENT'});
+});
 test('PDF import downloads the exact arXiv paper, preserves original bytes/title and rejects HTML masquerading as PDF',async()=>{
   const dir=await mkdtemp(join(tmpdir(),'ideal-paper-pdf-'));const doc=await PDFDocument.create();const page=doc.addPage();const font=await doc.embedFont(StandardFonts.Helvetica);page.drawText(abstract,{x:30,y:600,size:10,font,maxWidth:500});const bytes=Buffer.from(await doc.save());let calls=0;
   const tools=createResearchTools(dir,{read:async url=>{calls++;assert.equal(url,'https://arxiv.org/pdf/1707.06347v2');return{url,type:'application/pdf',bytes}}});

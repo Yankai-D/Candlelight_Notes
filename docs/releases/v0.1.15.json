@@ -1,0 +1,101 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.15",
+  "status": "verified-local-candidate",
+  "codeRevision": "0fbe5b131e79717e76566defd41354eb8a09dfae",
+  "sourceFingerprint": "621389a3d568853cf61bd94b58558b13fec12cf6c71617daeed1ca384d0327a0",
+  "changes": [
+    "Delete saved ideal learning goals with confirmation and cancellation of running work",
+    "Pair original source files with notebooks and repair recoverable catalog references",
+    "Relocate managed notes, original files, trees and generation records through a verified recoverable migration",
+    "Document PDF, Markdown, TXT and notebook-backup format boundaries"
+  ],
+  "validation": {
+    "tests": 353,
+    "browserSuites": 10,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "actualModelCalls": 0,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.14",
+        "asarSha256": "11a67b1fd4152cc21aea918e7b0cae1368bcbdde7a3466547af45793a455d9e1"
+      },
+      "to": {
+        "version": "0.1.15",
+        "asarSha256": "a641017d99a6cd14cb7e00d49d4e4e5f945c4625df3a317ab56b601725203bca"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ]
+    },
+    "crossVolume": {
+      "status": "pass",
+      "fromDrive": "C:\\",
+      "toDrive": "E:\\",
+      "sourceBytes": 8576,
+      "noteBytesIdentical": true,
+      "sourceBytesIdentical": true,
+      "oldManagedFilesRemoved": true
+    },
+    "payloadFilesVerified": 12064,
+    "dependencyGraphUnchanged": true,
+    "checkReportSha256": "815de7b0afc34ad32e628f02f1cfb392a767fcefc7a87e3e876de39f782b1864",
+    "localOriginalRepair": {
+      "originalsRestored": 14,
+      "noteBytesUnchanged": true,
+      "personalEvidenceIncluded": false
+    }
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.15-Setup-x64.exe",
+      "bytes": 138074525,
+      "sha256": "0ded2d2174dfa722110f687e8b3b78d9b710ae47ac0e2aadf240b5323e65bbc2",
+      "path": "output/releases/pangzhu-desktop-0.1.15-verified/installer/Candlelight-Notes-0.1.15-Setup-x64.exe"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.15-verified/Candlelight-Notes-0.1.15-Windows-x64.zip",
+      "bytes": 138121507,
+      "sha256": "37d06bf19539467fb7fa96456c58569f8bb2ded45fa66c263979bf60292c09e7"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": {
+    "installerLifecycle": "not-run-in-blank-Windows-account",
+    "remoteCI": "not-run",
+    "currentDependencyAuditRun": false,
+    "priorDependencyAudit": "docs/releases/v0.1.12.json",
+    "migration": "Independent empty directory; single-service coordination, not a cross-process workspace transaction; network drives and abrupt power loss not verified"
+  },
+  "review": "docs/reviews/2026-10-19-portability-move-0.1.15.md",
+  "evidenceManifest": "artifacts/release-0.1.15/evidence/MANIFEST.json",
+  "evidenceManifestSha256": "85adf640fb755950218592d9aea08fad228782fee6e546b8575af9ad86bd6209",
+  "githubPushed": false
+}

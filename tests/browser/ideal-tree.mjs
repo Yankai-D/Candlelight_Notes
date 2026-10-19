@@ -94,30 +94,30 @@ await page.click('[aria-label="收起节点详情"]');await click('构建记录'
 await page.type('[aria-label="搜索理想学习树节点"]','小项目');assert.equal((await page.$$('.ideal-leaf')).length,6);await page.click('[aria-label="清除节点搜索"]');
 await page.setViewport({width:390,height:844});await titleClick('做一个可检验的小项目');await page.screenshot({path:output+'/mobile.png',fullPage:true});assert.equal(await page.$eval('.ideal-tree',el=>el.scrollWidth>el.clientWidth),false);assert.ok(await page.$eval('.ideal-paper',el=>el.getBoundingClientRect().top>=0&&el.getBoundingClientRect().bottom<innerHeight));
 await page.setViewport({width:1440,height:1000});assert.deepEqual(await read(),before);
-await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved button');
+await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved-open');
 assert.equal(await page.$('#ideal-goal'),null);await page.screenshot({path:output+'/saved-goals.png'});
-await page.click('.ideal-saved button');await page.waitForSelector('.ideal-bough');
+await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');
 const originalJob=structuredClone(job);savedCopies=20;
-await click('全部目标');await page.waitForFunction(()=>document.querySelectorAll('.ideal-saved button').length===20);
+await click('全部目标');await page.waitForFunction(()=>document.querySelectorAll('.ideal-saved-open').length===20);
 assert.ok(await page.$eval('.ideal-saved',e=>e.scrollHeight>e.clientHeight));assert.ok(await page.$eval('.ideal-tree',e=>e.scrollHeight===e.clientHeight));
 await page.screenshot({path:output+'/saved-many.png'});
 for(let i=7;i<=16;i++){const id=`B${i}`;job.skeleton.branches.push({...job.skeleton.branches[0],id,title:`拓展方向 ${i}`});job.branches[id]={branchId:id,nodes:[]};}
 job.branches.B1.nodes=Array.from({length:40},(_,i)=>({...originalJob.branches.B1.nodes[0],id:`N${i+1}`,parentId:null,title:`知识节点 ${i+1} 的方法与应用`}));job.revision++;
-await page.click('.ideal-saved button');await page.waitForSelector('.ideal-bough');assert.equal((await page.$$('.ideal-bough')).length,16);
+await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');assert.equal((await page.$$('.ideal-bough')).length,16);
 for(const size of [{width:1280,height:720},{width:390,height:844}]){await page.setViewport(size);assert.deepEqual(await fitted(),[],`Sixteen branches at ${size.width}`);}
 await titleClick(names[0]);assert.equal((await page.$$('.ideal-leaf')).length,40);
 for(const size of [{width:1280,height:720},{width:390,height:844}]){await page.setViewport(size);assert.deepEqual(await fitted(),[],`Forty siblings at ${size.width}`);await page.screenshot({path:output+`/dense-${size.width}.png`});}
 await page.type('[aria-label="搜索理想学习树节点"]','方法');assert.equal((await page.$$('.ideal-bough')).length,6);await titleClick(names[0]);assert.equal((await page.$$('.ideal-leaf')).length,40);assert.deepEqual(await fitted(),[]);
 await page.click('[aria-label="清除节点搜索"]');await titleClick('知识节点 1 的方法与应用');await page.waitForSelector('.ideal-paper');
 const beforeDialog=await page.$eval('.ideal-organism',e=>e.getBoundingClientRect().toJSON());await click('新的目标');await page.waitForSelector('#ideal-goal');await page.keyboard.press('Escape');assert.equal(await page.$('#ideal-goal'),null);assert.equal(await page.$eval('.ideal-paper h2',e=>e.textContent),'知识节点 1 的方法与应用');assert.deepEqual(await page.$eval('.ideal-organism',e=>e.getBoundingClientRect().toJSON()),beforeDialog);
-job=originalJob;savedCopies=1;await page.setViewport({width:1440,height:1000});await click('全部目标');await page.waitForSelector('.ideal-saved button');await page.click('.ideal-saved button');await page.waitForSelector('.ideal-bough');
+job=originalJob;savedCopies=1;await page.setViewport({width:1440,height:1000});await click('全部目标');await page.waitForSelector('.ideal-saved-open');await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');
 await titleClick(names[0]);await titleClick('问题与基本原理');assert.equal((await page.$$('.ideal-source')).length,2);
 const beforePapers=JSON.stringify(job.branches);await click('查找 arXiv 论文');await page.waitForSelector('.ideal-paper-progress');
 await page.waitForFunction(()=>[...document.querySelectorAll('.ideal-source h4')].some(e=>e.textContent==='Proximal Policy Optimization Algorithms'));
 assert.equal(JSON.stringify(job.branches),beforePapers);await page.screenshot({path:output+'/knowledge-papers.png'});await click('下载 PDF 并导入');
 await page.waitForFunction(()=>!!document.querySelector('.reader-workspace,.continuous-article,[data-note-chapter]'));
 const after=await read();assert.equal(after.length,before.length+1);assert.equal(after.find(d=>d.title==='Proximal Policy Optimization Algorithms').intent,'能够说明方法、条件与预期结果之间的关系。');
-await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved button');await page.click('.ideal-saved button');await page.waitForSelector('.ideal-bough');await titleClick(names[0]);await titleClick('问题与基本原理');
+await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved-open');await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');await titleClick(names[0]);await titleClick('问题与基本原理');
 const paperCard=(await page.$$('.ideal-source'))[0];assert.equal(await paperCard.$eval('h4',e=>e.textContent),'Proximal Policy Optimization Algorithms');assert.equal(await paperCard.$eval('button',e=>e.textContent),'打开学习笔记');
 await paperCard.$eval('button',e=>e.click());assert.equal((await read()).length,after.length);assert.equal(requests.filter(r=>r.command==='resource').length,1);
 assert.deepEqual(after.find(d=>d.id===fixture.id),before.find(d=>d.id===fixture.id));assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[]);
@@ -126,8 +126,8 @@ assert.deepEqual(after.find(d=>d.id===fixture.id),before.find(d=>d.id===fixture.
 const beforeRebuildDocs=await read();
 job.status='review';job.stage='已构建 · 有内容改进建议';job.issues=[{branchId:'B1',nodeId:null,severity:'important',problem:'需要明确学习产物的检查方法。',repair:'增加具体的比较标准。'}];
 job.pathReport={status:'checked',errors:[],branchOrder:['B1','B2'],requirements:[{id:'R1',label:'完成可评估工具',outcome:'比较结果并分析失败原因',tasks:[{branchId:'B1',branchTitle:names[0],nodeId:'N1',title:'问题与基本原理',kind:'knowledge',outcome:'解释方法与条件的关系',deliverable:'',feedback:''}]}]};
-await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved button');
-assert.ok(!(await page.$eval('.ideal-saved',el=>el.textContent)).includes('改进建议'));await page.click('.ideal-saved button');await page.waitForSelector('.ideal-bough');
+await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved-open');
+assert.ok(!(await page.$eval('.ideal-saved',el=>el.textContent)).includes('改进建议'));await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');
 assert.equal(await page.$eval('.ideal-status',el=>el.textContent),'学习路径构建完成');await page.click('[aria-label="重建学习树"]');
 assert.equal(await page.$eval('.ideal-rebuild-form .primary',el=>el.disabled),true);assert.equal(await page.$eval('.ideal-review-choice input',el=>el.checked),false);
 await page.type('#ideal-rebuild-suggestion','加强检索评估，并增加贯穿各阶段的项目。');await page.type('#ideal-rebuild-reason','我需要通过具体成果检验理解。');await page.click('.ideal-review-choice input');
@@ -137,7 +137,7 @@ await click('生成新版本');await page.waitForSelector('.ideal-rebuild-form [
 await page.waitForFunction(()=>!document.querySelector('.ideal-rebuild-form') && document.querySelector('.ideal-map-title span')?.textContent.includes('第 2 版'));
 const rebuildCalls=requests.filter(r=>r.command==='rebuild');assert.equal(rebuildCalls.length,2);assert.equal(rebuildCalls[0].requestId,rebuildCalls[1].requestId);assert.equal(rebuildCalls[0].includeReview,true);assert.ok(rebuildCalls[0].reason.includes('检验理解'));
 await click('构建记录');await page.waitForSelector('.ideal-path-check');await page.click('.ideal-path-check summary');await page.screenshot({path:output+'/path-check.png'});
-await click('查看原版本');await page.waitForFunction(()=>document.querySelector('.ideal-map-title span')?.textContent.includes('第 1 版'));await click('全部目标');await page.waitForFunction(()=>document.querySelectorAll('.ideal-saved button').length===2);
+await click('查看原版本');await page.waitForFunction(()=>document.querySelector('.ideal-map-title span')?.textContent.includes('第 1 版'));await click('全部目标');await page.waitForFunction(()=>document.querySelectorAll('.ideal-saved-open').length===2);
 assert.deepEqual(await read(),beforeRebuildDocs);assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[]);
 console.log(JSON.stringify({passed:true,mockedRequests:requests.length,screenshots:output,actualModelCalls:0}));
 }finally{await browser.close();}

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowDownToLine, ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Compass, ExternalLink, GitBranch, Layers3, LoaderCircle, Pause, Play, Plus, RotateCcw, Search, Sparkles, Wrench, X } from 'lucide-react'
+import { ArrowDownToLine, ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, Compass, ExternalLink, GitBranch, Layers3, LoaderCircle, Pause, Play, Plus, RotateCcw, Search, Sparkles, Trash2, Wrench, X } from 'lucide-react'
 import type { Knowledge, LearningDocument } from '../types'
 import { idealInput, idealNodeResources, idealSourceIdentity } from '../../shared/ideal-tree.mjs'
 import { getPreference } from '../storage'
@@ -39,6 +39,7 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
   const [diagnostics, setDiagnostics] = useState(false), [imports, setImports] = useState<Record<string,string>>({})
   const [loading, setLoading] = useState(true), [searchBranch, setSearchBranch] = useState('')
   const [rebuilding, setRebuilding] = useState<Job | null>(null), [suggestion, setSuggestion] = useState(''), [reason, setReason] = useState(''), [includeReview, setIncludeReview] = useState(false)
+  const [deleting, setDeleting] = useState<{id:string;title:string} | null>(null)
   const rebuildRequest = useRef({ key:'', id:'' })
   const organism = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState({ width: 800, height: 450 })
@@ -56,7 +57,7 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
   }, [configured])
   const paperRunning = !!job && Object.values(job.paperResearch || {}).some(b=>Object.values(b).some(s=>s.status==='running'))
   useEffect(() => {
-    if (!job || job.status !== 'running' && !paperRunning) return
+    if (!job || deleting || job.status !== 'running' && !paperRunning) return
     let active = true, timer: ReturnType<typeof setTimeout>
     const poll = async () => {
       try { const result = await command({ command: 'get', id: job.id }); if (!active) return; setJob(result.job); setError(''); timer = setTimeout(poll, 1800) }
@@ -64,7 +65,7 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
     }
     timer = setTimeout(poll, 1200)
     return () => { active = false; clearTimeout(timer) }
-  }, [job?.id, job?.status, paperRunning])
+  }, [job?.id, job?.status, paperRunning, deleting])
   async function perform(label: string, task: () => Promise<void>) {
     setBusy(label); setError('')
     try { await task() } catch (e) { if (mounted.current) setError((e as Error).message) } finally { if (mounted.current) setBusy('') }
@@ -98,6 +99,18 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
     })
   }
   function showRebuild() { setRebuilding(job); setSuggestion(''); setReason(''); setIncludeReview(false); setError(''); rebuildRequest.current = {key:'',id:''} }
+  async function removeTree() {
+    if (!deleting) return
+    const id = deleting.id
+    await perform('删除学习树', async () => {
+      await command({ command:'delete', id, confirm:true })
+      if (!mounted.current) return
+      ++selection.current
+      setTrees(previous => previous.filter(tree => tree.id !== id))
+      if (job?.id === id) { setJob(null); resetFocus() }
+      setDeleting(null)
+    })
+  }
   const total = job ? Object.values(job.branches).reduce((n,b) => n+b.nodes.length,0) : 0
   const branch = job?.skeleton?.branches.find(b => b.id === branchId), nodes = job?.branches[branchId]?.nodes || []
   const selected = nodes.find(n => n.id === selectedId), parent = nodes.find(n => n.id === parentId)
@@ -164,10 +177,10 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
     <header className="tree-heading ideal-heading"><div><span className="collection-eyebrow">A MAP OF WHAT YOU COULD BECOME</span><h1>理想学习树<span>让每一条枝干，都通向想学会的事。</span></h1></div>
       <button className="primary" onClick={() => { setCreating(true); setError('') }}><Plus size={15} />新的目标</button>
     </header>
-    {error && !creating && !rebuilding && <p className="inline-error" role="alert">{error}</p>}
+    {error && !creating && !rebuilding && !deleting && <p className="inline-error" role="alert">{error}</p>}
     {!job && <div className="ideal-entry">
       <div className="ideal-saved-heading"><h2>已保存的目标</h2><span>{trees.length} 份学习路径</span></div>
-      {loading ? <div className="ideal-saved-empty" role="status"><LoaderCircle size={24} className="spin"/><p>正在打开你的目标…</p></div> : trees.length ? <div className="ideal-saved" aria-label="已保存的目标">{trees.map((tree,index) => <button key={tree.id} onClick={() => void open(tree.id)} disabled={!!busy}><span className="ideal-saved-mark" aria-hidden="true"><GitBranch size={24} strokeWidth={1.2}/><small>{String(index+1).padStart(2,'0')}</small></span><span className="ideal-saved-copy"><strong>{tree.title}</strong><small><i className={tree.status}/>{labels[tree.status]} · {tree.nodes} 个节点 · 第 {tree.edition || 1} 版</small></span><ArrowUpRight size={16} /></button>)}</div> : <div className="ideal-saved-empty">
+      {loading ? <div className="ideal-saved-empty" role="status"><LoaderCircle size={24} className="spin"/><p>正在打开你的目标…</p></div> : trees.length ? <div className="ideal-saved" aria-label="已保存的目标">{trees.map((tree,index) => <div className="ideal-saved-card" key={tree.id}><button className="ideal-saved-open" onClick={() => void open(tree.id)} disabled={!!busy}><span className="ideal-saved-mark" aria-hidden="true"><GitBranch size={24} strokeWidth={1.2}/><small>{String(index+1).padStart(2,'0')}</small></span><span className="ideal-saved-copy"><strong>{tree.title}</strong><small><i className={tree.status}/>{labels[tree.status]} · {tree.nodes} 个节点 · 第 {tree.edition || 1} 版</small></span><ArrowUpRight size={16} /></button><button className="icon-button ideal-saved-delete" aria-label={`删除目标 ${tree.title}`} title="删除目标" disabled={!!busy} onClick={() => { setError(''); setDeleting(tree) }}><Trash2 size={15}/></button></div>)}</div> : <div className="ideal-saved-empty">
         <div className="ideal-seed-art" aria-hidden="true"><svg viewBox="0 0 400 220"><path d="M200 210 C200 145 188 130 200 80 M200 164 C160 140 130 160 94 100 M200 130 C250 130 275 85 310 64 M200 96 C169 83 151 53 137 25 M200 82 C224 64 234 43 238 14" /><circle cx="94" cy="100" r="5"/><circle cx="310" cy="64" r="6"/><circle cx="137" cy="25" r="4"/><circle cx="238" cy="14" r="4"/></svg></div>
         <h2>留一个想抵达的方向</h2><p>保存你的学习目标，让知识、资料与实践逐步展开。</p><button className="secondary" onClick={() => { setCreating(true); setError('') }}><Plus size={14}/>创建第一个目标</button>
       </div>}
@@ -189,12 +202,14 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
         <div className="ideal-goal-footer"><span>原目标与稳定画像继续作为起点<br/>本次会重新调用模型，生成完整学习树</span><button className="primary" disabled={!!busy || suggestion.trim().length < 4 || reason.trim().length < 4}>{busy ? <LoaderCircle size={15} className="spin" /> : <RotateCcw size={15} />}{configured ? '生成新版本' : '连接模型'}</button></div>
       </form>
     </Modal>}
+    {deleting && <Modal title="删除理想学习树" subtitle={deleting.title} onClose={() => { if (!busy) setDeleting(null) }}><div className="ideal-goal-form"><p>此目标的学习树和构建记录将被删除，正在进行的构建或论文查找会先停止。已导入资料库的资料、笔记以及其他版本会保留。</p><p>删除后无法撤销。</p>{error && <p className="inline-error" role="alert">{error}</p>}<div className="modal-actions"><button className="secondary" disabled={!!busy} onClick={() => setDeleting(null)}>保留目标</button><button className="secondary danger" disabled={!!busy} onClick={() => void removeTree()}>{busy ? <LoaderCircle size={14} className="spin"/> : <Trash2 size={14}/>}确认删除</button></div></div></Modal>}
     {job && <>
       <div className="ideal-toolbar"><div><button className="ideal-back" onClick={() => { ++selection.current; setJob(null); resetFocus(); void command({ command: 'list' }).then(data => setTrees(data.trees)).catch(e => setError(e.message)) }}><ArrowLeft size={14} />全部目标</button><span className={`ideal-status ${job.status}`}>{job.status === 'running' && <LoaderCircle className="spin" size={12} />}{['complete','review'].includes(job.status) ? '学习路径构建完成' : job.stage}</span></div><div>
         {job.status === 'running' ? <button className="secondary" disabled={!!busy} onClick={() => void perform('暂停', async () => { setJob((await command({ command: 'pause', id: job.id })).job) })}><Pause size={13} />暂停</button> : ['paused','failed'].includes(job.status) && <button className="primary" disabled={!!busy} onClick={() => void perform('继续', async () => { setJob((await command({ command: 'resume', id: job.id })).job) })}><Play size={13} />继续构建</button>}
         {['complete','review'].includes(job.status) && <button className="secondary" aria-label="重建学习树" disabled={!!busy || paperRunning} onClick={showRebuild}><RotateCcw size={13}/>重建</button>}
         <button className="icon-button" title="导出学习树与构建记录" aria-label="导出理想学习树" onClick={() => void perform('导出', async () => { const { artifact } = await command({ command: 'export', id: job.id }); const url = URL.createObjectURL(new Blob([JSON.stringify(artifact,null,2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = `${job.contract?.title || '理想学习树'}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url),1000) })}><ArrowDownToLine size={16} /></button>
         <button className="secondary" aria-expanded={diagnostics} onClick={() => { setDiagnostics(!diagnostics); setSelectedId('') }}>构建记录</button>
+        <button className="icon-button" aria-label="删除理想学习树" title="删除此目标" disabled={!!busy} onClick={() => { setError(''); setDeleting({id:job.id,title:job.contract?.title || job.goal}) }}><Trash2 size={16}/></button>
       </div></div>
       {job.error && <p className="ideal-notice" role="status">{job.error}</p>}
       <div className="ideal-workspace">
@@ -233,7 +248,7 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
         </aside>}
         {diagnostics && <aside className="ideal-paper ideal-diagnostics" aria-label="构建记录"><button className="icon-button ideal-close" aria-label="收起构建记录" onClick={() => setDiagnostics(false)}><X size={16}/></button><span className="ideal-kicker">构建记录</span><h2>从目标到枝叶</h2><p>{job.contract?.summary || job.goal}</p><dl><dt>模型</dt><dd>{job.model}</dd><dt>协议版本</dt><dd>{job.promptVersion}</dd><dt>模型调用</dt><dd>{job.metrics.modelCalls}</dd><dt>资料工具调用</dt><dd>{job.metrics.toolCalls}</dd><dt>返回 token</dt><dd>{job.metrics.completionTokens}</dd><dt>格式修复</dt><dd>{job.metrics.repairs}</dd></dl>
           <h3>目标约定</h3>{job.contract?.requirements.map(r => <p key={r.id}><strong>{r.label}</strong><br/>{r.outcome}</p>)}
-          {job.rebuild && <><h3>本版重建依据</h3><p>{job.rebuild.suggestion}</p><p>原因：{job.rebuild.reason}</p><button className="secondary" disabled={!!busy} onClick={() => void open(job.rebuild!.sourceId)}><ArrowLeft size={13}/>查看原版本</button></>}
+          {job.rebuild && <><h3>本版重建依据</h3><p>{job.rebuild.suggestion}</p><p>原因：{job.rebuild.reason}</p>{trees.some(tree => tree.id === job.rebuild!.sourceId) ? <button className="secondary" disabled={!!busy} onClick={() => void open(job.rebuild!.sourceId)}><ArrowLeft size={13}/>查看原版本</button> : <p>原版本已删除，重建依据仍保留。</p>}</>}
           {job.pathReport && <section className="ideal-path-check" aria-label="学习路径检查"><h3>学习路径检查</h3><p>{job.pathReport.status === 'checked' ? '已核对目标覆盖、先修无环、成果与反馈字段。' : '这份历史记录尚有结构项未通过当前检查。'}这些检查不代表已证明教学内容完整或学习者已经掌握。</p><p>先修顺序：{job.pathReport.branchOrder.map(id => job.skeleton?.branches.find(b => b.id === id)?.title).join(' → ')}</p>{job.pathReport.requirements.map(r => <details key={r.id}><summary>{r.label} · {r.tasks.length} 个学习任务</summary><p>掌握标准：{r.outcome}</p>{r.tasks.map(task => <div key={`${task.branchId}/${task.nodeId}`}><button onClick={() => { chooseBranch(task.branchId); chooseNode(task.nodeId) }}>{task.branchTitle} · {task.title}<ArrowUpRight size={12}/></button><p>{task.outcome}</p>{task.deliverable && <p>成果：{task.deliverable}<br/>反馈：{task.feedback}</p>}</div>)}</details>)}</section>}
           {!!job.contract?.assumptions.length && <><h3>当前假设</h3>{job.contract.assumptions.map((s,i) => <p key={i}>{s}</p>)}</>}
           {!!job.contract?.excluded.length && <><h3>范围边界</h3>{job.contract.excluded.map((s,i) => <p key={i}>{s}</p>)}</>}

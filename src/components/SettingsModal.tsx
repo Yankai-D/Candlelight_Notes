@@ -6,7 +6,7 @@ import { defaultModelConnection, defaultStartupMode, startupModes } from '../../
 import type { ModelConfig, ReaderStartupMode } from '../types'
 import '../settings.css'
 import { StorageLocation } from './StorageLocation'
-import { storageSettings, setStorageDirectory, type StorageSettings } from '../storage'
+import { storageSettings, setStorageDirectory, maintainWorkspace, flushWrites, reloadWorkspace, type StorageSettings } from '../storage'
 
 type Props = { config: ModelConfig; onClose: () => void; onCourseStyle: () => void; onDiscover?: () => void; onMaintenance?: () => void; api: (path: string, body: unknown) => Promise<any>; onSave: (data: Partial<ModelConfig>) => void; initialSection?: 'model' | 'startup' | 'storage' }
 export function SettingsModal({config,onClose,onCourseStyle,onDiscover,onMaintenance,api,onSave,initialSection='model'}: Props) {
@@ -17,14 +17,27 @@ export function SettingsModal({config,onClose,onCourseStyle,onDiscover,onMainten
   const [busy,setBusy]=useState(''),[message,setMessage]=useState(''),[error,setError]=useState('')
   const working=useRef(false)
   const [location,setLocation]=useState<StorageSettings|null>(null),[directory,setDirectory]=useState('')
+  const [movePreview,setMovePreview]=useState<{id:string;directory:string;documents:number;retired:number;files:number;bytes:number;warnings:string[]}|null>(null)
+  const [moveResult,setMoveResult]=useState<{directory:string;remainingOldPaths:string[]}|null>(null)
   useEffect(()=>{if(section==='storage')void storageSettings().then(value=>{setLocation(value);setDirectory(value.directory||'')}).catch(error=>setError(error.message))},[section])
   const draft=()=>({baseUrl:baseUrl.trim(),model:model.trim(),...(key.trim()?{apiKey:key.trim()}: {})})
   function discard() {setBaseUrl(config.baseUrl);setModel(config.model);setKey('');setEditing(false);setConfirmation(null);setError('');setMessage('')}
-  function navigate(next:'model'|'startup'|'storage') {if(working.current)return;discard();setStartup(config.startupMode||defaultStartupMode);setSection(next)}
+  function navigate(next:'model'|'startup'|'storage') {if(working.current)return;if(moveResult){reloadWorkspace();return}discard();setStartup(config.startupMode||defaultStartupMode);setSection(next)}
   async function saveLocation() {
     if(working.current)return;working.current=true;setBusy('storage');setError('');setMessage('')
     try {const value=await setStorageDirectory(directory);setDirectory(value.directory);setLocation(previous=>({...previous,enabled:true,...value}));setMessage('保存位置已更新，下次导入时使用。已有资料和笔记保持原位置。')}
     catch(error){setError((error as Error).message)}finally{working.current=false;setBusy('')}
+  }
+  async function transfer(confirm=false) {
+    if(working.current)return;working.current=true;setBusy('move');setError('');setMessage('')
+    try {
+      await flushWrites()
+      if(!confirm)setMovePreview(await maintainWorkspace({action:'workspace-move-preview',directory}))
+      else {
+        const result=await maintainWorkspace({action:'workspace-move',previewId:movePreview!.id,confirm:true})
+        setMoveResult(result);setMovePreview(null)
+      }
+    }catch(error){setError((error as Error).message);if(confirm)setMovePreview(null)}finally{working.current=false;setBusy('')}
   }
   async function perform(action:'save'|'test'|'reset'|'clear'|'startup') {
     if(working.current)return
@@ -39,7 +52,7 @@ export function SettingsModal({config,onClose,onCourseStyle,onDiscover,onMainten
     } catch(e){setError((e as Error).message)}finally{working.current=false;setBusy('')}
   }
   const leave=(callback:()=>void)=>{if(!working.current)callback()}
-  return <Modal title="设置" subtitle={section==='storage'?'管理资料与笔记的保存位置。':section==='model'?'管理保存在本机的模型连接。':'选择进入资料时的阅读方式。'} onClose={()=>leave(onClose)}>
+  return <Modal title="设置" subtitle={section==='storage'?'管理资料与笔记的保存位置。':section==='model'?'管理保存在本机的模型连接。':'选择进入资料时的阅读方式。'} onClose={()=>moveResult?reloadWorkspace():leave(onClose)}>
     <SettingsSections current={section} onModel={()=>navigate('model')} onCourse={()=>leave(onCourseStyle)} onStartup={()=>navigate('startup')} onStorage={()=>navigate('storage')} />
     <div className="settings-form settings-panel">
       {section==='model'?<>
@@ -60,7 +73,7 @@ export function SettingsModal({config,onClose,onCourseStyle,onDiscover,onMainten
       </>:section==='storage'?<>
         {location?.maintenance && onMaintenance && <div className="discovery-entry"><strong>备份与恢复</strong><p className="field-help">完整备份学习空间，恢复移除的记录，或管理回收站。</p><button className="secondary" disabled={!!busy} onClick={()=>leave(onMaintenance)}>资料备份与恢复</button></div>}
         {location?.discovery && onDiscover && <div className="discovery-entry"><strong>找回已有学习笔记</strong><p className="field-help">启动时识别默认资料目录。其他位置的笔记可选择目录后加入。</p><button className="secondary" disabled={!!busy} onClick={()=>leave(onDiscover)}>识别已有笔记</button></div>}
-        {location?.enabled?<><StorageLocation value={directory} onChange={setDirectory} disabled={!!busy}/><p className="field-help">资料与笔记保存为独立文件。卸载保留它们和轻量路径索引，清除 API Key 与缓存；内置描述性统计原文随程序卸载。</p><div className="modal-actions"><div className="spacer"/><button className="primary" disabled={!!busy||!directory.trim()||directory===location.directory} onClick={()=>void saveLocation()}>保存位置</button></div></>:<p className="field-help">{location?'当前使用浏览器存储，请更新本机服务以启用文件资料库。':'正在读取保存位置…'}</p>}
+        {location?.enabled?<><StorageLocation value={directory} onChange={value=>{setDirectory(value);setMovePreview(null)}} disabled={!!busy||!!moveResult} help="保存位置只影响后续导入；迁移现有资料会把原文、笔记和学习树一起移到新位置。"/><p className="field-help">每份资料的原文副本和笔记保存在同一个文件夹。卸载保留用户文件，清除 API Key 与缓存。</p>{moveResult?<div className="settings-confirm" role="status"><strong>资料已迁移</strong><p>{moveResult.directory}</p>{moveResult.remainingOldPaths.length>0&&<p>部分旧文件在迁移期间发生变化或被占用，已保留，请检查：{moveResult.remainingOldPaths.join('；')}</p>}<button className="primary" onClick={reloadWorkspace}>打开迁移后的资料库</button></div>:movePreview?<div className="settings-confirm" aria-label="确认资料迁移"><strong>迁移 {movePreview.documents} 份资料与笔记</strong><p>包括 {movePreview.retired} 条回收记录、学习树及生成记录，共 {movePreview.files} 个文件，约 {(movePreview.bytes/1024/1024).toFixed(1)} MB。</p><p>复制并逐一校验后切换位置，再清理旧副本。请先关闭其他安装版本。用户最初导入的外部原文件不移动。</p>{movePreview.warnings.map((text,index)=><p key={index} className="field-help">{text}</p>)}<div className="modal-actions"><button className="secondary" disabled={!!busy} onClick={()=>setMovePreview(null)}>取消</button><button className="primary" disabled={!!busy} onClick={()=>void transfer(true)}>{busy?'正在迁移…':'确认迁移全部资料'}</button></div></div>:<div className="modal-actions"><button className="secondary" disabled={!!busy||!directory.trim()} onClick={()=>void transfer()}>{busy==='move'?'正在检查文件…':'迁移现有资料到这里'}</button><div className="spacer"/><button className="primary" disabled={!!busy||!directory.trim()||directory===location.directory} onClick={()=>void saveLocation()}>保存位置</button></div>}</>:<p className="field-help">{location?'当前使用浏览器存储，请更新本机服务以启用文件资料库。':'正在读取保存位置…'}</p>}
       </>:<>
         <div className="startup-options" role="radiogroup" aria-label="进入资料时的启动方式">{startupModes.map(mode=><label key={mode.id} className={`startup-option ${startup===mode.id?'selected':''}`}><input type="radio" name="startup-mode" value={mode.id} checked={startup===mode.id} disabled={!!busy} onChange={()=>setStartup(mode.id as ReaderStartupMode)}/><span><strong>{mode.label}{mode.id==='adaptive'&&<small>默认</small>}</strong><span>{mode.description}</span></span></label>)}</div>
         <p className="field-help">已有笔记直接打开，缺少所选版本时才生成。两种笔记分别保存；设置不会重写正文或改变正在阅读的版本。</p>

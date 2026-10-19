@@ -784,6 +784,7 @@ function ImportModal({ configured, onClose, onImport }: { configured: boolean; o
       <input ref={input} type="file" accept=".pdf,.md,.markdown,.txt,.json" hidden onChange={e => { setFile(e.target.files?.[0] || null); setError('') }} />
       <label>这次，你想学会什么？<textarea rows={3} value={intent} onChange={e => setIntent(e.target.value)} maxLength={4000} /></label>
       <p className="field-help">默认只求看懂原文；有特别关注的问题时，可以自行修改。</p>
+      {file && /\.json$/i.test(file.name) && <p className="field-help">JSON 备份包含笔记和原文文字，不包含原始 PDF。跨设备保留原件请使用“资料备份与恢复”。</p>}
       {location?.enabled && <StorageLocation value={location.directory || ''} onChange={directory => setLocation(current => current ? { ...current, directory } : null)} disabled={!!busy} />}
       <p className="import-initialization">{configured ? '进入资料时按设置中的阅读启动方式打开；两种笔记分别保存。' : '导入后请连接模型；阅读启动方式可在设置中调整。'}</p>
       {error && <p className="inline-error" role="alert">{error}</p>}
