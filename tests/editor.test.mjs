@@ -356,15 +356,16 @@ test('rich editor and independent notebooks preserve edits, selection, history a
         field.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
       });
       await React.act(async () => { dom.window.document.querySelector('.intent-form .primary').click(); });
-      assert.equal(initializationCalls.length, 5, 'Saving a goal does not silently regenerate existing notes');
+      await waitUntil(() => initializationCalls.length === 10 && !dom.window.document.querySelector('.preparation-banner'));
+      assert.equal(initializationCalls[5].document.intent, updatedGoal, 'The combined action regenerates using the edited goal');
       await React.act(async () => {
         const selector = dom.window.document.querySelector('[aria-label="阅读方式"]');
         selector.value = 'translation'; selector.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
       });
-      await waitUntil(() => initializationCalls.length === 10 && !dom.window.document.querySelector('.preparation-banner'));
-      assert.equal(initializationCalls[5].learning.template, 'translation-v1');
-      assert.equal(initializationCalls[5].knowledge, undefined);
-      assert.equal(initializationCalls[5].document.intent, updatedGoal, 'The next generation must use the saved goal');
+      await waitUntil(() => initializationCalls.length === 15 && !dom.window.document.querySelector('.preparation-banner'));
+      assert.equal(initializationCalls[10].learning.template, 'translation-v1');
+      assert.equal(initializationCalls[10].knowledge, undefined);
+      assert.equal(initializationCalls[10].document.intent, updatedGoal, 'The next generation must use the saved goal');
 
       // Sending clears the visible selection, but applying a rewrite must
       // still replace exactly the originally submitted range.
@@ -405,7 +406,7 @@ test('rich editor and independent notebooks preserve edits, selection, history a
         await waitUntil(() => dom.window.document.querySelector('[aria-label="阅读方式"]').value === id);
       };
       await chooseNotebook('adaptive');
-      await waitUntil(() => initializationCalls.length === 10 && !dom.window.document.querySelector('.preparation-banner'));
+      await waitUntil(() => initializationCalls.length === 15 && !dom.window.document.querySelector('.preparation-banner'));
       await waitUntil(() => /adaptive 初始化内容.*顺着前文继续解释/s.test(dom.window.document.querySelector('.learning-article').textContent));
       assert.equal(initializationCalls[0].learning.template, 'guided-v3');
       assert.equal(initializationCalls[0].knowledge.materials, undefined);
@@ -420,31 +421,31 @@ test('rich editor and independent notebooks preserve edits, selection, history a
       assert.deepEqual(structuredClone(returnedEditor.getJSON()), translationSaved.chapters.find(c => c.id === 'attention').content);
       assert.notEqual(returnedEditor, rewriteEditor, 'Switching notebooks must isolate the editor undo stack');
       await React.act(async () => { assert.equal(returnedEditor.commands.undo(), false); });
-      assert.equal(initializationCalls.length, 10);
+      assert.equal(initializationCalls.length, 15);
       await chooseNotebook('adaptive');
       await waitUntil(() => /适应学习的个人编辑/.test(dom.window.document.querySelector('.learning-article').textContent));
-      assert.equal(initializationCalls.length, 10);
+      assert.equal(initializationCalls.length, 15);
       await React.act(async () => { root.render(React.createElement(App, { key: 'reopen-editions' })); });
       await waitUntil(() => dom.window.document.querySelector('.paper-library'));
       await React.act(async () => { dom.window.document.querySelector('[aria-label="打开 Supplied Paper"]').click(); });
       await waitUntil(() => /适应学习的个人编辑/.test(dom.window.document.querySelector('.learning-article')?.textContent || ''));
       assert.equal(dom.window.document.querySelector('[aria-label="阅读方式"]').value, 'adaptive');
-      assert.equal(initializationCalls.length, 10, 'Reopening must reuse the selected notebook');
+      assert.equal(initializationCalls.length, 15, 'Reopening must reuse the selected notebook');
       let storedEditions = (await storage.readDocuments()).find(d => d.id === supplied.id);
       assert.deepEqual(storedEditions.notebooks.translation.chapters, translationSaved.chapters);
       assert.deepEqual(storedEditions.notebooks.translation.versions, translationSaved.versions);
       assert.deepEqual(storedEditions.chapters.find(c => c.id === 'attention').content, adaptiveContent);
-      await React.act(async () => { dom.window.document.querySelector('[aria-label="重新生成当前笔记"]').click(); });
-      assert.equal(initializationCalls.length, 10, 'Opening regeneration controls must not change notes');
+      await React.act(async () => { dom.window.document.querySelector('.document-meta .intent-pill').click(); });
+      assert.equal(initializationCalls.length, 15, 'Opening regeneration controls must not change notes');
       await React.act(async () => { dom.window.document.querySelector('.modal-actions .primary').click(); });
-      await waitUntil(() => initializationCalls.length === 15 && !dom.window.document.querySelector('.preparation-banner'));
+      await waitUntil(() => initializationCalls.length === 20 && !dom.window.document.querySelector('.preparation-banner'));
       storedEditions = (await storage.readDocuments()).find(d => d.id === supplied.id);
       assert.deepEqual(storedEditions.notebooks.translation.chapters, translationSaved.chapters);
       assert.deepEqual(storedEditions.versions[0].chapters.find(c => c.id === 'attention').content, adaptiveContent);
       await React.act(async () => { dom.window.document.querySelector('[aria-label="修改记录"]').click(); });
       await React.act(async () => { dom.window.document.querySelector('.version-item .secondary').click(); });
       await waitUntil(() => /适应学习的个人编辑/.test(dom.window.document.querySelector('.learning-article').textContent));
-      assert.equal(initializationCalls.length, 15, 'Restoring complete notes must not trigger generation');
+      assert.equal(initializationCalls.length, 20, 'Restoring complete notes must not trigger generation');
 
       // A small navigation area must keep the active chapter visible and let
       // the reader reach any other chapter without scrolling the sidebar.

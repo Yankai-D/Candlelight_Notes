@@ -20,10 +20,10 @@ test('local server round trip: config, authenticated requests, mock upstream, or
     const organizing = upstreamBody.messages[0].content.includes('folder-topics-v2');
     const styling = upstreamBody.messages[0].content.includes('course-style-edit-v1');
     const templateStyling = upstreamBody.messages[0].content.includes('template-sample-v1');
-    const routing = upstreamBody.messages[0].content.includes('template-routing-v1');
+    const routing = upstreamBody.messages[0].content.includes('template-routing-v2');
     const styleData = styling || templateStyling ? JSON.parse(upstreamBody.messages[1].content) : null;
     const documents = organizing ? JSON.parse(upstreamBody.messages[1].content).documents : [];
-    const result = routing ? { templateId: 'lecture', reason: '按知识点组织的教学资料。' } : styling || templateStyling ? { rules: ['用完整因果关系衔接段落。'], edits: [{ id: styleData.paragraphs[0].id, text: styleData.paragraphs[0].text + '中心需要与离散程度结合解释。' }] }
+    const result = routing ? { task: 'understand', material: 'course', fit: 'direct', adaptation: '', templateId: 'lecture', reason: '按知识点组织的教学资料。' } : styling || templateStyling ? { rules: ['用完整因果关系衔接段落。'], edits: [{ id: styleData.paragraphs[0].id, text: styleData.paragraphs[0].text + '中心需要与离散程度结合解释。' }] }
       : organizing ? { groups: [{ label: '测试主题', description: '', documents: documents.map(d => d.ref) }] }
       : { title: '接口测试纸条', paragraphs: ['这是一条模拟模型返回，仅供测试。'], sourcePages: [2], summary: '接口链路通过' };
     res.end(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(result) } }] }));
@@ -101,7 +101,7 @@ test('local server round trip: config, authenticated requests, mock upstream, or
     assert.equal((await remove.json()).configured, false);
     assert.equal((await fetch(base + '/api/test', { method: 'POST', headers, body: '{}' })).status, 400);
     const exported = await fetch(base + '/api/export/pdf', { method: 'POST', headers, body: JSON.stringify({ document: doc, fontSize: 17, theme: 'dark' }) });
-    assert.equal(exported.status, 200);
+    assert.equal(exported.status, 200, exported.status === 200 ? '' : await exported.text());
     assert.equal(exported.headers.get('Content-Type'), 'application/pdf');
     const bytes = new Uint8Array(await exported.arrayBuffer());
     assert.equal(new TextDecoder().decode(bytes.slice(0, 5)), '%PDF-');

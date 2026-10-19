@@ -1,4 +1,7 @@
 .learning-controls{margin-top:13px;border-top:1px solid #dce2d2;padding-top:11px;min-width:0}
+.reader-template-hint{font-size:9px;line-height:1.6;color:var(--muted,#8c997e);margin-top:4px}
+.reader-template-hint button{font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;padding:0 3px}
+.intent-form>label+label{display:block;margin-top:16px}
 .learning-control-heading{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#8b967d;margin-bottom:7px}
 .learning-control-heading button{display:flex;align-items:center;gap:4px;font-size:10px;color:#5f7751;padding:0}
 .learning-control-heading small{font:11px Georgia,serif;padding:1px 5px;background:#e2e9d6;border-radius:9px}

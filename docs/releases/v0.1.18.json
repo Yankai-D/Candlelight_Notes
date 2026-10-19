@@ -1,0 +1,118 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.18",
+  "status": "verified-local-candidate",
+  "codeRevision": "2cfc2a8e6e9f04475fed65eab2835c97504fc14f",
+  "sourceFingerprint": "83af17c1c041c20f9bc60ce950246139901c4e8104e36910af9781efa1106fc7",
+  "changes": [
+    "Add an independent exercise template with original subquestions, concise reasoning and necessary solution steps",
+    "Route by requested deliverable before source genre, validate task/template consistency, and repair conflicts at most once",
+    "Unify goal editing and regeneration with per-notebook revision feedback and archived current content",
+    "Migrate template libraries without deleting personal samples or custom templates",
+    "Render compact subquestion headings through the shared compiler without altering literal code or formulas"
+  ],
+  "validation": {
+    "tests": 370,
+    "browserSuites": 10,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "actualModelCalls": 18,
+    "fullCheckActualModelCalls": 0,
+    "liveReview": {
+      "status": "pass-on-small-authored-cases",
+      "reviewer": "same-collaborator",
+      "routeCases": 13,
+      "actualModelCalls": 18,
+      "completionTokens": 3955,
+      "privateMaterialsSent": false,
+      "observations": [
+        "All 13 routing decisions match the declared tasks, built-in templates and fit labels.",
+        "Final worked solution preserves each question and subquestion and computes mean 4 minutes, sample variance 4 minutes squared, and quadratic roots 2 and 3 correctly.",
+        "Refined responses avoid unrequested duplicate translations and the final hint response avoids duplicated shared-stem subquestions.",
+        "Final hint response provides useful approaches without the final numeric answers.",
+        "Recorded compact subquestion headings compile to four valid heading nodes after the deterministic compatibility fix."
+      ],
+      "remainingLimitations": [
+        "Same-collaborator review, small authored samples and no controlled baseline; no general teaching-quality claim.",
+        "The final formatting-only prompt clarification was checked offline, not by another paid generation.",
+        "No mathematical verifier or external exercise-data retrieval/execution is added.",
+        "Routing correctness does not establish correctness of generated solutions."
+      ],
+      "replay": {
+        "callCount": 0,
+        "headingCount": 4,
+        "format": "reading-tree-note-v1"
+      }
+    },
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.17",
+        "asarSha256": "ba792f6a36d6963d7116158c77b6a50ca1c74bbf9ec27b75c5febeda1c68fa99"
+      },
+      "to": {
+        "version": "0.1.18",
+        "asarSha256": "c7089800f0fea056827b43c18d71096583d903290aa1230ca0d365265c206345"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ]
+    },
+    "payloadFilesVerified": 12078,
+    "dependencyGraphUnchanged": true,
+    "checkReportSha256": "b7755abb779559fa2b61633220fa0480b3f03d603e7c9661442e8a67073be997"
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.18-Setup-x64.exe",
+      "bytes": 138093203,
+      "sha256": "4611025f779255762f7b1bd4595bc2a0ae7cc04f3e159f9caf004ad693a38433",
+      "path": "output/releases/pangzhu-desktop-0.1.18-verified/installer/Candlelight-Notes-0.1.18-Setup-x64.exe"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.18-verified/Candlelight-Notes-0.1.18-Windows-x64.zip",
+      "bytes": 138140496,
+      "sha256": "ca0ffb22b83f6af118db41da6aa85639958aff3bcdcf289ef0e276848f9d482d"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": {
+    "installerLifecycle": "not-run-in-blank-Windows-account",
+    "remoteCI": "not-run",
+    "currentDependencyAuditRun": false,
+    "priorDependencyAudit": "docs/releases/v0.1.16.json",
+    "missingInputs": "No automatic exercise-data retrieval or R/Python execution; incomplete inputs cannot yield verified numerical answers",
+    "assessment": "Same-collaborator review of small authored cases; not an independent or general teaching-quality evaluation"
+  },
+  "review": "docs/reviews/2026-10-19-exercise-template-0.1.18.md",
+  "evidenceManifest": "artifacts/release-0.1.18/evidence/MANIFEST.json",
+  "evidenceManifestSha256": "bf90741e18e69201b469b5602d949951b58bd7ce73118aa76809574942be340e",
+  "githubPushed": false
+}

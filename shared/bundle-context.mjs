@@ -86,10 +86,12 @@ export function bundlePlanRequest(document) {
     if (current.excerpts.length < 3) current.excerpts.push({ page: page.number, text: page.text.slice(0, 200) });
   }
   if (units.length > 300) throw new Error('资料包内容过多，请选择下属资料包分别整理。');
-  return { action: 'bundle-plan', title: document.title, intent: document.intent, units: units.map(({ size, ...unit }) => unit) };
+  const feedback = document.preparation?.settings?.regenerationFeedback || document.notebooks?.[document.activeNotebookId]?.settings?.regenerationFeedback;
+  return { action: 'bundle-plan', title: document.title, intent: document.intent, ...(feedback ? { feedback } : {}), units: units.map(({ size, ...unit }) => unit) };
 }
 
 export const bundlePlanInputSchema = z.object({ action: z.literal('bundle-plan'), title: z.string().max(400), intent: z.string().min(1).max(4000),
+  feedback: z.string().max(4000).optional(),
   units: z.array(z.object({ id: z.string().max(100), sourceId: z.string().max(100), title: z.string().max(400), pages: z.array(z.number().int().positive()).min(1).max(1000), excerpts: z.array(z.object({ page: z.number().int().positive(), text: z.string().max(600) })).max(3) })).min(1).max(300) });
 const planSchema = z.object({ sections: z.array(z.object({ title: z.string().trim().min(1).max(400), purpose: z.string().trim().min(1).max(1200), unitIds: z.array(z.string()).min(1).max(300) }).strict()).min(1).max(300) }).strict();
 export function validateBundlePlan(input, raw) {

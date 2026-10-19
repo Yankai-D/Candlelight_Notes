@@ -23,9 +23,9 @@ const generated = text => ({ blocks: [{ type: 'paragraph', text, sourcePages: []
 const config = { baseUrl: 'https://api.deepseek.com', model: 'mock', apiKey: 'not-a-real-key' };
 const completion = value => ({ ok: true, json: async () => ({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(value) } }] }) });
 
-test('two distinct built-ins, five-template cap, immutable defaults, unique names and independent samples', () => {
+test('three distinct built-ins, five-template cap, immutable defaults, unique names and independent samples', () => {
   let value = library();
-  assert.deepEqual(value.templates.map(t => t.layout), ['narrative', 'structured']);
+  assert.deepEqual(value.templates.map(t => t.layout), ['narrative', 'structured', 'exercise']);
   assert.ok(sample().paragraphs.some(p => p.text.startsWith('## ')));
   const original = structuredClone(value), personal = sample(); personal.paragraphs[0].text += '\n\n额外的表达示范。';
   value = changeTemplateLibrary(value, { type: 'edit', id: 'lecture', sample: personal });
@@ -36,10 +36,10 @@ test('two distinct built-ins, five-template cap, immutable defaults, unique name
   const reset = changeTemplateLibrary(value, { type: 'reset', id: 'lecture' });
   assert.deepEqual(reset.templates[1].personalSample, sample());
   assert.deepEqual(changeTemplateLibrary(reset, { type: 'undo', id: 'lecture' }).templates[1].personalSample, personal);
-  for (let i = 0; i < 3; i++) value = custom(value, i);
+  for (let i = 0; i < 2; i++) value = custom(value, i);
   assert.equal(value.templates.length, 5); assert.throws(() => custom(value, 4), /五套/);
   assert.throws(() => changeTemplateLibrary(value, { type: 'delete', id: 'lecture' }), /不能删除/);
-  value = changeTemplateLibrary(value, { type: 'delete', id: 'custom-2' });
+  value = changeTemplateLibrary(value, { type: 'delete', id: 'custom-0' });
   assert.equal(custom(value, 4).templates.length, 5);
   assert.throws(() => custom(value, 1));
   const tampered = library(); tampered.templates[1].organization = 'changed'; assert.throws(() => templateLibrarySchema.parse(tampered));
@@ -74,12 +74,12 @@ test('routing reads distributed source and goal, excludes profile, notes and sam
   let calls = 0;
   const raw = await runModel(config, messages, undefined, async (_, options) => {
     calls++; assert.equal(JSON.parse(options.body).max_tokens, 1024);
-    return completion({ templateId: calls === 1 ? 'made-up' : 'lecture', reason: '课件按知识点组织，目标是复习。' });
+    return completion({ task: 'review', material: 'course', fit: 'direct', adaptation: '', templateId: calls === 1 ? 'made-up' : 'lecture', reason: '课件按知识点组织，目标是复习。' });
   });
   assert.equal(calls, 2); assert.equal(selectedTemplate(custom(library(), 0), validateResult(input, raw)).id, 'lecture');
   await assert.rejects(runModel(config, messages, undefined, async () => completion({ templateId: 'bad', reason: 'bad' })), /模板选择无效/);
   const cancelled = new AbortController(); calls = 0;
-  await assert.rejects(runModel(config, messages, cancelled.signal, async () => { calls++; cancelled.abort(); return completion({ templateId: 'lecture', reason: '课程' }); }), { name: 'AbortError' });
+  await assert.rejects(runModel(config, messages, cancelled.signal, async () => { calls++; cancelled.abort(); return completion({ task: 'review', material: 'course', fit: 'direct', adaptation: '', templateId: 'lecture', reason: '课程' }); }), { name: 'AbortError' });
   assert.equal(calls, 1);
 });
 
@@ -93,7 +93,7 @@ test('route snapshot is saved before chapters, survives partial failure, refresh
   } });
   assert.equal(current.preparation.status, 'partial');
   value = changeTemplateLibrary(value, { type: 'delete', id: 'custom-1' });
-  assert.equal(value.templates.length, 2);
+  assert.equal(value.templates.length, 3);
   current = restoreBackup(JSON.stringify({ format: 'reading-tree-v1', document: current }));
   assert.deepEqual(notebookSettings(current).writingTemplate, chosen);
   await prepareDocument({ ...shared, document: current, request: async (_, id, settings) => { assert.deepEqual(settings.writingTemplate, chosen); return generated(id); } });
@@ -163,7 +163,7 @@ test('sample edits preserve formulas, accept structured headings, and reject fab
   assert.deepEqual(validateResult(request, wrapped).sample, result.sample, 'Exact redundant wrappers must not corrupt protected formulas');
   const malformed = structuredClone(reply); malformed.edits[0].text += String.raw`\(unclosed`;
   assert.throws(() => validateResult(request, malformed), /单元 mean 排版失败/);
-  let full = value; for (let i = 0; i < 3; i++) full = custom(full, i);
+  let full = value; for (let i = 0; i < 2; i++) full = custom(full, i);
   assert.throws(() => buildMessages({ action: 'create-template', revision: full.revision, definition: definition(4), catalog: templateCatalog(full) }), /五套/);
   const input = { action: 'create-template', revision: 1, definition: definition(9), catalog: templateCatalog(value) };
   const source = JSON.parse(buildMessages(input)[1].content);

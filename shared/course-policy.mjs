@@ -40,9 +40,13 @@ export const coursePolicy = {
 };
 
 export function courseEditorialPrompt(writingTemplate) {
+  if (writingTemplate?.layout === 'exercise') return exerciseCoursePrompt(writingTemplate);
   if (writingTemplate) return `讲义模板 ${coursePolicy.id}；采用独立的 ${writingTemplate.name} 组织规范。\n${writingTemplatePrompt(writingTemplate, { course: true })}\n` +
     coursePolicy.composition.filter((_, index) => index !== 2).join('\n') + '\n每个主题有一个主要解释位置；知识单元可独立回查，标题层级、段落职责按选定模板组织。跨文件、跨章节重组时保留来源和覆盖边界。\n' + noteFormatPrompt;
   return `讲义模板 ${coursePolicy.id}；文风契约 ${coursePolicy.voice}。\n` +
     [...editorialPolicy.invariants, ...editorialPolicy.adaptation, ...editorialPolicy.pacing, ...coursePolicy.composition]
       .map((rule, i) => `${i + 1}. ${rule}`).join('\n') + `\n${courseStylePrompt}\n${noteFormatPrompt}`;
+}
+function exerciseCoursePrompt(template) {
+  return `${writingTemplatePrompt(template, { course: true })}\n按已规划的小节与来源范围处理题目，共享题干只呈现一次，其他题逐小问排列。不得合并无关小题为知识讲义。\n${[4, 5, 7].map(index => coursePolicy.composition[index]).join('\n')}\n${noteFormatPrompt}`;
 }

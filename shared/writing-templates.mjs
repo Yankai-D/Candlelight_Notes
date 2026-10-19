@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import narrative from './course-default-sample.json' with { type: 'json' };
 import { editorialPolicy } from './editorial-policy.mjs';
+import { exerciseTemplate, exerciseWritingPrompt } from './exercise-template.mjs';
+import { templateDecisionSchema } from './template-decision.mjs';
 
 export const TEMPLATE_LIBRARY_KEY = 'writing-templates-v1';
 export const MAX_TEMPLATES = 5;
@@ -38,29 +40,42 @@ const lectureSample = {
 export const builtInTemplates = [
   { id: 'narrative', name: '长文讲述', layout: 'narrative', audience: '论文、研究文章、论述性长文；需要理解作者的问题、方法、推理与证据。', organization: '围绕问题推进连贯论述，把背景、直觉和推导融入正文。张弛有度：关键转折充分展开，熟悉步骤紧凑处理，局部数学完成后回到主线。保留原文实质内容与证据边界，不机械分成教学栏目。', defaultSample: narrativeSample },
   { id: 'lecture', name: '结构化讲义', layout: 'structured', audience: '课程课件、课堂讲义、教学提纲、复习资料；需要建立清楚的知识层级并分块回查。', organization: '按知识依赖由浅入深安排主题，使用知识性标题与明确层级。定义、条件、原理、推导、算例、易混点各有合适的位置和段落职责，知识单元相对独立，同时说明概念关系。把课件的简略要点展开为充分解释，不只生成提纲，不对每节强套同一组栏目。', defaultSample: lectureSample },
+  exerciseTemplate,
 ].map(template => ({ ...template, defaultSample: templateSampleSchema.parse(template.defaultSample) }));
 export const templateDefinitionSchema = z.object({ name: z.string().trim().min(1).max(40), audience: z.string().trim().min(1).max(2000), organization: z.string().trim().min(1).max(4000) }).strict();
 export const writingTemplateSnapshotSchema = templateDefinitionSchema.extend({
-  version: z.literal(1), id: z.string().min(1).max(100), layout: z.enum(['narrative', 'structured', 'custom']),
+  version: z.literal(1), id: z.string().min(1).max(100), layout: z.enum(['narrative', 'structured', 'exercise', 'custom']),
   libraryRevision: z.number().int().nonnegative(), sample: templateSampleSchema,
   sampleChoice: z.enum(['default', 'personal']), reason: z.string().max(600).default(''),
+  routing: templateDecisionSchema.optional(),
 }).strict();
 const sampleState = z.object({ selectedSample: z.enum(['default', 'personal']), personalSample: templateSampleSchema, editCount: z.number().int().nonnegative() }).strict();
 export const writingTemplateSchema = templateDefinitionSchema.extend({
-  id: z.string().min(1).max(100), layout: z.enum(['narrative', 'structured', 'custom']), defaultSample: templateSampleSchema,
+  id: z.string().min(1).max(100), layout: z.enum(['narrative', 'structured', 'exercise', 'custom']), defaultSample: templateSampleSchema,
   selectedSample: z.enum(['default', 'personal']), personalSample: templateSampleSchema, editCount: z.number().int().nonnegative(), undo: sampleState.optional(),
 }).strict();
-export const templateLibrarySchema = z.object({ version: z.literal(1), revision: z.number().int().nonnegative(), templates: z.array(writingTemplateSchema).min(2).max(MAX_TEMPLATES) }).strict().superRefine((value, ctx) => {
-  if (new Set(value.templates.map(t => t.id)).size !== value.templates.length || new Set(value.templates.map(t => t.name.toLowerCase())).size !== value.templates.length)
+const libraryShape = z.object({ version: z.union([z.literal(1), z.literal(2)]), revision: z.number().int().nonnegative(), templates: z.array(writingTemplateSchema).min(2).max(MAX_TEMPLATES + 1) }).strict();
+const checkedLibrary = libraryShape.superRefine((value, ctx) => {
+  const names = value.templates.filter(t => !(value.version === 2 && t.id === 'exercise')).map(t => t.name.toLowerCase());
+  if (new Set(value.templates.map(t => t.id)).size !== value.templates.length || new Set(names).size !== names.length)
     ctx.addIssue({ code: 'custom', message: '模板名称或标识重复。' });
-  for (const builtin of builtInTemplates) {
+  if (value.version === 1 && value.templates.length > MAX_TEMPLATES) ctx.addIssue({ code: 'custom', message: '旧模板库超过上限。' });
+  for (const builtin of builtInTemplates.filter(t => value.version === 2 || t.id !== 'exercise')) {
     const entry = value.templates.find(t => t.id === builtin.id);
     if (!entry || ['name', 'layout', 'audience', 'organization', 'defaultSample'].some(key => JSON.stringify(entry[key]) !== JSON.stringify(builtin[key])))
-      ctx.addIssue({ code: 'custom', message: '两套内置模板及默认样稿必须保留。' });
+      ctx.addIssue({ code: 'custom', message: '内置模板及默认样稿必须保留。' });
   }
   if (value.templates.some(t => !builtInTemplates.some(b => b.id === t.id) && (t.layout !== 'custom' || !t.id.startsWith('custom-'))))
     ctx.addIssue({ code: 'custom', message: '自定义模板标识无效。' });
 });
+// Idempotent read migration: keep every personal sample, undo state and revision.
+// A full legacy library temporarily retains six entries; new additions still cap at five.
+export const templateLibrarySchema = checkedLibrary.transform(value => {
+  if (value.version === 2) return value;
+  const templates = structuredClone(value.templates);
+  if (!templates.some(t => t.id === 'exercise')) templates.splice(2, 0, { ...structuredClone(exerciseTemplate), selectedSample: 'default', personalSample: structuredClone(exerciseTemplate.defaultSample), editCount: 0 });
+  return checkedLibrary.parse({ ...value, version: 2, templates });
+}).pipe(libraryShape.extend({ version: z.literal(2) }));
 export function freshTemplateLibrary(legacy) {
   const templates = builtInTemplates.map(t => ({ ...structuredClone(t), selectedSample: 'default', personalSample: structuredClone(t.defaultSample), editCount: 0 }));
   // The previous continuous course sample becomes the long-form personal sample.
@@ -69,7 +84,7 @@ export function freshTemplateLibrary(legacy) {
     const candidate = templateSampleSchema.safeParse({ title: narrative.title, paragraphs: legacy.personal.paragraphs, rules: legacy.personal.rules });
     if (candidate.success) Object.assign(templates[0], { personalSample: candidate.data, selectedSample: legacy.selected === 'personal' ? 'personal' : 'default', editCount: legacy.personal.editCount });
   }
-  return templateLibrarySchema.parse({ version: 1, revision: 0, templates });
+  return templateLibrarySchema.parse({ version: 2, revision: 0, templates });
 }
 export function templateSnapshot(library, id, reason = '') {
   const valid = templateLibrarySchema.parse(library), template = valid.templates.find(t => t.id === id);
@@ -84,6 +99,7 @@ export function changeTemplateLibrary(value, action) {
   if (action.type === 'add') {
     if (templates.length >= MAX_TEMPLATES) throw new Error('最多保留五套模板，请先删除一套自定义模板。');
     const definition = templateDefinitionSchema.parse(action.definition), sample = templateSampleSchema.parse(action.sample);
+    if (templates.some(t => t.name.toLowerCase() === definition.name.toLowerCase())) throw new Error('模板名称已存在。');
     templates.push({ ...definition, id: action.id || `custom-${crypto.randomUUID()}`, layout: 'custom', defaultSample: sample, personalSample: structuredClone(sample), selectedSample: 'default', editCount: 0 });
   } else {
     if (!entry) throw new Error('模板已不存在，请重新打开设置。');
@@ -93,7 +109,9 @@ export function changeTemplateLibrary(value, action) {
       templates.splice(templates.indexOf(entry), 1);
     } else if (action.type === 'definition') {
       if (builtin) throw new Error('内置模板的组织规则固定保留，请调整个人样稿或新建模板。');
-      Object.assign(entry, templateDefinitionSchema.parse(action.definition));
+      const definition = templateDefinitionSchema.parse(action.definition);
+      if (templates.some(t => t.id !== entry.id && t.name.toLowerCase() === definition.name.toLowerCase())) throw new Error('模板名称已存在。');
+      Object.assign(entry, definition);
     } else if (action.type === 'select') entry.selectedSample = action.selected;
     else {
       const undo = { selectedSample: entry.selectedSample, personalSample: structuredClone(entry.personalSample), editCount: entry.editCount };
@@ -107,6 +125,7 @@ export function changeTemplateLibrary(value, action) {
 }
 export function writingTemplatePrompt(snapshot, { course = false } = {}) {
   const template = writingTemplateSnapshotSchema.parse(snapshot);
+  if (template.layout === 'exercise') return exerciseWritingPrompt({ course });
   const organization = template.layout === 'narrative'
     ? [...editorialPolicy.pacing, ...(course ? ['按规划的小节范围写成连贯论述，保留全部实质内容和原文证据边界。'] : editorialPolicy.composition)].join('\n')
     : template.layout === 'structured'

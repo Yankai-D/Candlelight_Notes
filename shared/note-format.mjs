@@ -6,6 +6,22 @@ export const NOTE_FORMAT = 'reading-tree-note-v1';
 export const noteFormatPrompt = `统一内容格式 ${NOTE_FORMAT}：正文、讲解小纸条、改写和风格编辑使用同一规则。字段仍是 JSON 字符串，段落由数组/blocks 表达；可用 **重点**、*术语*、行内代码，不生成 HTML、图片或 Markdown 表格。公式只用配对的 \\(…\\) 和 \\[...\\]；不要使用美元定界符、公式代码围栏或裸 LaTeX 环境，不要把数学公式包进行内代码。JSON 解析后每个定界符仅有一个反斜杠，公式内部 aligned 的 \\\\ 换行保留。不要额外转义整段字符串。title/summary 是普通文字，公式放在正文。输出会先由统一编译器转成文本、强调、列表和 math(latex,display) 节点，校验通过后才能写入；不要自行输出渲染节点或 SVG。`;
 
 const md = new MarkdownIt({ html: false, linkify: false, typographer: false, breaks: true }).disable(['table', 'image']);
+// Some providers omit the ATX separator on a standalone subquestion label.
+// Recognize only this narrow shape at block level, so code, formulas, ordinary
+// hashes and inline text keep their literal meaning in every rendering path.
+md.block.ruler.before('heading', 'subquestion_heading', (state, line, end, silent) => {
+  if (state.sCount[line] - state.blkIndent >= 4) return false;
+  const start = state.bMarks[line] + state.tShift[line];
+  const match = /^(#{2,3})([（(](?:[a-zA-Z]|\d{1,3})[）)])[ \t]*$/.exec(state.src.slice(start, state.eMarks[line]));
+  if (!match) return false;
+  if (silent) return true;
+  const tag = `h${match[1].length}`;
+  const open = state.push('heading_open', tag, 1); open.markup = match[1]; open.map = [line, line + 1];
+  const inline = state.push('inline', '', 0); inline.content = match[2]; inline.map = [line, line + 1]; inline.children = [];
+  const close = state.push('heading_close', tag, -1); close.markup = match[1];
+  state.line = line + 1;
+  return true;
+}, { alt: ['paragraph', 'reference', 'blockquote'] });
 function prepare(text, options) {
   if (options?.strict && /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text)) throw new Error('内容含异常控制字符，请检查 JSON 中 LaTeX 反斜杠是否双写。');
   let prefix = '\uE000M'; while (text.includes(prefix)) prefix += 'M';

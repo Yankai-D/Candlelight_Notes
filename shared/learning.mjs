@@ -10,6 +10,7 @@ export const learningSettingsSchema = z.object({
   style: z.enum(['clear', 'academic', 'derivation']).default('clear'),
   template: z.enum(['translation-v1', 'guided-v1', 'guided-v2', 'guided-v3', 'legacy']).optional(),
   writingTemplate: writingTemplateSnapshotSchema.optional(),
+  regenerationFeedback: z.string().trim().max(4000).optional(),
 });
 export const materialSchema = z.object({
   id: z.string().min(1).max(100), documentId: z.string().max(100).optional(),

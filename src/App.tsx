@@ -1,3 +1,4 @@
+import { RegenerateModal } from './components/RegenerateModal'
 import { HelpModal, type HelpAction } from './components/HelpModal'
 import { Onboarding } from './components/Onboarding'
 import { BrandMark } from './components/BrandMark'
@@ -36,7 +37,7 @@ import { collectionSchema, reconcileCollection, updateCollectionItem } from '../
 import { organizationInput, treeFingerprint, validateTree } from '../shared/study-tree.mjs'
 import { defaultEditInstruction, defaultGenerationInstruction } from '../shared/learning-templates.mjs'
 import { defaultLearningIntent, normalizeLearningIntent } from '../shared/learning-intent.mjs'
-import { commitNotebook, ensureNotebooks, selectNotebook, regenerateNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
+import { commitNotebook, ensureNotebooks, selectNotebook, reviseNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
 import { prepareDocument, remainingChapters } from '../shared/preparation.mjs'
 import { applyBundlePlan, bundlePlanRequest, captureBundleContext, contextForMaterial, createBundleNote } from '../shared/bundle-context.mjs'
 import { repairFormulaDocument } from '../shared/formula-layout.mjs'
@@ -463,16 +464,16 @@ export default function App() {
     setDocuments(items => items.map(d => d.id === next.id ? next : d))
     await storage.saveDocument(next)
   }
-  async function regenerateCurrentNotebook() {
-    if (docRef.current?.storageIssue) { notify('请恢复原文后重新打开，再重新生成笔记。'); return }
-    if (busy || preparationJob.current || !docRef.current) return
-    if (!configRef.current.configured) { setModal('settings'); return }
-    let next = regenerateNotebook(docRef.current) as LearningDocument
+  async function regenerateCurrentNotebook(intent: string, feedback: string) {
+    if (docRef.current?.storageIssue) throw new Error('请恢复原文后重新打开，再重新生成笔记。')
+    if (busy || preparationJob.current || !docRef.current) throw new Error('当前笔记正在处理，请完成或暂停后再试。')
+    if (!configRef.current.configured) throw new Error('请先在设置中连接模型。')
+    let next = reviseNotebook(docRef.current, { intent, feedback }) as LearningDocument
     if (next.entryType === 'note') next = { ...next, composition: { version: 1, planned: false } }
+    await storage.saveDocument(next)
     clearSelection(); setPending(null); setError(''); restoredDocument.current = ''
     docRef.current = next
     setDocuments(items => items.map(d => d.id === next.id ? next : d))
-    await storage.saveDocument(next)
     setModal(null)
   }
   function switchChapter(id: string) {
@@ -681,7 +682,7 @@ export default function App() {
     {view === 'reader' && doc && chapter && <div className={`workspace ${focused ? 'focus-mode' : ''} ${showSidebar ? 'sidebar-open' : ''}`}>
     <aside className="study-sidebar">
       <WorkspaceBrand onHome={() => showLibrary()} />
-      <div className="document-meta"><span className="eyebrow">正在阅读</span><h1 title={doc.title}>{doc.title}</h1><p title={doc.subtitle}>{doc.subtitle}</p><button className="intent-pill" title={doc.intent} onClick={() => setModal('intent')}><Leaf size={13} /> 我的学习目标 <ChevronRight size={12} /></button>{(doc.sourceContext || doc.preparation?.sourceContext) && <button className="intent-pill" onClick={() => setModal('references')}><FileText size={13} />参考资料 · {(doc.sourceContext || doc.preparation?.sourceContext)!.sources.length} 份<ChevronRight size={12} /></button>}<LearningControls document={doc} locked={!!busy || preparing} onKnowledge={() => setModal('knowledge')} onChange={id => { void switchNotebook(id).catch(e => setError(e.message)) }} onRegenerate={() => setModal('regenerate')} /></div>
+      <div className="document-meta"><span className="eyebrow">正在阅读</span><h1 title={doc.title}>{doc.title}</h1><p title={doc.subtitle}>{doc.subtitle}</p><button className="intent-pill" title={doc.intent} disabled={!!busy || preparing} onClick={() => setModal(doc.chapters.some(c => c.status === 'ready') ? 'regenerate' : 'intent')}><Leaf size={13} />{doc.chapters.some(c => c.status === 'ready') ? '调整并重新生成' : '我的学习目标'}<ChevronRight size={12} /></button><div className="reader-template-hint">长期表达偏好可在<button onClick={() => setModal('course-style')}>设置 → 模板风格</button>调整</div>{(doc.sourceContext || doc.preparation?.sourceContext) && <button className="intent-pill" onClick={() => setModal('references')}><FileText size={13} />参考资料 · {(doc.sourceContext || doc.preparation?.sourceContext)!.sources.length} 份<ChevronRight size={12} /></button>}<LearningControls document={doc} locked={!!busy || preparing} onKnowledge={() => setModal('knowledge')} onChange={id => { void switchNotebook(id).catch(e => setError(e.message)) }} /></div>
       <ReadingRoute document={doc} currentIndex={chapterIndex} progress={chapterProgress} onNavigate={switchChapter} />
       <div className="sidebar-source"><SourceReader documents={documents} document={doc} position={sourcePosition} chapterTitle={chapter.title} onExpand={() => { setSourceOverride(null); setModal('source') }} /></div>
       <div className="sidebar-footer"><span className="small-seed">✧</span> 理解，在每一次追问中生长。</div>
@@ -750,15 +751,7 @@ export default function App() {
     {modal === 'reference-source' && referenceSource && <Modal title={referenceSource.title} subtitle="保存的参考原文" onClose={() => setModal('references')} wide><div className="source-modal-content"><SourceReader document={referenceSource} position={{ page: 1, fraction: 0, quote: '', approximate: false }} expanded /></div></Modal>}
     {modal === 'references' && doc && <Modal title="这份笔记的参考资料" subtitle={(doc.sourceContext || doc.preparation?.sourceContext)?.folderName} onClose={() => setModal(null)}><div className="reference-inventory"><p>保存于 {new Date((doc.sourceContext || doc.preparation?.sourceContext)!.capturedAt).toLocaleDateString('zh-CN')}。来源文字随笔记保留；文件夹的后续变化不会自动改写已有笔记。</p>{(doc.sourceContext || doc.preparation?.sourceContext)!.sources.map(source => <button key={source.id} onClick={() => { const original = documents.find(document => document.id === source.id); setReferenceSource({ ...doc, id: source.id, title: source.title, pages: source.pages, entryType: undefined, kind: original?.kind || 'text', library: original?.library, demo: original?.demo, filename: original?.filename || source.title }); setModal('reference-source') }}><FileText size={18} /><span>{source.title}<small>{source.path} · {source.pages.length} 页{!documents.some(document => document.id === source.id) && ' · 原资料已移除，仍保留文字来源'}</small></span></button>)}</div></Modal>}
     {modal === 'intent' && doc && <IntentModal intent={doc.intent} onClose={() => setModal(null)} onSave={intent => { mutate(d => ({ ...d, intent, intentSource: 'user', revision: d.revision + 1 })); setModal(null); notify('学习目标已更新，将用于后续生成、讲解和编辑') }} />}
-    {modal === 'regenerate' && doc && <Modal title={`重新生成${notebookLabel(doc)}笔记`} subtitle="将按当前模板重新处理全文。" onClose={() => setModal(null)}>
-      <div className="confirmation-content">
-        <p>当前正文和小纸条会先存入这份笔记的修改记录，再开始重新生成。其他阅读方式的笔记保持原样。</p>
-        <div className="modal-actions">
-          <button className="secondary" onClick={() => setModal(null)}>保留当前笔记</button>
-          <button className="primary" disabled={!!busy} onClick={() => { void regenerateCurrentNotebook().catch(e => setError(e.message)) }}>重新生成这份笔记</button>
-        </div>
-      </div>
-    </Modal>}
+    {modal === 'regenerate' && doc && <RegenerateModal intent={doc.intent} label={notebookLabel(doc)} configured={config.configured} onClose={() => setModal(null)} onSettings={() => setModal('settings')} onSubmit={regenerateCurrentNotebook} />}
     {modal === 'history' && doc && <Modal title="笔记的生长记录" subtitle={`${notebookLabel(doc)} · 保留最近 20 次修改前的版本，恢复仅影响当前笔记。`} onClose={() => setModal(null)}><div className="version-list">{config.fileStorage && <button className="secondary" onClick={() => setModal('records')}>查看生成来源与调用记录</button>}{doc.versions.length ? doc.versions.map(version => <div className="version-item" key={version.id}><History size={18} /><div><strong>{version.label}</strong><span>{new Date(version.time).toLocaleString('zh-CN')}</span></div><button className="secondary" disabled={!!busy} onClick={() => { mutate(d => restoreNotebookVersion(snapshot(d, '恢复历史版本之前'), version.chapters) as LearningDocument); setPending(null); setModal(null); notify('已恢复历史笔记，之后的版本仍保留在记录中') }}>恢复</button></div>) : <div className="modal-empty"><History size={28} /><p>还没有 AI 修改记录</p><span>直接编辑正文时，可用 Ctrl / ⌘ + Z 撤销。<br />AI 修改之前会自动保存版本。</span></div>}</div></Modal>}
     {missingDocument && <Modal title="找不到文件" subtitle={missingDocument.title} onClose={() => setMissingDocument(null)}><div className="confirmation-content"><p>文件可能已被移动或删除。可恢复到原位置，或通过“识别已有笔记”关联移动后的目录。</p>{missingDocument.paths.map(path => <p className="missing-file-path" key={path}>{path}</p>)}{missingDocument.canRead && <SourceRepair id={missingDocument.id} />}<p className="field-help">移除记录不会删除仍然存在的资料或笔记文件。</p><div className="modal-actions"><button className="secondary" onClick={() => setMissingDocument(null)}>保留记录</button>{missingDocument.canRead && <button className="secondary" onClick={() => { void openDocument(missingDocument.id, undefined, undefined, true); setMissingDocument(null) }}>只读打开笔记</button>}<button className="primary" onClick={() => void removeDocument(missingDocument.id, true).then(() => setMissingDocument(null)).catch(error => notify(error.message))}>移除失效记录</button></div></div></Modal>}
     {importLocation && <Modal title="确认保存位置" subtitle={importLocation.title} onClose={() => { importLocation.resolve(null); setImportLocation(null) }}><div className="settings-form"><StorageLocation value={importLocation.directory} onChange={directory => setImportLocation(current => current ? { ...current, directory } : null)} /><div className="modal-actions"><button className="secondary" onClick={() => { importLocation.resolve(null); setImportLocation(null) }}>取消</button><button className="primary" disabled={!importLocation.directory.trim()} onClick={() => { importLocation.resolve(importLocation.directory); setImportLocation(null) }}>确认保存位置</button></div></div></Modal>}
@@ -807,6 +800,6 @@ function ImportModal({ configured, onClose, onImport }: { configured: boolean; o
 
 function IntentModal({ intent, onClose, onSave }: { intent: string; onClose: () => void; onSave: (intent: string) => void }) {
   const [value, setValue] = useState(intent)
-  return <Modal title="带着目标去阅读" subtitle="说明想得到的成果：读懂原理、逐题解答或整理复习讲义。" onClose={onClose}><div className="intent-form"><label>我的学习目标<textarea aria-label="我的学习目标" autoFocus value={value} rows={6} onChange={e => setValue(e.target.value)} maxLength={4000} /></label><p className="field-help">保存后用于后续生成、讲解和编辑；调整现有全文请使用「重新生成」。纯翻译保留完整原文，目标仅用于术语与语境判断。</p><div className="modal-actions"><button className="primary" disabled={!value.trim()} onClick={() => onSave(value.trim())}>保存学习目标</button></div></div></Modal>
+  return <Modal title="带着目标去阅读" subtitle="说明想得到的成果：读懂原理、逐题解答或整理复习讲义。" explicitCancel onClose={onClose}><div className="intent-form"><label>我的学习目标<textarea aria-label="我的学习目标" autoFocus value={value} rows={6} onChange={e => setValue(e.target.value)} maxLength={4000} /></label><p className="field-help">目标用于首次生成。纯翻译保留完整原文，目标仅用于术语与语境判断。</p><div className="modal-actions"><button className="secondary" onClick={onClose}>取消</button><button className="primary" disabled={!value.trim()} onClick={() => onSave(value.trim())}>保存学习目标</button></div></div></Modal>
 }
 

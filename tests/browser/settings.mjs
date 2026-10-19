@@ -138,6 +138,41 @@ try {
   assert.deepEqual(contentSnapshot(after.find(d=>d.id===saved.id)),before);
   assert.deepEqual(after.find(d=>d.id==='新资料').notebooks.translation.chapters,firstTranslation);
 
+  // One entry edits the goal and the revision feedback, preserves drafts on
+  // outside clicks/Escape, and reroutes only after explicit submission.
+  await open('新资料');await reader('adaptive');
+  assert.equal(await page.$('[aria-label="重新生成当前笔记"]'),null);
+  await clickText('调整并重新生成');await page.waitForSelector('[aria-label="重新生成的调整要求"]');
+  const callCount=generationCalls().length;
+  await replace('[aria-label="我的学习目标"]','按小问讲解题目');
+  await replace('[aria-label="重新生成的调整要求"]','只给提示，不要答案');
+  await page.keyboard.press('Escape');await page.mouse.click(5,5);
+  assert.equal(await page.$eval('[aria-label="重新生成的调整要求"]',el=>el.value),'只给提示，不要答案');
+  assert.equal(generationCalls().length,callCount);
+  await page.screenshot({path:`${output}/regenerate-goal.png`});
+  await clickText('取消');assert.equal(generationCalls().length,callCount);
+  assert.equal((await readDocs()).find(d=>d.id==='新资料').intent,documents[1].intent);
+  await clickText('调整并重新生成');
+  await replace('[aria-label="我的学习目标"]','按小问讲解题目');
+  await replace('[aria-label="重新生成的调整要求"]','只给提示，不要答案');
+  await clickText('保存目标并重新生成');await page.waitForSelector('dialog',{hidden:true});
+  await page.waitForSelector('.preparation-banner',{hidden:true});
+  await page.waitForFunction(()=>document.querySelector('.notebook-status')?.textContent.includes('已保存'));
+  const newCalls=generationCalls().slice(callCount);
+  assert.deepEqual(newCalls.map(c=>c.body.action),['select-template','generate']);
+  assert.equal(newCalls[0].body.document.feedback,'只给提示，不要答案');
+  assert.equal(newCalls[1].body.document.intent,'按小问讲解题目');
+  assert.equal(newCalls[1].body.learning.regenerationFeedback,'只给提示，不要答案');
+  const revised=(await readDocs()).find(d=>d.id==='新资料');
+  assert.deepEqual(revised.notebooks.translation.chapters,firstTranslation);
+  assert.ok(revised.versions.length);
+  await page.click('.reader-template-hint button');await page.waitForSelector('.template-list');
+  assert.equal(await page.$$eval('.template-list [role="tab"]',tabs=>tabs.length),3);
+  await page.click('.template-list [role="tab"]:nth-child(3)');await page.waitForFunction(()=>document.querySelector('.course-style-preview h3')?.textContent.includes('原创小题'));
+  await page.screenshot({path:`${output}/exercise-template.png`});
+  assert.equal(await page.$eval('dialog',el=>el.scrollWidth>el.clientWidth+1),false);
+  await close();await library();
+
   // The setting affects the next entry, not the edition currently being read.
   await open(saved.title);await reader('adaptive');await mode('translation');await reader('adaptive');await library();
   for(const theme of ['sage','dark','light']) {

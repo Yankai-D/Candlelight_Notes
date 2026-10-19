@@ -76,7 +76,7 @@ flowchart TD
 | --- | --- |
 | HTTP 认证、配置、请求生命周期 | `server/index.mjs` |
 | 笔记请求和模型适配 | `server/harness.mjs` |
-| 两套模板、样稿与快照 | `shared/writing-templates.mjs`、`server/template-harness.mjs` |
+| 三套内置模板、样稿、任务路由与快照 | `shared/writing-templates.mjs`、`shared/exercise-template.mjs`、`shared/template-decision.mjs`、`server/template-harness.mjs` |
 | 文档修改、笔记版本 | `shared/document.mjs`、`shared/notebooks.mjs` |
 | 统一公式和 Markdown | `shared/note-format.mjs`、`shared/note-html.mjs` |
 | 理想树持久任务 | `server/ideal-tree/runner.mjs` |

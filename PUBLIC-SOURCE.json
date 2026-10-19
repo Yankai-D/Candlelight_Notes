@@ -1,13 +1,13 @@
 {
   "schema": "candlelight-public-source-v1",
-  "version": "0.1.17",
-  "sourceRevision": "614b3f76fb470e929494422a45312dc105137073",
-  "applicationRevision": "5d32d346b4a9eb39206de13a3a55f378c20e3f2f",
-  "applicationFilesVerified": 129,
+  "version": "0.1.18",
+  "sourceRevision": "7e8018d048d1316eaba9f99a94af0c0b07e37461",
+  "applicationRevision": "2cfc2a8e6e9f04475fed65eab2835c97504fc14f",
+  "applicationFilesVerified": 132,
   "installer": {
-    "file": "Candlelight-Notes-0.1.17-Setup-x64.exe",
-    "bytes": 138088279,
-    "sha256": "7d0afec8c5779067d7b715c25f27f5f5728d33c848951c5cf725f0ffe70f6af6"
+    "file": "Candlelight-Notes-0.1.18-Setup-x64.exe",
+    "bytes": 138093203,
+    "sha256": "4611025f779255762f7b1bd4595bc2a0ae7cc04f3e159f9caf004ad693a38433"
   },
   "gitHistoryIncluded": false,
   "personalDataIncluded": false,
@@ -97,8 +97,8 @@
     },
     {
       "path": "docs/architecture.md",
-      "bytes": 11846,
-      "sha256": "01e5b44596a0f7341245dd7eba0301615d313a4586ca8528e634d92c1e2f4b49"
+      "bytes": 11933,
+      "sha256": "12ab70f3d74672264a4bc0b1247f6a11637f9585fc36c8fc4d63b2138fe2490b"
     },
     {
       "path": "docs/bundle-notes.md",
@@ -117,8 +117,8 @@
     },
     {
       "path": "docs/learning-tasks.md",
-      "bytes": 2499,
-      "sha256": "17a3e25d25026c9a0393b7f82c19117b86e8aae5b9a84ed50b316bfd56309503"
+      "bytes": 5427,
+      "sha256": "175d89de1a3f93780c80aabe13c49c42694c3819653588abbf853a96a6fb9744"
     },
     {
       "path": "docs/product-quality.md",
@@ -191,6 +191,11 @@
       "sha256": "ef838a68bbce4e899adc05c36296efacfd1a3a25459795cd97f0cdaf2ebb2bb8"
     },
     {
+      "path": "docs/releases/v0.1.18.json",
+      "bytes": 6509,
+      "sha256": "9abc839fda90cc30118098fe96dd1d6634ac4412342b1d9be8df7222c0513c2c"
+    },
+    {
       "path": "docs/releases/v0.1.2-desktop.json",
       "bytes": 2536,
       "sha256": "1596c5dde41a0dddb8c246edbefd968bff3cd2d20f6f7885906e2d2323fbfb66"
@@ -244,6 +249,11 @@
       "path": "docs/reviews/2026-10-19-exercise-goals-0.1.17.md",
       "bytes": 3365,
       "sha256": "a68b9f442c43fd34a273c9490e46d777f901cf14267d5b6a2f0cccc9706f576f"
+    },
+    {
+      "path": "docs/reviews/2026-10-19-exercise-template-0.1.18.md",
+      "bytes": 3969,
+      "sha256": "ee8bb34cb91e21e42b3579ae719633716bbe9785f2da206dec6b15236052d28c"
     },
     {
       "path": "docs/reviews/2026-10-19-file-storage.md",
@@ -676,6 +686,11 @@
       "sha256": "71064dcb71dea7da1fd4b04327f5b995690cc92939e22d2559868be70e419f96"
     },
     {
+      "path": "evals/template-routing-cases.mjs",
+      "bytes": 3297,
+      "sha256": "299e180e10c0ec01d8cbb5e55438beebfbc4c48ad75f2f12efbb4cc557fc1c86"
+    },
+    {
       "path": "examples/course-packages/descriptive-statistics/originals/downloads.json",
       "bytes": 528,
       "sha256": "1663ff176cc704d58e51b6b0e2152e0b9a513d958aa501bd1a31cf2963d202a6"
@@ -748,12 +763,12 @@
     {
       "path": "package-lock.json",
       "bytes": 230191,
-      "sha256": "6dfe2dd46c22953b0dcd844c374ed6b16fd054b7d988f4713b376036197380ad"
+      "sha256": "aa36c6adc8415d4aee6dda8fff956c3b830dba6610747ee4cb60cd128dc59af9"
     },
     {
       "path": "package.json",
-      "bytes": 2371,
-      "sha256": "089208d48f82b5c81dff379313501097e82050f68f74eb25f89b06695dc59277"
+      "bytes": 2439,
+      "sha256": "2eb2d4ba0a20ea4445a807f76a171dd4ab8b54b7fc08157057add965c7c843ea"
     },
     {
       "path": "packaging/desktop/使用说明.txt",
@@ -777,13 +792,13 @@
     },
     {
       "path": "packaging/source/PUBLICATION.public.md",
-      "bytes": 3861,
-      "sha256": "16b0750134aefd52de901acb844540af32770146507551f614cd29117d24dc3c"
+      "bytes": 4168,
+      "sha256": "fd8d48fc974277d686d44ffc55507b9b7e8da6ed6340d05ec62799b1e7cde7bd"
     },
     {
       "path": "packaging/source/README.public.md",
-      "bytes": 6065,
-      "sha256": "dc1e3bf7b174fc51e8ff4cffe692c2b4ce595c62fe1aa0cf6d81d67a52c94552"
+      "bytes": 6404,
+      "sha256": "9bcf2fddcca2374ecb886e116c99f51fa7220728a1c8ed9d2ed0ffaf1cbcca44"
     },
     {
       "path": "packaging/windows/使用说明.txt",
@@ -842,13 +857,13 @@
     },
     {
       "path": "PUBLICATION.md",
-      "bytes": 3861,
-      "sha256": "16b0750134aefd52de901acb844540af32770146507551f614cd29117d24dc3c"
+      "bytes": 4168,
+      "sha256": "fd8d48fc974277d686d44ffc55507b9b7e8da6ed6340d05ec62799b1e7cde7bd"
     },
     {
       "path": "README.md",
-      "bytes": 6065,
-      "sha256": "dc1e3bf7b174fc51e8ff4cffe692c2b4ce595c62fe1aa0cf6d81d67a52c94552"
+      "bytes": 6404,
+      "sha256": "9bcf2fddcca2374ecb886e116c99f51fa7220728a1c8ed9d2ed0ffaf1cbcca44"
     },
     {
       "path": "scripts/audit-desktop.mjs",
@@ -904,6 +919,11 @@
       "path": "scripts/evaluate-notes.mjs",
       "bytes": 5712,
       "sha256": "e7de473f4c7d9edf2ed3cb71337603efb873a90e25d126ad40760a8e9763342b"
+    },
+    {
+      "path": "scripts/evaluate-template-routing.mjs",
+      "bytes": 3722,
+      "sha256": "c5a4f5d4e61e4533899b56b80bd324ee3ccaa0ef5508f539b557d0a5fee90508"
     },
     {
       "path": "scripts/export-note-review.mjs",
@@ -1072,8 +1092,8 @@
     },
     {
       "path": "server/harness.mjs",
-      "bytes": 34496,
-      "sha256": "5e142174f442fb3613afe736624aab151af50d784d2b42edce1b7a62e2ac9292"
+      "bytes": 35616,
+      "sha256": "9ab167d6336dea6b7d22825481bf2a9b7e4175ecb0c21ae46e8e5bbd390d07db"
     },
     {
       "path": "server/ideal-tree/adapter.mjs",
@@ -1167,8 +1187,8 @@
     },
     {
       "path": "server/template-harness.mjs",
-      "bytes": 13344,
-      "sha256": "f0ab7be81828cf44343cb0f0103c53a77beaa526407e4a022795e1f5a8f232cf"
+      "bytes": 12539,
+      "sha256": "9e76a221e4df0bc324e9499c64115c5f86eff0ac3157473290daedc3997b5bbd"
     },
     {
       "path": "server/workspace-backup.mjs",
@@ -1217,8 +1237,8 @@
     },
     {
       "path": "shared/bundle-context.mjs",
-      "bytes": 10451,
-      "sha256": "c718bebd6126f5467c17f1561b17101d845f40c163ec6879235bfc9ccbd98b2f"
+      "bytes": 10687,
+      "sha256": "0bff4c4f9be1fd582d3186928ba21890495f6086112fc2b89f5bcc55b5d0f4d1"
     },
     {
       "path": "shared/collection.mjs",
@@ -1232,8 +1252,8 @@
     },
     {
       "path": "shared/course-policy.mjs",
-      "bytes": 5490,
-      "sha256": "1cd9671d6f9927a689f0312ab4b0b6f75d8a0ee8bb56abc6f78495f083c785c6"
+      "bytes": 5935,
+      "sha256": "f6bcd4aef80c3664ea110224a6bb8b7f5f5ccdedbae8cd9f697358af2dca41c8"
     },
     {
       "path": "shared/course-style-store.mjs",
@@ -1254,6 +1274,11 @@
       "path": "shared/editorial-policy.mjs",
       "bytes": 10853,
       "sha256": "7f7ca80ee3028c62d2a4b0f1eeee4061afc824d7782171c751f473335adcbe86"
+    },
+    {
+      "path": "shared/exercise-template.mjs",
+      "bytes": 5457,
+      "sha256": "af962b3f3ca117b0f7749019afe35bb5c26c963e1c3ea8fc781d3d65ae517287"
     },
     {
       "path": "shared/folders.mjs",
@@ -1277,8 +1302,8 @@
     },
     {
       "path": "shared/learning-goal.mjs",
-      "bytes": 5994,
-      "sha256": "e4628a89cf87d724479fe4cbb88cfd99f4b490310a4f75f501b50f54ab24fd0f"
+      "bytes": 7200,
+      "sha256": "28ccd3e1f2f12757a70ce71187fc258a112acf5381f99c0b6fad36388284409c"
     },
     {
       "path": "shared/learning-intent.mjs",
@@ -1292,8 +1317,8 @@
     },
     {
       "path": "shared/learning.mjs",
-      "bytes": 3455,
-      "sha256": "64ecc82e233c84a39d6ab7a9ca4dec371ed2b4d7d57e99f75373294d13aee17e"
+      "bytes": 3519,
+      "sha256": "7531d526c50f61dbdd0a63b9b402eac71366a9bcf9e7d1a7d2a6b11e7b3a2ceb"
     },
     {
       "path": "shared/library.mjs",
@@ -1322,8 +1347,8 @@
     },
     {
       "path": "shared/note-format.mjs",
-      "bytes": 7879,
-      "sha256": "84ea1914c9011ad0311d030359e85104d609f6a4520660cf4ed9dafb9e376fa5"
+      "bytes": 8936,
+      "sha256": "a39a61149f122984e3385cfe59e4eef0fdd99f9b903e73eeb60fae760569d95f"
     },
     {
       "path": "shared/note-html.mjs",
@@ -1332,8 +1357,8 @@
     },
     {
       "path": "shared/notebooks.mjs",
-      "bytes": 6525,
-      "sha256": "7022f5609943e1d7f4332f4b792607477836cab99aa19792bd22af36cc7d7647"
+      "bytes": 7170,
+      "sha256": "9603093f4576de8857b8c95c256e13c6775cf70985f9c143380b3be00c292b83"
     },
     {
       "path": "shared/preparation.mjs",
@@ -1361,24 +1386,29 @@
       "sha256": "72bac97ab72f2891b24e134e63033768d334408a3e04c6c845f27704398ae0fa"
     },
     {
+      "path": "shared/template-decision.mjs",
+      "bytes": 5844,
+      "sha256": "c01436315babadd23e8888513e3bf7be077d51c252eb9466df3f5045e65fa471"
+    },
+    {
       "path": "shared/template-library-store.mjs",
       "bytes": 1154,
       "sha256": "45abd0155cc40fa2490444e833fb7159558dce019e6da140e967769d94d6bbb9"
     },
     {
       "path": "shared/template-routing.mjs",
-      "bytes": 1346,
-      "sha256": "69490d0792e29021e0633dd29b6e00ac77e03c5f59bd4f4bd4370be01276469a"
+      "bytes": 1728,
+      "sha256": "d6f968302917eef35d080681e94739eae04b23af1a134b852f3ea785bb915d43"
     },
     {
       "path": "shared/writing-templates.mjs",
-      "bytes": 13746,
-      "sha256": "53f43f56007a1ee98e62b383c8c72263e66a2a97abd5ec452cfa2731be1b8720"
+      "bytes": 15388,
+      "sha256": "d510fe01b1cf415bc614e866009f1da9e241386dbf87cca510bf05642f1e58e3"
     },
     {
       "path": "src/App.tsx",
-      "bytes": 78666,
-      "sha256": "4d81ad2e3b128e75827e5781a060c3f6a8e5be1b8ebefc3fce45c7754fc32382"
+      "bytes": 78668,
+      "sha256": "771664457ec957b9789c950b5ee00bcbeb54ad2508395eb087a6707f69021bdc"
     },
     {
       "path": "src/collection.css",
@@ -1427,8 +1457,8 @@
     },
     {
       "path": "src/components/HelpModal.tsx",
-      "bytes": 12945,
-      "sha256": "8f4aa6ab97c2f0b3fb4ee5b469b206f6489689a364479e058df1f29bb434fe3b"
+      "bytes": 13113,
+      "sha256": "ff35bff61807ccfdbd26297393fabf28f5ebfe15258390a736f95111d8425648"
     },
     {
       "path": "src/components/IdealTree.tsx",
@@ -1442,8 +1472,8 @@
     },
     {
       "path": "src/components/LearningControls.tsx",
-      "bytes": 2316,
-      "sha256": "d08a002b7875a5f46fc98130eb1c879afae6fe745555fd33b408cdf8633b4858"
+      "bytes": 1995,
+      "sha256": "d34ad44b037e717d9f2737a4bbd232a3f7904b67ef70aab61ee160f2fa19f427"
     },
     {
       "path": "src/components/LibraryHome.tsx",
@@ -1496,6 +1526,11 @@
       "sha256": "38b457b77b3db10850d814d579e2b2071fcad0b55d39884f347524fc72817e8c"
     },
     {
+      "path": "src/components/RegenerateModal.tsx",
+      "bytes": 2311,
+      "sha256": "b8aba84a9c4c2f981709f5ab52c47dd127c2bbf14f38b8ad930a056d5e60163c"
+    },
+    {
       "path": "src/components/SelectionHighlight.ts",
       "bytes": 1420,
       "sha256": "c4ed4f67995d441cdb39049fef15c65da926fa88d999eba7fee3a4b8f1a414b7"
@@ -1532,8 +1567,8 @@
     },
     {
       "path": "src/components/TemplateStyleModal.tsx",
-      "bytes": 15334,
-      "sha256": "b5cafc3f2c201e2eec7264c82e07c1ff3e1a1a47edb737f96b14b94700a8b06d"
+      "bytes": 15936,
+      "sha256": "ce4152af52e28bb87db2a14fbb7ede08599a8001e285fe1ccb68acf74402f8f6"
     },
     {
       "path": "src/components/ThemePicker.tsx",
@@ -1572,8 +1607,8 @@
     },
     {
       "path": "src/learning.css",
-      "bytes": 8839,
-      "sha256": "847b959231b2e65d35375d6ba6a794d815c9a4e1c2dee9924d590ba562be4c39"
+      "bytes": 9113,
+      "sha256": "68605b353f28fec0ff45aaf5443c3ed38ca4e74945f466b4c1eb240c7d08704a"
     },
     {
       "path": "src/main.tsx",
@@ -1627,8 +1662,8 @@
     },
     {
       "path": "src/types.ts",
-      "bytes": 6187,
-      "sha256": "78fded322b2d87c3c678efb22c7a726225eb71a4726628273dc2967dc69ee4f9"
+      "bytes": 6324,
+      "sha256": "cd04e0cf8f8825c0e622366dc017f69be286fafbbd4fb9282f1ca1e6eb8d0a4d"
     },
     {
       "path": "src/vite-env.d.ts",
@@ -1647,8 +1682,8 @@
     },
     {
       "path": "tests/api.test.mjs",
-      "bytes": 9575,
-      "sha256": "7925cf1d51c443ccebf320beeb05b20cc65ff4c9bb9d9228f290c608d9f6dfa2"
+      "bytes": 9700,
+      "sha256": "2fe9f50420c4cfd2b60fe6b549288a0e7a4770d19298aba4aafde2a0e5e9af9a"
     },
     {
       "path": "tests/browser/bundles.mjs",
@@ -1692,8 +1727,8 @@
     },
     {
       "path": "tests/browser/settings.mjs",
-      "bytes": 11824,
-      "sha256": "7f81f20065a0a2b16161c73fa075684e3815ff53ce04eddcb1505b5bd0375f97"
+      "bytes": 14528,
+      "sha256": "71b2dd00348cb3e83495ed76c1a3a9ec11e5578b66d8efc6eed191797d52fd59"
     },
     {
       "path": "tests/browser/workspace-maintenance.mjs",
@@ -1757,13 +1792,18 @@
     },
     {
       "path": "tests/editor.test.mjs",
-      "bytes": 40015,
-      "sha256": "4a4f86d8870a659bb3e0279418bbdeb21f0b8914098e3ad83fe4b472abb3300f"
+      "bytes": 40149,
+      "sha256": "0eb8fb5f7e581679b2a7a6be7694aae407402006140c61bb862c2aa582485e22"
     },
     {
       "path": "tests/editorial.test.mjs",
       "bytes": 7391,
       "sha256": "12be9246b82b7e9e508730fb39eaeab95a60e8b5ebe8bac3d32740aafeba8a1c"
+    },
+    {
+      "path": "tests/exercise-template.test.mjs",
+      "bytes": 9636,
+      "sha256": "9b62d924fcfc876434f93dbc5fc8e84d687bd84f8d8f770a892d7d53c0d1a91b"
     },
     {
       "path": "tests/field-review.test.mjs",
@@ -1977,8 +2017,8 @@
     },
     {
       "path": "tests/writing-templates.test.mjs",
-      "bytes": 16168,
-      "sha256": "87cb1acfcf0bf71151efcf6ec8648ff5605a873d5d782043f0b1282f2afa7e00"
+      "bytes": 16316,
+      "sha256": "3fecc3763f736591b1b71e0d826e8d877ce208c2eca74489e284568daa18a4b3"
     },
     {
       "path": "tsconfig.json",

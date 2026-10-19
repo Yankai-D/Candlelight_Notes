@@ -1,6 +1,6 @@
 {
   "name": "reading-tree",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "private": true,
   "author": {
     "name": "Yankai-D",
@@ -33,6 +33,7 @@
     "check": "node scripts/check.mjs",
     "demo:harness": "node scripts/demo-harness.mjs",
     "eval:notes": "node scripts/evaluate-notes.mjs",
+    "eval:templates": "node scripts/evaluate-template-routing.mjs",
     "eval:notes:pdf": "node scripts/export-note-review.mjs",
     "eval:claims": "node scripts/evaluate-claims.mjs",
     "eval:field": "node scripts/evaluate-field.mjs",

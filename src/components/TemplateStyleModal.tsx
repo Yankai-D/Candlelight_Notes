@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { ArrowRight, BookOpen, Check, FileText, LoaderCircle, Plus, RotateCcw, Sparkles, Trash2, Undo2 } from 'lucide-react'
+import { ArrowRight, BookOpen, Check, FileText, ListChecks, LoaderCircle, Plus, RotateCcw, Sparkles, Trash2, Undo2 } from 'lucide-react'
 import { Modal } from './Modal'
 import { builtInTemplates, changeTemplateLibrary, MAX_TEMPLATES, templateSnapshot } from '../../shared/writing-templates.mjs'
 import { defaultCourseSample } from '../../shared/course-style.mjs'
@@ -74,14 +74,15 @@ export function TemplateStyleModal({ configured, api, onClose, onModel, onStartu
     <SettingsSections current="course" onCourse={() => {}} onModel={() => leave(onModel)} onStartup={onStartup?()=>leave(onStartup):undefined} onStorage={onStorage?()=>leave(onStorage):undefined} />
     <div className="course-style-space template-space" aria-busy={!!busy}>
       <aside className="course-style-controls template-controls">
-        <div className="template-list-heading"><span>适应学习模板</span><span>{library?.templates.length || 2} / {MAX_TEMPLATES}</span></div>
+        <div className="template-list-heading"><span>适应学习模板</span><span>{library?.templates.length || builtInTemplates.length} / {Math.max(MAX_TEMPLATES, library?.templates.length || 0)}</span></div>
         <div className="template-list" role="tablist" aria-label="模板列表">
           {(library?.templates || builtInTemplates).map(t => <button key={t.id} role="tab" aria-selected={activeId === t.id && !form} disabled={!library || !!busy} onClick={() => browse(t.id)}>
-            {t.layout === 'narrative' ? <BookOpen size={17} /> : <FileText size={17} />}<span><strong>{t.name}</strong><small>{t.layout === 'narrative' ? '沿问题展开，张弛有度' : t.layout === 'structured' ? '分层理解，分块回查' : '自定义资料与组织模式'}</small></span><span className="template-kind">{t.layout === 'custom' ? '自定' : '内置'}</span>
+            {t.layout === 'narrative' ? <BookOpen size={17} /> : t.layout === 'exercise' ? <ListChecks size={17} /> : <FileText size={17} />}<span><strong>{t.name}</strong><small>{t.layout === 'narrative' ? '沿问题展开，张弛有度' : t.layout === 'structured' ? '分层理解，分块回查' : t.layout === 'exercise' ? '原题、思路、解法' : '自定义资料与组织模式'}</small></span><span className="template-kind">{t.layout === 'custom' ? '自定' : '内置'}</span>
           </button>)}
         </div>
         <button className="secondary template-add" disabled={!library || !!busy || library.templates.length >= MAX_TEMPLATES} onClick={() => openForm()}><Plus size={14} />{library?.templates.length === MAX_TEMPLATES ? '已达五套模板上限' : '添加模板'}</button>
-        <p className="template-routing-help">首次整理时，AI 根据资料内容、结构与学习目标自动选择。每套模板独立保留默认样稿与个人样稿。</p>
+        <p className="template-routing-help">首次生成或重新生成时，按学习目标与资料内容选择模板。每套模板独立保留默认样稿与个人样稿。</p>
+        {!!library && library.templates.length > MAX_TEMPLATES && <p className="field-help">升级前的模板均已保留。删除到五套以下后可再添加。</p>}
         {!form && template && <>
           <div className="course-style-request">
             <label htmlFor="template-style-instruction">调整这套模板的个人样稿</label>
@@ -107,10 +108,10 @@ export function TemplateStyleModal({ configured, api, onClose, onModel, onStartu
           <div className="course-style-preview-meta"><span>{template.name}</span><span>{template.selectedSample === 'personal' ? '新笔记采用个人样稿' : '新笔记采用默认样稿'}</span></div>
           <details className="template-description" open><summary>资料对象与组织模式</summary><p>{template.audience}</p><p>{template.organization}</p></details>
           <div className="template-sample-tabs" role="radiogroup" aria-label="此模板使用的样稿">{(['default', 'personal'] as const).map(option => <button role="radio" aria-checked={template.selectedSample === option} disabled={!!busy} key={option} onClick={() => { if (template.selectedSample !== option) void change({ type: 'select', selected: option }, `已选择${option === 'default' ? '默认' : '个人'}样稿，另一份仍保留。`) }}>{option === 'default' ? '默认样稿' : '个人样稿'}{template.selectedSample === option && <Check size={13} />}</button>)}</div>
-          <h3>{sample.title}</h3><p className="course-style-preview-intro">同一组知识与算例，呈现这套模板的组织与表达。</p>
+          <h3>{sample.title}</h3><p className="course-style-preview-intro">{template.layout === 'exercise' ? '原创小题示范逐题组织，保留题面，简洁作答。' : '同一组知识与算例，呈现这套模板的组织与表达。'}</p>
           <details className="course-style-rules"><summary>表达约定</summary><ul>{sample.rules.map((rule, i) => <li key={i}>{rule}</li>)}</ul></details>
           <Suspense fallback={<p className="field-help">正在排版样稿…</p>}><Preview paragraphs={sample.paragraphs} /></Suspense>
-          <details className="course-style-attribution"><summary>来源与改编说明</summary><p>{defaultCourseSample.attribution.note} 结构化样稿重新组织了相同主题，自定义样稿及个人样稿会进一步改编表达。</p>{defaultCourseSample.attribution.sources.map(source => <p key={source.url}>{source.authors.join('、')}{source.contributors?.length ? `；${source.contributors.join('、')}` : ''}。<a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> · <a href={source.licenseUrl} target="_blank" rel="noreferrer">{source.license}</a></p>)}<p>样稿及改编：<a href={defaultCourseSample.attribution.licenseUrl} target="_blank" rel="noreferrer">{defaultCourseSample.attribution.license}</a></p></details>
+          {template.layout === 'exercise' ? <p className="field-help">题目讲解默认样稿由本项目原创编写，未复制课程习题。</p> : <details className="course-style-attribution"><summary>来源与改编说明</summary><p>{defaultCourseSample.attribution.note} 结构化样稿重新组织了相同主题，自定义样稿及个人样稿会进一步改编表达。</p>{defaultCourseSample.attribution.sources.map(source => <p key={source.url}>{source.authors.join('、')}{source.contributors?.length ? `；${source.contributors.join('、')}` : ''}。<a href={source.url} target="_blank" rel="noreferrer">{source.title}</a> · <a href={source.licenseUrl} target="_blank" rel="noreferrer">{source.license}</a></p>)}<p>样稿及改编：<a href={defaultCourseSample.attribution.licenseUrl} target="_blank" rel="noreferrer">{defaultCourseSample.attribution.license}</a></p></details>}
         </> : <p className="field-help">正在读取模板…</p>}
       </section>
     </div>

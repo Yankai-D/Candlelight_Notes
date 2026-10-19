@@ -60,6 +60,13 @@ export function regenerateNotebook(document, now = Date.now()) {
   return commitNotebook({ ...current, notebooks: { ...current.notebooks, [notebook.id]: notebook }, ...emptyState(current, now), revision: current.revision + 1,
     versions: [previous, ...current.versions].slice(0,20) });
 }
+export function reviseNotebook(document, { intent, feedback = '' }, now = Date.now()) {
+  if (typeof intent !== 'string' || !intent.trim() || intent.length > 4000 || typeof feedback !== 'string' || feedback.length > 4000) throw new Error('请检查学习目标与调整要求的长度。');
+  const next = regenerateNotebook(document, now);
+  const notebook = next.notebooks[next.activeNotebookId];
+  return { ...next, intent: intent.trim(), intentSource: 'user', notebooks: { ...next.notebooks,
+    [notebook.id]: { ...notebook, settings: { ...notebook.settings, ...(feedback.trim() ? { regenerationFeedback: feedback.trim() } : {}) } } } };
+}
 export function restoreNotebookVersion(document, chapters, now = Date.now()) {
   if (!chapters.length) throw new Error('历史笔记没有可恢复的章节。');
   const completedIds = chapters.filter(chapter => chapter.status === 'ready').map(chapter => chapter.id);
