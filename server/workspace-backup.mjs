@@ -8,10 +8,11 @@ import { knowledgeSchema } from '../shared/learning.mjs';
 import { collectionSchema } from '../shared/collection.mjs';
 import { templateLibrarySchema } from '../shared/writing-templates.mjs';
 import { atomicJSON, readJSON, commitWorkspaceState } from './workspace-state.mjs';
+import { materialFormat, richMaterial } from '../shared/material-formats.mjs';
 
 const manifestName = 'candlelight-workspace.json';
 const preferenceKeys = ['knowledge', 'learner-setup-v1', 'writing-templates-v1', 'course-style-v1', 'collection', 'active-document', 'font-size', 'removed-library-papers', 'ideal-source-links', 'visual-theme'];
-const safePath = value => /^(notes\/\d{1,5}\/(note\.candlelight\.json|source\.(pdf|txt|md|json))|system\/ideal-trees\/[a-f0-9-]{36}\.json|system\/ideal-trees\/assets\/S[a-f0-9]{22}\.(pdf|txt)|system\/generation-records\/[a-zA-Z0-9_-]{1,100}\/[a-f0-9-]{36}\.json)$/.test(value);
+const safePath = value => /^(notes\/\d{1,5}\/(note\.candlelight\.json|source\.(pdf|txt|md|html|docx|pptx|json))|system\/ideal-trees\/[a-f0-9-]{36}\.json|system\/ideal-trees\/assets\/S[a-f0-9]{22}\.(pdf|txt)|system\/generation-records\/[a-zA-Z0-9_-]{1,100}\/[a-f0-9-]{36}\.json)$/.test(value);
 const fileSchema = z.object({ path: z.string().refine(safePath), bytes: z.number().int().nonnegative().max(128 * 1024 * 1024), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const entrySchema = z.object({ id: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), title: z.string().max(400), filename: z.string(), kind: z.enum(['pdf', 'text']), createdAt: z.number(), entryType: z.literal('note').optional(), note: z.string().refine(safePath).optional(), source: z.string().refine(safePath).optional(), sourceType: z.string(), retired: z.object({ mode: z.enum(['record','trash']), time: z.number(), placement: z.unknown().optional() }).optional() }).strict();
 const manifestSchema = z.object({ format: z.literal('candlelight-workspace-v1'), createdAt: z.number(), credentialsIncluded: z.literal(false), preferences: z.record(z.string(), z.unknown()), entries: z.array(entrySchema).max(2000), files: z.array(fileSchema).max(10000), warnings: z.array(z.string()).max(4000) }).strict();
@@ -86,7 +87,7 @@ export async function inspectWorkspaceBackup(store, directory) {
     if ((await regular(source)).size !== file.bytes || await hashFile(source) !== file.sha256) throw new Error('备份文件缺失或校验失败，当前资料库未更改。');
   }
   for (const entry of manifest.entries) {
-    if (entry.note && !/^notes\/\d+\/note\.candlelight\.json$/.test(entry.note) || entry.source && !/^notes\/\d+\/source\.(pdf|txt|md|json)$/.test(entry.source) || entry.note && entry.source && dirname(entry.note) !== dirname(entry.source)) throw new Error('备份资料配套关系异常。');
+    if (entry.note && !/^notes\/\d+\/note\.candlelight\.json$/.test(entry.note) || entry.source && !/^notes\/\d+\/source\.(pdf|txt|md|html|docx|pptx|json)$/.test(entry.source) || entry.note && entry.source && dirname(entry.note) !== dirname(entry.source)) throw new Error('备份资料配套关系异常。');
     if (!entry.retired) { if (ids.has(entry.id)) throw new Error('备份中存在重复资料编号。'); ids.add(entry.id); }
     for (const name of [entry.note, entry.source].filter(Boolean)) { if (!names.has(name) || usedNotes.has(name)) throw new Error('备份缺少资料文件或存在重复关联。'); usedNotes.add(name); }
     if (entry.note) { const document = storedDocumentSchema.parse(await readJSON(join(root, entry.note))); if (document.id !== entry.id) throw new Error('备份笔记编号不一致。'); }
@@ -110,7 +111,7 @@ export async function restoreWorkspaceBackup(store, preview, directory) {
   for (const [position, item] of manifest.entries.entries()) {
     const folder = join(target, item.note ? dirname(item.note) : item.source ? dirname(item.source) : `notes/missing-${position}`);
     const entry = { id: item.id, title: item.title, filename: item.filename, kind: item.kind, createdAt: item.createdAt, entryType: item.entryType,
-      directory: folder, notePath: join(folder, 'note.candlelight.json'), sourcePath: item.source ? join(target, item.source) : item.kind === 'pdf' && item.entryType !== 'note' ? join(folder, 'source.pdf') : null, sourceType: item.sourceType };
+      directory: folder, notePath: join(folder, 'note.candlelight.json'), sourcePath: item.source ? join(target, item.source) : (item.kind === 'pdf' || richMaterial(item.filename)) && item.entryType !== 'note' ? join(folder, 'source.' + (item.kind === 'pdf' ? 'pdf' : materialFormat(item.filename).extension)) : null, sourceType: item.sourceType };
     if (item.retired) retired.push({ id: randomUUID(), entry, ...item.retired, hash: item.note ? manifest.files.find(file => file.path === item.note).sha256 : undefined }); else entries.push(entry);
   }
   await mkdir(systemDirectory, { recursive: true });

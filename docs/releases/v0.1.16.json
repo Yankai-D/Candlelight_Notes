@@ -1,0 +1,101 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.16",
+  "status": "verified-local-candidate",
+  "codeRevision": "d04e49b8dded50276e6a3532bbba07b07756e303",
+  "sourceFingerprint": "362eeebfbe1356b8c995916676ec852ef9f2b427ccead32e465cdda8f7e6c946",
+  "changes": [
+    "Import DOCX, PPTX and HTML/HTM through a bounded local parser worker",
+    "Preserve original bytes across discovery, repair, backup/restore and workspace migration",
+    "Require explicit cancellation after file selection and preserve import drafts on outside clicks or Escape",
+    "Show extraction limits before confirmation and keep import actions visible on narrow screens"
+  ],
+  "validation": {
+    "tests": 360,
+    "browserSuites": 10,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "actualModelCalls": 0,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.15",
+        "asarSha256": "a641017d99a6cd14cb7e00d49d4e4e5f945c4625df3a317ab56b601725203bca"
+      },
+      "to": {
+        "version": "0.1.16",
+        "asarSha256": "536d0f04f7ff99348ca84a100c307444ab0f2dcccfeeb0c905b7492d5e3686f7"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ]
+    },
+    "payloadFilesVerified": 12076,
+    "dependencyGraphUnchanged": false,
+    "productionDependencyAudit": {
+      "command": "npm audit --omit=dev --json",
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "scope": "Production dependencies only; excludes development dependencies"
+    },
+    "checkReportSha256": "0569cf4a43a308833f3b7b11d3570859338f104bed59ae2014b7b4841857ae56"
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.16-Setup-x64.exe",
+      "bytes": 138086361,
+      "sha256": "359381748e195f645bea9594e30ea497c88389201ea14f5bc91594c2d433df8b",
+      "path": "output/releases/pangzhu-desktop-0.1.16/installer/Candlelight-Notes-0.1.16-Setup-x64.exe"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.16/Candlelight-Notes-0.1.16-Windows-x64.zip",
+      "bytes": 138133327,
+      "sha256": "8b442110c3469c5b8789a1a8e0985272a5bf63e5da4b427cccafad28de305e19"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": {
+    "installerLifecycle": "not-run-in-blank-Windows-account",
+    "remoteCI": "not-run",
+    "legacyOffice": "DOC/PPT require conversion to DOCX/PPTX",
+    "content": "Text extraction, not layout fidelity or OCR; images, charts and complex formula structures require original-file review",
+    "assessment": "Implemented and reviewed by the same collaborator; not an independent audit"
+  },
+  "review": "docs/reviews/2026-10-19-import-formats-0.1.16.md",
+  "evidenceManifest": "artifacts/release-0.1.16/evidence/MANIFEST.json",
+  "evidenceManifestSha256": "c5f0ee508f640b7f57d4d6c185cb688b75cf0a242cf3afe1918da022dc935707",
+  "githubPushed": false
+}

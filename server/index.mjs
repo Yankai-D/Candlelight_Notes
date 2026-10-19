@@ -10,6 +10,7 @@ import { openSettingsStore, settingsPath, connectionPatchSchema } from './settin
 import { idealTreeActivity, pauseIdealTrees } from './ideal-tree/adapter.mjs';
 import { FileLibrary } from './file-library.mjs';
 import { createGenerationRecord } from './generation-records.mjs';
+import { parseMaterialInWorker } from './material-worker.mjs';
 
 const envFile=settingsPath();
 try { process.loadEnvFile(envFile); } catch (e) { if (e.code !== 'ENOENT') console.error('无法读取 .env 文件'); }
@@ -64,6 +65,14 @@ const server = http.createServer(async (req, res) => {
     if (req.headers['sec-fetch-site'] === 'cross-site') return send(res, 403, { error: '来源不被允许。' });
     if (req.method !== 'GET' && req.headers['x-reading-tree-token'] !== token) return send(res, 403, { error: '会话已过期，请刷新页面。' });
     try {
+      if (path === '/api/import/material' && req.method === 'POST') {
+        const input = z.object({ name: z.string().min(1).max(500), data: z.string().max(72 * 1024 * 1024), workspaceToken: z.string().optional() }).strict().parse(await body(req, 74 * 1024 * 1024));
+        if (input.workspaceToken && input.workspaceToken !== workspaceToken) return send(res, 409, { error: '学习空间已切换，请重新打开导入窗口。' });
+        const controller = new AbortController(); controllers.add(controller);
+        res.on('close', () => { if (!res.writableEnded) controller.abort(); });
+        try { return send(res, 200, await parseMaterialInWorker(input, controller.signal)); }
+        finally { controllers.delete(controller); }
+      }
       if (path === '/api/storage' && process.env.READING_TREE_FILE_STORAGE !== '0') {
         if (req.headers['x-reading-tree-token'] !== token) return send(res, 403, { error: '会话已过期，请刷新页面。' });
         if (req.method !== 'POST') return send(res, 405, { error: '请使用存储接口。' });

@@ -15,7 +15,7 @@ export function SourceReader(props: Props) {
   const source = sources.find(source => source.id === (chosen || mapped?.sourceId)) || sources[0]
   const original = props.documents?.find(document => document.id === source.id)
   const document: LearningDocument = { ...props.document, id: source.id, title: source.title, pages: source.pages,
-    kind: original?.kind || 'text', filename: original?.filename || source.title, library: original?.library, demo: original?.demo, entryType: undefined }
+    kind: original?.kind || 'text', filename: original?.filename || source.title, sourceWarnings: original?.sourceWarnings, library: original?.library, demo: original?.demo, entryType: undefined }
   const position = !chosen || chosen === mapped?.sourceId ? { ...props.position, page: mapped?.sourcePage || 1 } : { page: 1, fraction: 0, quote: '', approximate: false }
   return <div className="bundle-source-reader"><label>参考资料<select aria-label="选择参考原文" value={source.id} onChange={event => setChosen(event.target.value)}>{sources.map(source => <option key={source.id} value={source.id}>{source.title}</option>)}</select></label><SingleSourceReader {...props} key={source.id} document={document} position={position} /></div>
 }
@@ -114,6 +114,7 @@ function SingleSourceReader({ document, position, expanded = false, onExpand, ch
     </div>
     <div className="page-scrubber" onMouseLeave={() => setHoverPage(null)}><div className="page-ticks" style={{ gap: document.pages.length > 40 ? 0 : undefined }}>{document.pages.map(p => <button key={p.number} className={p.number === page ? 'active' : ''} aria-label={`跳到第 ${p.number} 页`} onMouseEnter={() => setHoverPage(p.number)} onClick={() => setManualPage(p.number)} />)}</div>{hoverPage !== null && <div className="page-hover"><b>第 {hoverPage} 页</b><span>{document.pages[hoverPage - 1]?.text.slice(0, 110)}</span></div>}</div>
     <div className="page-controls"><button aria-label="上一页" disabled={page <= 1} onClick={() => setManualPage(page - 1)}><ChevronLeft size={16} /></button><label>原文 <input aria-label="原文页码" type="number" min={1} max={document.pages.length} value={page} onChange={e => { const n = Number(e.target.value); if (n >= 1 && n <= document.pages.length) setManualPage(n) }} /> <span>/ {document.pages.length}</span></label><button aria-label="下一页" disabled={page >= document.pages.length} onClick={() => setManualPage(page + 1)}><ChevronRight size={16} /></button></div>
+    {expanded && !!document.sourceWarnings?.length && <details className="extracted-text"><summary>资料读取说明</summary>{document.sourceWarnings.map(message => <p key={message}>{message}</p>)}</details>}
     {expanded && document.kind === 'pdf' && <details className="extracted-text"><summary>查看可复制的当前页原文</summary><pre>{document.pages[page - 1]?.text}</pre></details>}
   </div>
 }

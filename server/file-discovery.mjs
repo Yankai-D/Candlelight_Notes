@@ -2,9 +2,10 @@ import { readdir, lstat, realpath, readFile } from 'node:fs/promises';
 import { join, dirname, relative, isAbsolute, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { storedDocumentSchema } from '../shared/backup.mjs';
+import { sourceNames, materialFormat, richMaterial } from '../shared/material-formats.mjs';
+export { sourceNames };
 
 export const fileHash = bytes => createHash('sha256').update(bytes).digest('hex');
-export const sourceNames = ['source.pdf', 'source.txt', 'source.md', 'source.json'];
 const within = (root, path) => { const part = relative(root, path); return !part || !part.startsWith('..') && !isAbsolute(part); };
 
 // Discovery reads only the application's named notebook files. Ordinary PDFs,
@@ -35,7 +36,8 @@ export async function scanNoteFiles(directory, forbidden = []) {
         if ((await lstat(path)).size > 64 * 1024 * 1024) throw new Error('笔记文件超过 64 MB');
         const bytes = await readFile(path), document = storedDocumentSchema.parse(JSON.parse(bytes.toString('utf8')));
         // A JSON notebook backup is not an original PDF, even in older folders.
-        const sources = entries.filter(item => sourceNames.includes(item.name) && (document.kind !== 'pdf' || item.name === 'source.pdf'));
+        const expectedSource = document.kind === 'pdf' ? 'source.pdf' : richMaterial(document.filename) ? 'source.' + materialFormat(document.filename).extension : null;
+        const sources = entries.filter(item => sourceNames.includes(item.name) && (!expectedSource || item.name === expectedSource));
         if (sources.length > 1 || sources.some(item => !item.isFile() || item.isSymbolicLink())) throw new Error('配套原文存在多个文件或链接，请先确认原文');
         const sourcePath = sources[0] ? join(folder, sources[0].name) : null;
         if (sourcePath && await realpath(sourcePath) !== sourcePath) throw new Error('原文路径已被重定向');

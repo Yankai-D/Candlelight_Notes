@@ -15,6 +15,7 @@ import { brandMarkPaths } from '../shared/brand-mark.mjs';
 import { completeOnboarding } from '../tests/support/onboarding.mjs';
 import { parseArgs } from 'node:util';
 import { createHash } from 'node:crypto';
+import { docxFixture, pptxFixture, htmlFixture } from '../tests/support/office-fixtures.mjs';
 
 const { values, positionals } = parseArgs({ allowPositionals: true, options: {
   previous: { type: 'string' }, out: { type: 'string' }, visible: { type: 'boolean' },
@@ -32,6 +33,15 @@ const profile = join(scratch, '阅读数据');
 const environment = Object.fromEntries(Object.entries(process.env).filter(([key]) => /^(path|pathext|comspec|systemroot|windir|temp|tmp|localappdata|appdata|userprofile|programfiles|programfiles\(x86\)|programdata|lang)$/i.test(key)));
 let child, browser, logs = '', address;
 const checks = [], pass = text => { checks.push(text); console.log(`PASS: ${text}`); };
+async function verifyMaterialWorker(page) {
+  const inputs=[['lecture.docx',docxFixture()],['lecture.pptx',pptxFixture()],['lecture.html',htmlFixture()]].map(([name,bytes])=>({name,data:bytes.toString('base64')}));
+  const results=await page.evaluate(async inputs=>{
+    const config=await (await fetch('/api/config')).json(),results=[];
+    for(const input of inputs){const response=await fetch('/api/import/material',{method:'POST',headers:{'content-type':'application/json','x-reading-tree-token':config.token},body:JSON.stringify(input)});if(!response.ok)throw new Error(await response.text());results.push(await response.json());}return results;
+  },inputs);
+  assert.ok(results.every(result=>result.sections.length===2));assert.equal(results[0].sections[0].title,'中文概率讲义');assert.match(results[1].sections[0].title,/第一张/);assert.equal(results[2].sections[1].title,'期望');
+  pass('Packaged worker parses DOCX, PPTX and HTML without a model key or external resources');
+}
 async function packagedBuild(application) {
   const archive = join(dirname(application), 'resources/app.asar');
   const { extractFile } = await import('@electron/asar');
@@ -108,6 +118,7 @@ try {
   assert.equal(await page.evaluate(() => typeof window.pangzhuDesktop?.onCloseRequest), 'function');
   await screenshot(page, 'library.png');
   pass('Native window, private application origin, isolated settings, three public materials and sandboxed renderer');
+  if(!previous)await verifyMaterialWorker(page);
 
   const firstTarget = previous || target;
   const duplicate = spawn(packaged ? firstTarget : electron, [...(packaged ? [] : [firstTarget]), `--user-data-dir=${profile}`], { env: environment, windowsHide: true, stdio: 'ignore' });
@@ -158,7 +169,7 @@ try {
   // save to settle; otherwise the app correctly asks whether to pause before exit.
   // The first close above still verifies flushing an immediate, unsaved edit.
   await page.waitForFunction(() => !document.querySelector('.preparation-banner .spin, .ai-composer.is-busy') && document.querySelector('.save-indicator')?.textContent === '已保存到本机');
-  if (previous) pass('New packaged application opens the previous version’s profile and preserves the edited note and saved model settings');
+  if (previous) { pass('New packaged application opens the previous version’s profile and preserves the edited note and saved model settings'); await verifyMaterialWorker(page); }
   await closeWindow(page);
   page = await launch();
   const saved = await page.evaluate(async () => (await fetch('/api/config')).json());

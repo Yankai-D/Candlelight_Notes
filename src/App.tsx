@@ -3,6 +3,8 @@ import { Onboarding } from './components/Onboarding'
 import { BrandMark } from './components/BrandMark'
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { brand } from '../shared/brand.mjs'
+import { materialAccept, richMaterial } from '../shared/material-formats.mjs'
+import './import.css'
 import type { Editor, JSONContent } from '@tiptap/core'
 import { ArrowDownToLine, ArrowLeft, ArrowRight, ArrowUp, BookOpen, Library, Check, ChevronDown, ChevronRight, CircleHelp, Clock3, FilePlus2, FileText, Focus, History, Leaf, LoaderCircle, MoreHorizontal, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings2, Sparkles, Sprout, StickyNote, Trash2, Upload, X } from 'lucide-react'
 import { SourceReader } from './components/SourceContext'
@@ -768,27 +770,37 @@ function LightbulbIcon() { return <Sparkles size={13} /> }
 
 function ImportModal({ configured, onClose, onImport }: { configured: boolean; onClose: () => void; onImport: (document: LearningDocument, file: File, directory?: string) => Promise<void> }) {
   const [file, setFile] = useState<File | null>(null), [intent, setIntent] = useState(defaultLearningIntent)
+  const [prepared, setPrepared] = useState<LearningDocument | null>(null)
   const [busy, setBusy] = useState(''), [error, setError] = useState(''), [dragging, setDragging] = useState(false)
   const input = useRef<HTMLInputElement>(null)
   const [location, setLocation] = useState<storage.StorageSettings | null>(null)
   useEffect(() => { void storage.storageSettings().then(setLocation).catch(error => setError(error.message)) }, [])
   const submit = async () => {
-    if (!file) return
+    if (!file || busy) return
     setBusy('正在读取资料…'); setError('')
-    try { const { importMaterial } = await import('./pdf'); const doc = await importMaterial(file, intent.trim(), setBusy); await onImport(doc, file, location?.enabled ? location.directory : undefined) }
+    try {
+      const { importMaterial } = await import('./pdf')
+      const doc = prepared || await importMaterial(file, intent.trim(), setBusy)
+      if (!prepared && doc.sourceWarnings?.length) { setPrepared(doc); return }
+      await onImport(doc, file, location?.enabled ? location.directory : undefined)
+    }
     catch (e) { setError((e as Error).message) } finally { setBusy('') }
   }
-  return <Modal title="开始一段新的学习" subtitle="一篇论文，一份讲义，或一章你一直想弄懂的知识。" onClose={() => { if (!busy) onClose() }}>
+  return <Modal title="开始一段新的学习" subtitle="一篇论文，一份讲义，或一章你一直想弄懂的知识。" explicitCancel={!!file || !!busy} onClose={() => { if (!busy) onClose() }}>
     <div className="import-form">
-      <button className={`drop-zone ${dragging ? 'dragging' : ''}`} disabled={!!busy} onClick={() => input.current?.click()} onDragOver={e => { e.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); if (!busy && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]) }}><span className="upload-circle">{file ? <FileText size={26} /> : <Upload size={26} />}</span><strong>{file?.name || '把学习资料拖到这里'}</strong><span>{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB · 点击重新选择` : '或点击选择文件 · PDF / Markdown / TXT · 或 JSON 备份'}</span><small>文本型 PDF，最大 50 MB</small></button>
-      <input ref={input} type="file" accept=".pdf,.md,.markdown,.txt,.json" hidden onChange={e => { setFile(e.target.files?.[0] || null); setError('') }} />
-      <label>这次，你想学会什么？<textarea rows={3} value={intent} onChange={e => setIntent(e.target.value)} maxLength={4000} /></label>
+      <div className="import-fields">
+      <button className={`drop-zone ${dragging ? 'dragging' : ''}`} disabled={!!busy} onClick={() => input.current?.click()} onDragOver={e => { e.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); if (!busy && e.dataTransfer.files[0]) { setFile(e.dataTransfer.files[0]); setPrepared(null); setError('') } }}><span className="upload-circle">{file ? <FileText size={26} /> : <Upload size={26} />}</span><strong>{file?.name || '把学习资料拖到这里'}</strong><span>{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB · 点击重新选择` : 'PDF / Word / PowerPoint / HTML / Markdown / TXT'}</span><small>最大 50 MB · 也可恢复 JSON 笔记备份</small></button>
+      <input ref={input} type="file" accept={materialAccept + ',.json'} disabled={!!busy} hidden onChange={e => { if (e.target.files?.[0]) { setFile(e.target.files[0]); setPrepared(null); setError('') } }} />
+      <label>这次，你想学会什么？<textarea rows={3} value={intent} disabled={!!busy} onChange={e => { setIntent(e.target.value); setPrepared(null) }} maxLength={4000} /></label>
       <p className="field-help">默认只求看懂原文；有特别关注的问题时，可以自行修改。</p>
+      {file && richMaterial(file.name) && <p className="field-help">支持 DOCX、PPTX、HTML/HTM；原文对照显示提取的正文，原文件完整保存。图片、复杂图表和页面版式请对照原件。</p>}
+      {prepared && <div className="settings-confirm" role="status" aria-label="资料读取说明"><strong>已读取 {prepared.chapters.length} 个章节，请确认以下内容</strong>{prepared.sourceWarnings?.map(message => <p key={message}>{message}</p>)}</div>}
       {file && /\.json$/i.test(file.name) && <p className="field-help">JSON 备份包含笔记和原文文字，不包含原始 PDF。跨设备保留原件请使用“资料备份与恢复”。</p>}
       {location?.enabled && <StorageLocation value={location.directory || ''} onChange={directory => setLocation(current => current ? { ...current, directory } : null)} disabled={!!busy} />}
       <p className="import-initialization">{configured ? '进入资料时按设置中的阅读启动方式打开；两种笔记分别保存。' : '导入后请连接模型；阅读启动方式可在设置中调整。'}</p>
       {error && <p className="inline-error" role="alert">{error}</p>}
-      <div className="modal-actions"><span className="field-help">{location?.enabled ? '确认此位置并导入，文件保存在本机资料目录' : '资料保存在这台设备的浏览器中'}</span><div className="spacer" /><button className="primary" disabled={!file || !!busy || !intent.trim() || !location || (location.enabled && !location.directory?.trim())} onClick={() => void submit()}>{busy ? <LoaderCircle size={15} className="spin" /> : <ArrowRight size={15} />}{busy || '添加到资料库'}</button></div>
+      </div>
+      <div className="modal-actions"><span className="field-help">{location?.enabled ? '确认此位置并导入，文件保存在本机资料目录' : '资料保存在这台设备的浏览器中'}</span><div className="spacer" /><button className="secondary" disabled={!!busy} onClick={onClose}>取消</button><button className="primary" disabled={!file || !!busy || !intent.trim() || !location || (location.enabled && !location.directory?.trim())} onClick={() => void submit()}>{busy ? <LoaderCircle size={15} className="spin" /> : <ArrowRight size={15} />}{busy || (prepared ? '确认添加到资料库' : '添加到资料库')}</button></div>
     </div>
   </Modal>
 }

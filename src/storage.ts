@@ -12,10 +12,10 @@ import { readTemplateLibrary, commitTemplateLibrary } from '../shared/template-l
 
 const database = openDB('reading-tree', 1, { upgrade(db) { db.createObjectStore('documents', { keyPath: 'id' }); db.createObjectStore('files'); db.createObjectStore('preferences') } })
 let initialization: Promise<boolean> | undefined, token = '', workspaceToken = ''
-async function request(command: object, binary = false, retry = true): Promise<any> {
+async function request(command: object, binary = false, retry = true, path = '/api/storage'): Promise<any> {
   if (!token) { const response = await fetch('/api/config'); if (!response.ok) throw new Error('无法连接本机存储服务。'); const config = await response.json(); token = config.token; workspaceToken = config.workspaceToken || '' }
-  const response = await fetch('/api/storage', { method: 'POST', headers: { 'content-type': 'application/json', 'x-reading-tree-token': token }, body: JSON.stringify({ ...command, workspaceToken }) })
-  if (response.status === 403 && retry) { token = ''; return request(command, binary, false) }
+  const response = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-reading-tree-token': token }, body: JSON.stringify({ ...command, workspaceToken }) })
+  if (response.status === 403 && retry) { token = ''; return request(command, binary, false, path) }
   if (!response.ok) { const error = new Error((await response.json().catch(() => ({}))).error || '本机资料无法保存。') as Error & { status?: number }; error.status = response.status; throw error }
   if (binary && !response.headers.get('content-type')?.includes('application/json')) return response.blob()
   return response.json()
@@ -24,6 +24,9 @@ async function encoded(file: Blob, name?: string) {
   return { name: name || (file instanceof File ? file.name : 'source.pdf'), data: await new Promise<string>((resolve, reject) => {
     const reader = new FileReader(); reader.onerror = () => reject(new Error('无法读取导入文件。')); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.readAsDataURL(file)
   }) }
+}
+export async function parseRichMaterial(file: File): Promise<{sections: {title: string; text: string}[]; warnings: string[]}> {
+  return request(await encoded(file), false, true, '/api/import/material')
 }
 async function initialize() {
   const configResponse = await fetch('/api/config')

@@ -1,0 +1,8 @@
+.modal[open]:has(.import-form){display:flex;flex-direction:column;overflow:hidden}
+.modal:has(.import-form)>.modal-header{flex-shrink:0}
+.modal>.import-form{padding:0;min-height:0;display:flex;flex-direction:column}
+.import-fields{min-height:0;overflow:auto;padding:0 30px 12px;scrollbar-width:thin}
+.import-fields>label{display:flex;flex-direction:column;gap:9px;font-size:11px;color:var(--muted,#7e8e6c);margin:18px 0 8px}
+.import-form>.modal-actions{flex-shrink:0;margin:0;padding:16px 30px 24px;border-top:1px solid var(--line,#e0e5d6);background:var(--paper,#fcfcf7)}
+.import-form>.modal-actions>button{flex-shrink:0}
+@media(max-width:520px){.import-fields{padding:0 22px 12px}.import-form>.modal-actions{padding:14px 22px 18px}.import-form>.modal-actions>.field-help{flex:1 0 100%;max-width:none}.import-fields .drop-zone{padding:18px 14px}}

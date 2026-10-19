@@ -3,6 +3,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import type { LearningDocument, Chapter } from './types'
 import { paragraph, uid } from '../shared/document.mjs'
 import { defaultLearningIntent } from '../shared/learning-intent.mjs'
+import { richMaterial } from '../shared/material-formats.mjs'
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
 export { pdfjs }
 
@@ -12,6 +13,7 @@ export async function importMaterial(file: File, intent: string, progress: (mess
   const id = uid()
   let pages: LearningDocument['pages'] = []
   let chapters: Chapter[] = []
+  let sourceWarnings: string[] = []
   const pdf = /\.pdf$/i.test(file.name)
   const makeChapter = (title: string, pageNumbers: number[]): Chapter => ({ id: uid(), title, sourcePages: pageNumbers, status: 'empty', content: { type: 'doc', content: [paragraph('')] } })
   if (pdf) {
@@ -48,21 +50,28 @@ export async function importMaterial(file: File, intent: string, progress: (mess
       else for (let n = 1; n <= pages.length; n += 3) chapters.push(makeChapter(`第 ${n}${Math.min(n + 2, pages.length) > n ? `–${Math.min(n + 2, pages.length)}` : ''} 页`, pages.slice(n - 1, n + 2).map(p => p.number)))
     } finally { await loading.destroy() }
   } else {
-    if (!/\.(txt|md|markdown)$/i.test(file.name)) throw new Error('请选择 PDF、Markdown 或 TXT 文件。')
-    const content = (await file.text()).trim()
-    if (!content) throw new Error('文件内容为空。')
-    const sections = content.split(/(?=^#{1,2}\s)/m).filter(s => s.trim())
+    if (!/\.(txt|md|markdown)$/i.test(file.name) && !richMaterial(file.name)) throw new Error('请选择 PDF、DOCX、PPTX、HTML、Markdown 或 TXT 文件；旧版 DOC/PPT 请先另存为 DOCX/PPTX。')
+    let sections: {title: string; text: string}[]
+    if (richMaterial(file.name)) {
+      progress('正在提取标题与正文…')
+      const result = await (await import('./storage')).parseRichMaterial(file)
+      sections = result.sections; sourceWarnings = result.warnings
+    } else {
+      const content = (await file.text()).trim()
+      if (!content) throw new Error('文件内容为空。')
+      sections = content.split(/(?=^#{1,2}\s)/m).filter(s => s.trim()).map(text => ({text, title: text.match(/^#{1,2}\s+(.+)/)?.[1]?.trim().slice(0, 100) || ''}))
+    }
     for (const section of sections) {
       // Bounded slices for long plain text; retain all source text.
-      for (let offset = 0; offset < section.length; offset += 16000) {
-        const part = section.slice(offset, offset + 16000)
+      for (let offset = 0; offset < section.text.length; offset += 16000) {
+        const part = section.text.slice(offset, offset + 16000)
         pages.push({ number: pages.length + 1, text: part })
-        chapters.push(makeChapter(section.match(/^#{1,2}\s+(.+)/)?.[1]?.trim().slice(0, 100) || `阅读片段 ${pages.length}`, [pages.length]))
+        chapters.push(makeChapter((section.title || `阅读片段 ${pages.length}`) + (offset ? ` · 续 ${Math.floor(offset / 16000) + 1}` : ''), [pages.length]))
       }
     }
   }
   if (chapters.length > 300) throw new Error('资料章节过多，请按主题拆分后再导入。')
   const now = Date.now()
   const learningIntent = intent.trim() || defaultLearningIntent
-  return { id, title: file.name.replace(/\.[^.]+$/, ''), subtitle: '我的学习资料', filename: file.name, kind: pdf ? 'pdf' : 'text', intent: learningIntent, intentSource: learningIntent === defaultLearningIntent ? 'default' : 'user', createdAt: now, updatedAt: now, revision: 0, pages, chapters, currentChapter: chapters[0].id, currentPage: 1, versions: [] }
+  return { id, title: file.name.replace(/\.[^.]+$/, ''), subtitle: '我的学习资料', filename: file.name, kind: pdf ? 'pdf' : 'text', ...(sourceWarnings.length ? {sourceWarnings} : {}), intent: learningIntent, intentSource: learningIntent === defaultLearningIntent ? 'default' : 'user', createdAt: now, updatedAt: now, revision: 0, pages, chapters, currentChapter: chapters[0].id, currentPage: 1, versions: [] }
 }

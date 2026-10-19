@@ -45,6 +45,8 @@ Candlelight Notes 感谢以下项目的作者、维护者与贡献者，以及�
 
 ## 公开课程资料与改编样稿
 
+DOCX/PPTX 导入使用 [yauzl](https://github.com/thejoshwolfe/yauzl)（MIT）读取压缩包，感谢其对文件大小校验和有界读取的支持。Office 正文组织参考 Microsoft 的 [WordprocessingML](https://learn.microsoft.com/en-us/office/open-xml/word/structure-of-a-wordprocessingml-document) 与 [PresentationML](https://learn.microsoft.com/en-us/office/open-xml/presentation/structure-of-a-presentationml-document) 文档；本项目实现正文提取，不包含 Microsoft Office 运行时。HTML 解析使用 jsdom，既有致谢与许可继续适用。
+
 感谢 **OpenIntro** 及以下作者提供描述性统计教学资料：
 
 - [OpenIntro Statistics, Fourth Edition](https://www.openintro.org/book/os/)：David Diez、Mine Çetinkaya-Rundel、Christopher D Barr。所用版本的许可为 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)。

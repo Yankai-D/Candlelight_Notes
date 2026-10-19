@@ -13,6 +13,7 @@ import { atomicJSON, recoverWorkspaceState, commitWorkspaceState } from './works
 import { createWorkspaceBackup, inspectWorkspaceBackup, restoreWorkspaceBackup, undoWorkspaceRestore } from './workspace-backup.mjs';
 import { readGenerationRecords, generationRecordFiles } from './generation-records.mjs';
 import { previewWorkspaceMove, moveWorkspace, recoverWorkspaceMove } from './workspace-move.mjs';
+import { materialFormat, sourceNames, richMaterial } from '../shared/material-formats.mjs';
 export { atomicJSON } from './workspace-state.mjs';
 
 const idSchema = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/);
@@ -127,10 +128,10 @@ export class FileLibrary {
     for (const note of scan.notes) {
       const document = note.document, existing = this.index.entries.find(entry => entry.id === document.id);
       const builtin = !note.sourcePath ? await this.builtin(document.id) : null;
-      const missingSource = !note.sourcePath && !builtin && document.kind === 'pdf' && document.entryType !== 'note';
+      const missingSource = !note.sourcePath && !builtin && (document.kind === 'pdf' || richMaterial(document.filename)) && document.entryType !== 'note';
       const entry = { id: document.id, title: document.title, filename: document.filename, kind: document.kind, createdAt: document.createdAt,
         ...(document.entryType ? { entryType: document.entryType } : {}), directory: note.directory, notePath: note.notePath,
-        sourcePath: note.sourcePath || (missingSource ? join(note.directory, 'source.pdf') : null), sourceType: note.sourcePath?.endsWith('.pdf') || missingSource ? 'application/pdf' : 'text/plain',
+        sourcePath: note.sourcePath || (missingSource ? join(note.directory, 'source.' + (document.kind === 'pdf' ? 'pdf' : materialFormat(document.filename).extension)) : null), sourceType: materialFormat(note.sourcePath || document.filename)?.mime || 'text/plain',
         ...(builtin ? { builtinId: builtin.id } : {}) };
       const status = existing?.notePath === note.notePath ? 'known' : counts.get(document.id) > 1 ? 'conflict' : existing ? await exists(existing.notePath) ? 'conflict' : 'moved' : 'new';
       candidates.push({ key: randomUUID(), entry, hash: note.hash, status, missingSource, ignored: (this.index.ignoredNotes || []).includes(note.notePath) });
@@ -175,7 +176,7 @@ export class FileLibrary {
     return { id: found.library.id, path: join(this.builtinDirectory, found.library.id + '.pdf') };
   }
   async owned(entry, path, allowMissing = false) {
-    if (dirname(path) !== entry.directory || !['note.candlelight.json', 'source.pdf', 'source.txt', 'source.md', 'source.json'].includes(basename(path))) throw new Error('资料路径校验失败，未操作文件。');
+    if (dirname(path) !== entry.directory || !['note.candlelight.json', ...sourceNames].includes(basename(path))) throw new Error('资料路径校验失败，未操作文件。');
     const folder = await lstat(entry.directory).catch(error => { if (allowMissing && error.code === 'ENOENT') return null; throw error; });
     if (!folder) return false;
     if (!folder.isDirectory() || folder.isSymbolicLink() || await realpath(entry.directory) !== entry.directory) throw new Error('资料目录已被替换或重定向，未操作文件。');
@@ -260,10 +261,11 @@ export class FileLibrary {
     const builtin = await this.builtin(id);
     if (!bytes && builtin) bytes = await this.builtinBytes(builtin);
     if (bytes && document.kind === 'pdf' && bytes.subarray(0,5).toString() !== '%PDF-') throw new Error('原文不是有效的 PDF，未保存这份资料。');
-    const extension = document.kind === 'pdf' ? 'pdf' : input.source?.name?.match(/\.(txt|md|markdown)$/i)?.[1]?.toLowerCase() || 'txt';
-    const sourcePath = bytes || document.kind === 'pdf' && document.entryType !== 'note' && !document.demo ? join(folder, `source.${extension === 'markdown' ? 'md' : extension}`) : null;
+    const extension = document.kind === 'pdf' ? 'pdf' : materialFormat(backup ? document.filename : input.source?.name || document.filename)?.extension || 'txt';
+    if (bytes && ['docx', 'pptx'].includes(extension) && bytes.subarray(0, 2).toString() !== 'PK') throw new Error('原文不是有效的 Office 文件，请重新选择。');
+    const sourcePath = bytes || (document.kind === 'pdf' || richMaterial(document.filename)) && document.entryType !== 'note' && !document.demo ? join(folder, `source.${extension === 'markdown' ? 'md' : extension}`) : null;
     const entry = { id, title: document.title, kind: document.kind, filename: document.filename, ...(document.entryType ? { entryType: document.entryType } : {}), createdAt: document.createdAt,
-      directory: folder, notePath: join(folder, 'note.candlelight.json'), sourcePath, sourceType: sourcePath?.endsWith('.pdf') ? 'application/pdf' : 'text/plain',
+      directory: folder, notePath: join(folder, 'note.candlelight.json'), sourcePath, sourceType: materialFormat(sourcePath || '')?.mime || 'text/plain',
       ...(input.migration ? { migrationDigest: hash } : {}) };
     let created = false;
     try { await mkdir(folder); created = true; }
@@ -330,11 +332,15 @@ export class FileLibrary {
         const status = await this.inspect(entry); if (!status.missing.length) throw new Error('原文已存在，不会覆盖。');
         const bytes = Buffer.from(z.string().max(72 * 1024 * 1024).parse(command.source?.data), 'base64');
         if (!bytes.length || bytes.length > 50 * 1024 * 1024 || entry.kind === 'pdf' && bytes.subarray(0,5).toString() !== '%PDF-') throw new Error('请选择有效的原文文件，PDF 最大 50 MB。');
-        const sourcePath = join(entry.directory, entry.kind === 'pdf' ? 'source.pdf' : 'source.txt'); await this.owned(entry, sourcePath, true);
+        const format = materialFormat(command.source?.name || entry.filename || (entry.kind === 'pdf' ? 'source.pdf' : 'source.txt'));
+        const expected = materialFormat(entry.filename);
+        if (!format || (expected && expected.extension !== format.extension)) throw new Error('请选择与这份笔记相同格式的原文件。');
+        if (['docx','pptx'].includes(format.extension) && bytes.subarray(0, 2).toString() !== 'PK') throw new Error('请选择有效的 Office 原文件。');
+        const sourcePath = join(entry.directory, entry.kind === 'pdf' ? 'source.pdf' : 'source.' + format.extension); await this.owned(entry, sourcePath, true);
         await this.withNoteWrite(entry, async () => {
           await writeFile(sourcePath, bytes, { flag: 'wx' });
           const { builtinId: _builtin, ...next } = entry;
-          try { await this.persist({ ...this.index, entries: this.index.entries.map(item => item.id === entry.id ? { ...next, sourcePath, sourceType: entry.kind === 'pdf' ? 'application/pdf' : 'text/plain' } : item) }); }
+          try { await this.persist({ ...this.index, entries: this.index.entries.map(item => item.id === entry.id ? { ...next, sourcePath, sourceType: format.mime } : item) }); }
           catch (error) { await unlink(sourcePath); throw error; }
         });
         return { id: entry.id };

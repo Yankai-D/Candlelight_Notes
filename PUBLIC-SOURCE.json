@@ -1,13 +1,13 @@
 {
   "schema": "candlelight-public-source-v1",
-  "version": "0.1.15",
-  "sourceRevision": "7b35e4a00809ab3b97402781403f7eac32f43d0f",
-  "applicationRevision": "0fbe5b131e79717e76566defd41354eb8a09dfae",
-  "applicationFilesVerified": 125,
+  "version": "0.1.16",
+  "sourceRevision": "0ddeb68b91bd1ad4590ee72e84de764e557b83db",
+  "applicationRevision": "d04e49b8dded50276e6a3532bbba07b07756e303",
+  "applicationFilesVerified": 129,
   "installer": {
-    "file": "Candlelight-Notes-0.1.15-Setup-x64.exe",
-    "bytes": 138074525,
-    "sha256": "0ded2d2174dfa722110f687e8b3b78d9b710ae47ac0e2aadf240b5323e65bbc2"
+    "file": "Candlelight-Notes-0.1.16-Setup-x64.exe",
+    "bytes": 138086361,
+    "sha256": "359381748e195f645bea9594e30ea497c88389201ea14f5bc91594c2d433df8b"
   },
   "gitHistoryIncluded": false,
   "personalDataIncluded": false,
@@ -32,7 +32,7 @@
     {
       "path": "README.md",
       "operation": "public-distribution-documentation",
-      "originalSha256": "f6f8bb98d837dffe2bf2c711bd9df497edb0036c8383a1b0617271b44b2da05e"
+      "originalSha256": "24259fa289d7428506f9f0ffdee37fa5c691e6b5eb36ae6cc0e42c489e5de31f"
     },
     {
       "path": "PUBLICATION.md",
@@ -67,8 +67,8 @@
     },
     {
       "path": "ACKNOWLEDGEMENTS.md",
-      "bytes": 6751,
-      "sha256": "b37bba3d41f2624d0d0463d1a7c2bc7e2f1ea3d88566396ce410f92dde71fd32"
+      "bytes": 7326,
+      "sha256": "b5a4b690eabfa119dec3f4d8705b6a13e2eeeaef4ab1b44f8a8f149a215f77b5"
     },
     {
       "path": "desktop/main.mjs",
@@ -97,8 +97,8 @@
     },
     {
       "path": "docs/architecture.md",
-      "bytes": 11123,
-      "sha256": "e5d439363f04b7709a75c8718d1ed89b0a9ef32c65318dc3ea9cc5501ddecff6"
+      "bytes": 11483,
+      "sha256": "9839f5063009f90f9f8bc5c3e79b45873378b1e033de4c55dd35e3df3ae9af7f"
     },
     {
       "path": "docs/bundle-notes.md",
@@ -109,6 +109,11 @@
       "path": "docs/engineering.md",
       "bytes": 16448,
       "sha256": "ca4291c61df1840a436fa9de885445446f6db7502d928633def74834354db16d"
+    },
+    {
+      "path": "docs/import-formats.md",
+      "bytes": 3229,
+      "sha256": "da9e8eca068e619e6385288b141ae47f6c26f15ae34e10a4b9c5076f1593bb33"
     },
     {
       "path": "docs/product-quality.md",
@@ -169,6 +174,11 @@
       "path": "docs/releases/v0.1.15.json",
       "bytes": 4901,
       "sha256": "2595eee80b5f78c24ab7a721c834b0d656db1ccef42f2c3da271decd14504433"
+    },
+    {
+      "path": "docs/releases/v0.1.16.json",
+      "bytes": 5062,
+      "sha256": "a17d1b3e6623ace89bcd29a1eae7108b08ac374e04e370fbd37fbd3eb5c1bda1"
     },
     {
       "path": "docs/releases/v0.1.2-desktop.json",
@@ -239,6 +249,11 @@
       "path": "docs/reviews/2026-10-19-ideal-tree-entry-0.1.14.md",
       "bytes": 2672,
       "sha256": "c1bcca96568724334eb9782383e699d850672e729d84b1341998feccd0c72268"
+    },
+    {
+      "path": "docs/reviews/2026-10-19-import-formats-0.1.16.md",
+      "bytes": 3523,
+      "sha256": "f73185a33fe50e6af2b00eec37ecfdd5e404d84273e715ef7358465bcf8df053"
     },
     {
       "path": "docs/reviews/2026-10-19-maintenance-0.1.13.md",
@@ -717,13 +732,13 @@
     },
     {
       "path": "package-lock.json",
-      "bytes": 229511,
-      "sha256": "219398bc5ab95ccb4a2bf905137bb077b1edf1591aef075f172927db62eed7db"
+      "bytes": 230191,
+      "sha256": "ab241bf87c9cb6e2c45d9012e2f1ccd727443c655fe91e64a5dcedfcdb9d1f87"
     },
     {
       "path": "package.json",
-      "bytes": 2349,
-      "sha256": "f040adf88ef23973e8f97606600af6c410097a94aaaca2c4daf436c5ce4e27da"
+      "bytes": 2371,
+      "sha256": "8f1e39b39f63f718eb648a3f1a41dc2046d6b868646ccbf3b3c9107ff50eb830"
     },
     {
       "path": "packaging/desktop/使用说明.txt",
@@ -747,13 +762,13 @@
     },
     {
       "path": "packaging/source/PUBLICATION.public.md",
-      "bytes": 3038,
-      "sha256": "6741307635fe32709e37818771cf16e57d5c7bccd18198274234ce2f2ca68e35"
+      "bytes": 3202,
+      "sha256": "13c1d55f117f0ca8404a4f395cd2cae44e9ca0e693404384997f49f3b3486ba1"
     },
     {
       "path": "packaging/source/README.public.md",
-      "bytes": 5315,
-      "sha256": "8b6feb70ee03c5bd4c508fa37317e7021419903e3e375ea77855ca2a1b0a2d55"
+      "bytes": 5570,
+      "sha256": "8ffdb504d7eb0b8337442157a9e0f463532799d026499fe80875e0c7061e59bf"
     },
     {
       "path": "packaging/windows/使用说明.txt",
@@ -812,13 +827,13 @@
     },
     {
       "path": "PUBLICATION.md",
-      "bytes": 3038,
-      "sha256": "6741307635fe32709e37818771cf16e57d5c7bccd18198274234ce2f2ca68e35"
+      "bytes": 3202,
+      "sha256": "13c1d55f117f0ca8404a4f395cd2cae44e9ca0e693404384997f49f3b3486ba1"
     },
     {
       "path": "README.md",
-      "bytes": 5315,
-      "sha256": "8b6feb70ee03c5bd4c508fa37317e7021419903e3e375ea77855ca2a1b0a2d55"
+      "bytes": 5570,
+      "sha256": "8ffdb504d7eb0b8337442157a9e0f463532799d026499fe80875e0c7061e59bf"
     },
     {
       "path": "scripts/audit-desktop.mjs",
@@ -972,8 +987,8 @@
     },
     {
       "path": "scripts/test-desktop.mjs",
-      "bytes": 13944,
-      "sha256": "c4f66bada61dcbf897e5eabb9494bcc0d1ccfdab0b18a82d154e3efdd22ada2f"
+      "bytes": 15122,
+      "sha256": "ad3c98e701247341e00001b70a005549230565be73201c5db33ffef4b6926c5f"
     },
     {
       "path": "scripts/test-portable.mjs",
@@ -1027,13 +1042,13 @@
     },
     {
       "path": "server/file-discovery.mjs",
-      "bytes": 4210,
-      "sha256": "cd34d2c29fd2f2061e57eacef5511459af57f46e107f5924d8c9b147c22325cd"
+      "bytes": 4405,
+      "sha256": "3319c62d68ec294e1595918f3e9b1f9c13e5302b7178faaedffca152b79b16d2"
     },
     {
       "path": "server/file-library.mjs",
-      "bytes": 38430,
-      "sha256": "534aa5f51e677931319ac25d2a6d842f0da43a8839165ffd31f03d0af8aa97a3"
+      "bytes": 39289,
+      "sha256": "3affa81406b2b1bd5b1403f92b2175223fedf6e110ec3d7f77f19842a65cf4fe"
     },
     {
       "path": "server/generation-records.mjs",
@@ -1082,13 +1097,23 @@
     },
     {
       "path": "server/index.mjs",
-      "bytes": 15627,
-      "sha256": "c1429ed231071d111d4f0eb481c827a097eb9dab253ec7fe1f59baf590800778"
+      "bytes": 16441,
+      "sha256": "80fc109f0608dd76f6910b8a89123ce3c3df416bc0fcbf214f33816a861920be"
     },
     {
       "path": "server/library.mjs",
       "bytes": 815,
       "sha256": "370e1eb3f1da8e42728075c208496d8deebf59d036ffe083670714d19254f731"
+    },
+    {
+      "path": "server/material-import.mjs",
+      "bytes": 12755,
+      "sha256": "29b6ff22da0f4e48579597cab9bff677287e62e9139f10a149f37337b2da1f47"
+    },
+    {
+      "path": "server/material-worker.mjs",
+      "bytes": 1417,
+      "sha256": "b0de8b09f2c6a9ca2c6833e55f68f02644c197930b604752ce1e64132678c152"
     },
     {
       "path": "server/model-budget.mjs",
@@ -1132,8 +1157,8 @@
     },
     {
       "path": "server/workspace-backup.mjs",
-      "bytes": 13523,
-      "sha256": "6a001c19405fcf17b22001cd63b5e11e6a6cc678d7e74d7a2f8548c4240e9cbf"
+      "bytes": 13736,
+      "sha256": "1e08c5e18ee9733f06d81375e73247b1e4d58d318320a971383a6f87c10c2b9d"
     },
     {
       "path": "server/workspace-move.mjs",
@@ -1162,8 +1187,8 @@
     },
     {
       "path": "shared/backup.mjs",
-      "bytes": 6699,
-      "sha256": "3b9b21b7c76806150257a53401e09f993ad5f76ef24eeb9fb83c33ad4a1ae9cc"
+      "bytes": 6766,
+      "sha256": "5eb19be719358dadff6ed05a29e163b231186dcb17b366c03bf880f31f0f1870"
     },
     {
       "path": "shared/brand-mark.mjs",
@@ -1261,6 +1286,11 @@
       "sha256": "9c3df5b0c0602ce384bbec70a36c334f27480434540559649ee336f52f483091"
     },
     {
+      "path": "shared/material-formats.mjs",
+      "bytes": 1003,
+      "sha256": "b711234f94c2c901c5197a7b8edd54d328bbb63c8dea5fca4c2b39be3be8b996"
+    },
+    {
       "path": "shared/math-references.mjs",
       "bytes": 3518,
       "sha256": "5dc8a4c4b4676b783e2a4731465cb280d0e33a83561ddadba620f18d0fd97acf"
@@ -1332,8 +1362,8 @@
     },
     {
       "path": "src/App.tsx",
-      "bytes": 77708,
-      "sha256": "a8d2461706d980669d2a267c0444be8d3bef8003c63650a4337457a004e9e7e9"
+      "bytes": 78828,
+      "sha256": "bc518026e3188634d90a3a9c2a31833f63e8d6e89b0bb775de49029981703865"
     },
     {
       "path": "src/collection.css",
@@ -1382,8 +1412,8 @@
     },
     {
       "path": "src/components/HelpModal.tsx",
-      "bytes": 12800,
-      "sha256": "d6557b02d91b245d204bfe42596a318da2d86292a0a9da46486c569e23aa8519"
+      "bytes": 12945,
+      "sha256": "8f4aa6ab97c2f0b3fb4ee5b469b206f6489689a364479e058df1f29bb434fe3b"
     },
     {
       "path": "src/components/IdealTree.tsx",
@@ -1422,8 +1452,8 @@
     },
     {
       "path": "src/components/Modal.tsx",
-      "bytes": 1016,
-      "sha256": "d6bf30916e078034fc3adc8295a6051f394d650f984a76a51e428c58b01446d3"
+      "bytes": 1293,
+      "sha256": "25107138dc20d1a8576a7c5327584eba2e4f0fc732dafb81a0e3e122a8693a90"
     },
     {
       "path": "src/components/NoteEditor.tsx",
@@ -1462,8 +1492,8 @@
     },
     {
       "path": "src/components/SourceContext.tsx",
-      "bytes": 13027,
-      "sha256": "aa5a616919d07baa61b8c5da8ce9b822660c44967546719d46219bd5dbe5df48"
+      "bytes": 13280,
+      "sha256": "b97e1120aee3755534672c5e2c891d2ea99e8dd349ab115abbc2281fe2695ba5"
     },
     {
       "path": "src/components/SourceLabels.tsx",
@@ -1472,8 +1502,8 @@
     },
     {
       "path": "src/components/SourceRepair.tsx",
-      "bytes": 1024,
-      "sha256": "76dde00a4f0118ef497a5d1f7072fbcc76432b1b0cb62857c26940cc6c49564c"
+      "bytes": 1092,
+      "sha256": "0a9693bdc664da5b278128763a1f5f9f0cb7421d6f3ea80805449f45eb9a91bd"
     },
     {
       "path": "src/components/StorageLocation.tsx",
@@ -1521,6 +1551,11 @@
       "sha256": "88d9cdbf02e2cd19ac5cb976baa92c8bf1bab89694986c10750187c46ff7b99e"
     },
     {
+      "path": "src/import.css",
+      "bytes": 848,
+      "sha256": "75c93c31099b647f219b9efdc1e7b93f8bdff4aea4eac1786fa9f9ca328438d9"
+    },
+    {
       "path": "src/learning.css",
       "bytes": 8839,
       "sha256": "847b959231b2e65d35375d6ba6a794d815c9a4e1c2dee9924d590ba562be4c39"
@@ -1532,8 +1567,8 @@
     },
     {
       "path": "src/pdf.ts",
-      "bytes": 4659,
-      "sha256": "243bd730cdcbfbb9fb3809cf7044077dc8484ea31a11ab750abbf305cfa892dd"
+      "bytes": 5321,
+      "sha256": "0acbc35c07c7d5e50a9db33cf78f83a9c81161c92c7a74582e5f7fe120e4d993"
     },
     {
       "path": "src/settings.css",
@@ -1547,8 +1582,8 @@
     },
     {
       "path": "src/storage.ts",
-      "bytes": 11653,
-      "sha256": "c7460cc39067d0bf75014d783a8dcfd5baf5aa8ae4c817abaab0fa2602741c48"
+      "bytes": 11877,
+      "sha256": "fa2b120863fcdf116a87431b57cb4171004ac4821bd89188db8a0b1b6d701e67"
     },
     {
       "path": "src/study-tree.css",
@@ -1577,8 +1612,8 @@
     },
     {
       "path": "src/types.ts",
-      "bytes": 6160,
-      "sha256": "6ffefec313d1897ad342df6c707941709c0d0a4387cfe978c664b772e65f5084"
+      "bytes": 6187,
+      "sha256": "78fded322b2d87c3c678efb22c7a726225eb71a4726628273dc2967dc69ee4f9"
     },
     {
       "path": "src/vite-env.d.ts",
@@ -1617,8 +1652,8 @@
     },
     {
       "path": "tests/browser/file-storage.mjs",
-      "bytes": 13080,
-      "sha256": "fb84e426df40e74e23f3119724cbb35cf175c95c887ace2f1d8a7b8ebd078e03"
+      "bytes": 16562,
+      "sha256": "b81afeb75c0ad25b3fa72146801b7d2322c7a6e5d9508b1d3d3bcedaf92dcfb2"
     },
     {
       "path": "tests/browser/ideal-tree-local.mjs",
@@ -1781,6 +1816,11 @@
       "sha256": "d4e65b7e31e9edf0a6a7ce976b83f553c4792bb648cc3e4f47c7a67cfcaab994"
     },
     {
+      "path": "tests/material-import.test.mjs",
+      "bytes": 6831,
+      "sha256": "4585ca3a6f6499f94388156e9e7507adc53073525350095c682b62e210c3e681"
+    },
+    {
       "path": "tests/math.test.mjs",
       "bytes": 5097,
       "sha256": "a46548afa5bf793f7f5c2ac8b98d93af303836515293ebb20dcaaf5d3f85b7fc"
@@ -1869,6 +1909,11 @@
       "path": "tests/support/browser.mjs",
       "bytes": 421,
       "sha256": "fa33b562369946f6393af5c934786c54152a84519197d320b4d493bc5839d113"
+    },
+    {
+      "path": "tests/support/office-fixtures.mjs",
+      "bytes": 4178,
+      "sha256": "6acf158e09d16fa80997046f7dcfe1a78a8447c4ed063dbe866c1e5e1e4b2df2"
     },
     {
       "path": "tests/support/onboarding.mjs",

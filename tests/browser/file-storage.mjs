@@ -5,6 +5,7 @@ import { testBrowser } from '../support/browser.mjs';
 import { startTestServer } from '../support/server.mjs';
 import { createDemo } from '../../src/demo.ts';
 import { FileLibrary } from '../../server/file-library.mjs';
+import { docxFixture, pptxFixture, htmlFixture } from '../support/office-fixtures.mjs';
 
 const output = process.env.PANGZHU_TEST_OUTPUT;
 if (!output) throw new Error('Set a test evidence directory.');
@@ -114,7 +115,40 @@ try {
   assert.equal(await page.evaluate(async config=>(await fetch('/api/storage',{method:'POST',headers:{'content-type':'application/json','x-reading-tree-token':config.token},body:JSON.stringify({action:'preference-set',key:'active-document',value:'stale',workspaceToken:config.workspaceToken})})).status,oldConfig),409);
   await click('打开迁移后的资料库');await page.waitForSelector('[aria-label="打开 另一安装版的笔记"]');
   assert.equal((await index()).directory,moveTarget);assert.equal((await index()).entries.length,3);
+  for(const [ext,bytes] of [['docx',docxFixture()],['html',htmlFixture()],['pptx',pptxFixture()]]) {
+    const name=`格式验收-${ext}`,file=join(server.directory,`${name}.${ext}`);await writeFile(file,bytes);
+    await click('导入资料');await page.waitForSelector(pathInput);
+    await (await page.$('.import-form input[type="file"]')).uploadFile(file);
+    await replace('.import-form textarea','复习这份资料的核心概念，保留推理关系。');
+    await page.mouse.click(2,2);await page.keyboard.press('Escape');
+    await page.waitForSelector('dialog[open] .import-form',{visible:true});
+    assert.equal(await page.$eval('.import-form textarea',el=>el.value),'复习这份资料的核心概念，保留推理关系。');
+    assert.equal(await page.$('dialog [aria-label="关闭弹窗"]'),null);
+    if(ext==='docx') {
+      const count=(await index()).entries.length;await click('取消');await page.waitForSelector('.import-form',{hidden:true});assert.equal((await index()).entries.length,count);
+      await click('导入资料');await page.waitForSelector(pathInput);
+      const damaged=join(server.directory,'damaged.docx');await writeFile(damaged,'not an Office file');await (await page.$('.import-form input[type="file"]')).uploadFile(damaged);
+      await click('添加到资料库');await page.waitForSelector('.import-form .inline-error');await page.mouse.click(2,2);await page.keyboard.press('Escape');assert.ok(await page.$('.import-form'));
+      await (await page.$('.import-form input[type="file"]')).uploadFile(file);
+    }
+    const count=(await index()).entries.length;await click('添加到资料库');await page.waitForSelector('[aria-label="资料读取说明"]');
+    assert.equal((await index()).entries.length,count,'Warnings must be confirmed before any file is imported');
+    await page.mouse.click(2,2);await page.keyboard.press('Escape');await page.keyboard.press('Escape');await page.waitForSelector('dialog[open] [aria-label="资料读取说明"]',{visible:true});
+    if(ext==='docx') {
+      await page.screenshot({path:join(output,'word-import-preview.png'),fullPage:true});
+      await page.setViewport({width:390,height:844});assert.ok(await page.$eval('dialog',el=>el.scrollWidth<=el.clientWidth+1));await page.screenshot({path:join(output,'word-import-mobile.png'),fullPage:true});await page.setViewport({width:1440,height:960});
+    }
+    await click('确认添加到资料库');await page.waitForSelector(`[aria-label="打开 ${name}"]`);
+    const imported=(await index()).entries.find(e=>e.filename===`${name}.${ext}`);assert.deepEqual(await readFile(imported.sourcePath),bytes);
+    const note=JSON.parse(await readFile(imported.notePath,'utf8'));assert.equal(note.chapters.length,2);assert.ok(note.sourceWarnings.length);assert.ok(note.pages.some(p=>p.text.includes(ext==='html'?'期望':'样本均值')));
+  }
+  await page.reload();await page.waitForSelector('[aria-label="打开 格式验收-docx"]');assert.equal((await index()).entries.length,6);
   assert.equal(modelCalls.length, 0); assert.deepEqual(errors, []);
   await writeFile(join(output, 'report.json'), JSON.stringify({ status: 'pass', modelCalls: 0, checks: ['verified legacy migration and cleared old blobs', 'explicit import location and remembered successful choice', 'cancel leaves default unchanged', 'settings persist across reloads', 'external deletion is detected at open', 'record-only removal preserves remaining note and external source', 'discovery preview and cancel', 'cross-installation recognition preserves exact file bytes without importing credentials', 'known notes are deduplicated', 'missing original preserves read-only notes', 'mobile discovery layout'] }, null, 2));
   console.log('PASS: file-storage browser workflow');
+} catch(error) {
+  const page=(await browser.pages()).at(-1);
+  await page?.screenshot({path:join(output,'failure.png'),fullPage:true});
+  console.error(await page?.$$eval('dialog button',buttons=>buttons.map(button=>({text:button.textContent,disabled:button.disabled,rect:button.getBoundingClientRect().toJSON(),display:getComputedStyle(button).display}))));
+  throw error;
 } finally { await browser.close(); await server.stop(); }
