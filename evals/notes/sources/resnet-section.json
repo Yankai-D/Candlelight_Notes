@@ -1,0 +1,16 @@
+{
+  "title": "Deep Residual Learning for Image Recognition",
+  "authors": [
+    "Kaiming He",
+    "Xiangyu Zhang",
+    "Shaoqing Ren",
+    "Jian Sun"
+  ],
+  "sourceSha256": "1e0651b6810ecba34a3dbc5b5b0209226f889004607c1f203540a48d64e5a93a",
+  "pages": [
+    {
+      "number": 3,
+      "text": "3.1. Residual Learning \nLet us consider H ( x ) as an underlying mapping to be\nfit by a few stacked layers (not necessarily the entire net),\nwith x denoting the inputs to the first of these layers. If one\nhypothesizes that multiple nonlinear layers can asymptotically approximate complicated functions 2 , then it is equivalent to hypothesize that they can asymptotically approximate the residual functions, i.e ., H ( x ) − x (assuming that\nthe input and output are of the same dimensions). So\nrather than expect stacked layers to approximate H ( x ) , we\nexplicitly let these layers approximate a residual function \nF ( x ) := H ( x ) − x . The original function thus becomes \nF ( x )+ x . Although both forms should be able to asymptotically approximate the desired functions (as hypothesized),\nthe ease of learning might be different.\nThis reformulation is motivated by the counterintuitive\nphenomena about the degradation problem (Fig. 1, left). As\nwe discussed in the introduction, if the added layers can\nbe constructed as identity mappings, a deeper model should\nhave training error no greater than its shallower counterpart. The degradation problem suggests that the solvers\nmight have difficulties in approximating identity mappings\nby multiple nonlinear layers. With the residual learning reformulation, if identity mappings are optimal, the solvers\nmay simply drive the weights of the multiple nonlinear layers toward zero to approach identity mappings.\nIn real cases, it is unlikely that identity mappings are optimal, but our reformulation may help to precondition the\nproblem. If the optimal function is closer to an identity\nmapping than to a zero mapping, it should be easier for the\nsolver to find the perturbations with reference to an identity\nmapping, than to learn the function as a new one. We show\nby experiments (Fig. 7) that the learned residual functions in\ngeneral have small responses, suggesting that identity mappings provide reasonable preconditioning.\n\n2 This hypothesis, however, is still an open question. See [28]."
+    }
+  ]
+}

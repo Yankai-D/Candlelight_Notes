@@ -1,0 +1,155 @@
+{
+  "schema": "local-engineering-release-v1",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "status": "closed",
+  "kind": "local-single-user-engineering-baseline",
+  "codeRevision": "68cfe7a0e920d8ea9081b4190b314525471d9f80",
+  "scope": [
+    "资料库、文件夹与联合资料包管理，资料学习树与理想学习树",
+    "连续阅读、原文定位、独立笔记版本、选区协作与版本恢复",
+    "固定模板、稳定画像、学习目标、结构化输出、修订与来源边界、有界修复",
+    "统一正文、纸条与 PDF 渲染，匿名对照审阅与 PDF 阅读副本",
+    "离线验收、真实实验重放、失败记录、架构说明与十分钟展示路线"
+  ],
+  "harnessDecision": {
+    "production": "保留当前基线；不追加本轮撤回的证据约束候选。",
+    "experiment": "evals/notes/runs/2026-10-18-evidence/README.md",
+    "qualitativeFeedback": "evals/notes/runs/2026-10-18-evidence/user-feedback.json",
+    "feedbackUse": "用户偏好支持保留当前 ResNet 讲述路径，作为后续风格改进依据；未代填数字分数或更改生产提示。",
+    "independentQualityReview": "pending",
+    "generalTeachingAdvantage": "not-established",
+    "modelCallsDuringClosure": 0
+  },
+  "validation": {
+    "command": "npm run check",
+    "checkedCodeRevision": "68cfe7a0e920d8ea9081b4190b314525471d9f80",
+    "sourceReport": "artifacts/check/report.json",
+    "sourceReportSha256": "f3027465f1733322637cf770cbe4d463a553ae5295a9967028a0d6ce8959e6ef",
+    "tests": {
+      "tests": 279,
+      "pass": 279,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browserSuites": 5,
+    "realModelCalls": 0,
+    "remoteCI": "not-run",
+    "report": {
+      "startedAt": "2026-10-18T08:03:12.242Z",
+      "status": "pass",
+      "environment": {
+        "node": "24.14.1",
+        "platform": "win32",
+        "arch": "x64",
+        "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+      },
+      "stages": [
+        {
+          "name": "types",
+          "status": "pass",
+          "startedAt": 1792310592246,
+          "elapsedMs": 6141
+        },
+        {
+          "name": "build",
+          "status": "pass",
+          "startedAt": 1792310598387,
+          "elapsedMs": 11632
+        },
+        {
+          "name": "tests",
+          "status": "pass",
+          "startedAt": 1792310610019,
+          "elapsedMs": 167064
+        },
+        {
+          "name": "browser",
+          "status": "pass",
+          "startedAt": 1792310777083,
+          "elapsedMs": 48568
+        },
+        {
+          "name": "harness-demo",
+          "status": "pass",
+          "startedAt": 1792310825651,
+          "elapsedMs": 1328
+        },
+        {
+          "name": "note-eval-demo",
+          "status": "pass",
+          "startedAt": 1792310826979,
+          "elapsedMs": 1589
+        },
+        {
+          "name": "note-calibration",
+          "status": "pass",
+          "startedAt": 1792310828568,
+          "elapsedMs": 1615
+        },
+        {
+          "name": "claim-eval-demo",
+          "status": "pass",
+          "startedAt": 1792310830183,
+          "elapsedMs": 1716
+        },
+        {
+          "name": "claim-comparison-demo",
+          "status": "pass",
+          "startedAt": 1792310831899,
+          "elapsedMs": 1763
+        },
+        {
+          "name": "claim-focused-demo",
+          "status": "pass",
+          "startedAt": 1792310833662,
+          "elapsedMs": 1872
+        },
+        {
+          "name": "claim-meaning-demo",
+          "status": "pass",
+          "startedAt": 1792310835534,
+          "elapsedMs": 2444
+        },
+        {
+          "name": "claim-calculation-demo",
+          "status": "pass",
+          "startedAt": 1792310837978,
+          "elapsedMs": 1797
+        },
+        {
+          "name": "field-review-demo",
+          "status": "pass",
+          "startedAt": 1792310839775,
+          "elapsedMs": 1657
+        }
+      ]
+    }
+  },
+  "remainingBoundaries": [
+    "真实生成仍可能存在论证强度、补充假设或概括边界问题；结构与引文定位检查不保证教学内容正确。",
+    "联合资料包管理已交付，整包复习讲义／试卷成品入口尚未接通。",
+    "独立评分、更广材料与留出集、进一步文风优化属于后续质量迭代。",
+    "扫描件 OCR、多用户服务与云端部署不在本地版本范围内。",
+    "远程 CI 尚未运行；本版不声明跨平台实测通过。",
+    "尚未公开发布或选定代码许可证；公开发布前须另行核对材料再分发范围。"
+  ],
+  "closureRule": "当前提交通过一次完整本地验收，保存报告并固定本地版本标签后，本轮结束。新增偏好、实验或功能另立后续版本，不自动扩展本版范围。",
+  "closedAt": "2026-10-18T08:07:54.574Z",
+  "nonBlockingWarnings": [
+    {
+      "code": "large-build-chunks",
+      "scope": "Vite reports chunks above 500 kB; bundle optimization is deferred."
+    },
+    {
+      "code": "react-test-act",
+      "scope": "A React DOM test emits an act warning; assertions and browser suites pass."
+    },
+    {
+      "code": "pdfjs-wasm-fallback",
+      "scope": "PDF.js uses its JavaScript fallback for a PostScript function; PDF assertions pass."
+    }
+  ]
+}

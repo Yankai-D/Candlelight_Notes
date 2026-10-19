@@ -1,0 +1,82 @@
+{
+  "version":"note-findings-v1",
+  "runId":"b10f869c-ced2-4b60-b134-595f75d106c1",
+  "artifactHash":"610a89da234fe6d736a654f87f7e947fd132a3851958466ab6f93752f8139773",
+  "reviewKind":"ai-preliminary",
+  "independentReview":"pending",
+  "reviewer":"Codex；参与规则与案例设计，已看见组别，不是独立盲评",
+  "decision":"keep-experimental; no demonstrated target improvement; no default rollout",
+  "findings":[
+    {
+      "id":"shrink-target-check",
+      "category":"paired-target-observation",
+      "severity":"no-target-issue-observed",
+      "noteEvidence":[
+        {"candidateId":"independent-shrink/fluent/1/harness","block":2,"quote":"这个式子由两部分相加而成。"},
+        {"candidateId":"independent-shrink/fluent/1/operation-check","block":2,"quote":"把公式拆开看，它由两项相加而成。"}
+      ],
+      "sourceEvidence":[{"caseId":"independent-shrink/fluent","page":1,"quote":"This is the sum of a uniformly shrunk current vector and a scaled data-gradient increment."}],
+      "reason":"逐段核对本例，两组都对当前向量进行独立缩放，并与固定数据梯度增量合成；算例分别得到 (2.5,-1.4) 与耦合的 (2.65,-1.2)。未观察到先做梯度步、再缩整个结果的目标错误。这是对一次输出的 AI 判断，不是语义验证器通过。",
+      "hypothesis":"本次完整样稿与更明确的来源表述已足以使两组避免目标错误，当前试验未区分额外约束的贡献。",
+      "counterRisk":"不能从未复现错误推断规则无用或目标问题已完全解决；原始失败来自移除样稿组。",
+      "verification":"独立核对两版全文与算例；未来分别检验来源措辞与样稿作用，不把它们和新规则一起改变。"
+    },
+    {
+      "id":"state-target-check",
+      "category":"paired-target-observation",
+      "severity":"no-target-issue-observed",
+      "noteEvidence":[
+        {"candidateId":"simultaneous-state/fluent/1/harness","block":2,"quote":"至于结果先存到哪个变量、以什么顺序写回，都不影响映射本身"},
+        {"candidateId":"simultaneous-state/fluent/1/operation-check","block":2,"quote":"两个新分量是在同一次应用"}
+      ],
+      "sourceEvidence":[{"caseId":"simultaneous-state/fluent","page":1,"quote":"The vector on the right-hand side is the state before this map is applied. Both components belong to one application of M."}],
+      "reason":"两组都使用旧的 a、b，明确排除以新 a 计算第二分量，算例 (2.5,3.5) 正确；都保留存储顺序可变而映射不变的含义。实验组多给了临时变量/一起写回的实现提示，但没有形成额外算法教程；必要性仍待人工评议。",
+      "hypothesis":"这份来源已明确状态时点，尚未显示新增后缀有独立效果。",
+      "counterRisk":"把描述实现顺序的几句说明全部视为错误，会误伤合理解释。",
+      "verification":"结合完整第 2、4 段复核；合法控制为先缓存旧输入，按任意顺序存两个新分量。"
+    },
+    {
+      "id":"composition-control",
+      "category":"paired-positive-control",
+      "severity":"no-target-issue-observed",
+      "noteEvidence":[
+        {"candidateId":"affine-composition/fluent/1/harness","block":1,"quote":"再把所得的和乘以"},
+        {"candidateId":"affine-composition/fluent/1/operation-check","block":1,"quote":"再把所得的和乘以"}
+      ],
+      "sourceEvidence":[{"caseId":"affine-composition/fluent","page":1,"quote":"This map adds b to x and then scales that sum by c. The alternative map S(x)=c*x+b scales x and then adds the offset."}],
+      "reason":"两组均正确保留 T 的先偏移后缩放、S 的先缩放后偏移、20 与 11 的数值，以及 (c-1)b=0 的相等条件；没有把合法复合顺序一律改成同时操作。",
+      "hypothesis":"本例未见新规则损害合法顺序，但样本不足以证明所有复合算法安全。",
+      "counterRisk":"把文本里出现‘先/再’当错误信号，会把本例正确说明拒绝掉。",
+      "verification":"人工核对展开式与两种顺序；数值控制已验证 c=1 和 b=0 时两者相同。"
+    },
+    {
+      "id":"identity-control",
+      "category":"paired-positive-control",
+      "severity":"no-target-issue-observed",
+      "noteEvidence":[
+        {"candidateId":"variance-identity/fluent/1/harness","block":7,"quote":"它是分布层面各量之间的恒等关系"},
+        {"candidateId":"variance-identity/fluent/1/operation-check","block":8,"quote":"只是把同一个分布的三个量联系起来。"}
+      ],
+      "sourceEvidence":[{"caseId":"variance-identity/fluent","page":1,"quote":"This is an identity between distributional quantities, not a recurrence that updates X or mu."}],
+      "reason":"两组都将关系保留为恒等式，区分 E[X²] 与 E[X]²，数值均值 2、原点矩 5、方差 1、均值平方 4 正确，没有构造对 X 或 mu 的迭代更新。实验组多出展开解释；仅凭长度不能判断教学价值。",
+      "hypothesis":"当前未见强行算法化，仍未证明目标一致性有改善。",
+      "counterRisk":"将正常推导中的‘代回’‘先知道均值’也视为更新算法，会误判合法讲解。",
+      "verification":"核对全部推导和最后一段；另查实验组第 4 段被清除的精确引文，页级来源仍保留，不能将引文缺失隐藏。"
+    },
+    {
+      "id":"overstated-difference",
+      "category":"unsupported-universal-condition",
+      "severity":"substantive",
+      "noteEvidence":[{"candidateId":"independent-shrink/fluent/1/operation-check","block":3,"quote":"偏离单位矩阵，两种做法就会给出不同的下一步。"}],
+      "sourceEvidence":[{"caseId":"independent-shrink/fluent","page":1,"quote":"The coupled minus independent difference is -eta*rho*(P-I)*u."}],
+      "reason":"P 不等于 I 并不足以保证差向量非零。rho=0 时差为零；即使 rho>0 且 u 非零，(P-I)u 也可能为零。实验组这句明确的‘不同’超出了差值公式支持的范围。基础组‘差异就按公式出现’也有含糊措辞，不能据一次输出认定新规则导致了这种错误。",
+      "counterexamples":[
+        {"u":[3,-2],"h":[2,-1],"p":[0.5,2],"eta":0.2,"rho":0,"expectedIndependent":[2.8,-1.6],"expectedCoupled":[2.8,-1.6]},
+        {"u":[0,2],"h":[2,-1],"p":[0.5,1],"eta":0.2,"rho":0.5,"expectedIndependent":[-0.2,2],"expectedCoupled":[-0.2,2]}
+      ],
+      "hypothesis":"后续应单独研究自然语言中的量词和成立条件，不与本次步骤规则一起修改。",
+      "counterRisk":"靠不断追加禁止条款可能增加篇幅却不提高事实准确性；不能把这个条件问题归因于步骤规则。",
+      "verification":"数值反例满足原文的 eta>0、rho>=0、P 正对角条件，并且 P!=I；正例保留本轮来源中两种更新确实不同的算例。"
+    }
+  ]
+}

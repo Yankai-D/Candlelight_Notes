@@ -1,0 +1,131 @@
+{
+  "kind": "windows-desktop-distribution",
+  "version": "0.1.8",
+  "status": "pass",
+  "checkedAt": "2026-10-18T14:01:00.779Z",
+  "applicationRevision": "c8e03aa4105a7c61bf40a2ca5403f74b90e40952",
+  "installer": "Candlelight-Notes-0.1.8-Setup-x64.exe",
+  "bytes": 138050185,
+  "sha256": "385813be242bba861d391e918baa049f2101e892c5bb42f4a70fb479997b5501",
+  "archive": {
+    "file": "Candlelight-Notes-0.1.8-Windows-x64.zip",
+    "bytes": 138095665,
+    "sha256": "e70b6e91f8cff145b7c0cd1d0d5c0a85bb1843d1de1edbd15e81bde0e5c3ff0d",
+    "verifiedEntries": [
+      {
+        "name": "Candlelight-Notes-0.1.8-Setup-x64.exe",
+        "sha256": "385813be242bba861d391e918baa049f2101e892c5bb42f4a70fb479997b5501"
+      },
+      {
+        "name": "Candlelight-Notes-0.1.8-Setup-x64.exe.sha256",
+        "sha256": "d005289cfac292389a2fe6dcee231d1a1a994ed75df4a1a56cad94baf27b4295"
+      },
+      {
+        "name": "使用说明.txt",
+        "sha256": "d502d14f581ed2f8097489b328d533c8bb83833f3df0223628b963f6addfd13a"
+      },
+      {
+        "name": "ACKNOWLEDGEMENTS.md",
+        "sha256": "b37bba3d41f2624d0d0463d1a7c2bc7e2f1ea3d88566396ce410f92dde71fd32"
+      },
+      {
+        "name": "THIRD-PARTY-NOTICES.txt",
+        "sha256": "0a693f3622364f57567e1ad6d345da891f342d069a3eae645f2b2ab22228d27a"
+      },
+      {
+        "name": "materials/ATTRIBUTION.txt",
+        "sha256": "f49aa71639345fa1687bb77d482ed2836af8777d82b521387a7cbc13cbce0c40"
+      },
+      {
+        "name": "materials/SOURCES.json",
+        "sha256": "64b86925f37e2ff77ba6c3eeaf31a51c0eb4daf627485b4a2bd222a7a87f90d0"
+      }
+    ]
+  },
+  "branding": {
+    "name": "烛光笔记",
+    "englishName": "Candlelight Notes",
+    "windowTitle": "烛光笔记 Candlelight",
+    "authorName": "Yankai-D",
+    "projectUrl": "https://github.com/Yankai-D/Candlelight_Notes",
+    "selectedDesign": "A - Quiet Candle",
+    "matchesSelectedProposal": true
+  },
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "signed": false,
+  "automaticUpdates": false,
+  "changes": [
+    "Nested material packages with parent validation, ancestry navigation and safe container dissolution",
+    "Independent notes with user names and requirements, recursive source snapshots and distinct icons",
+    "Source-aware plan coverage, bounded repair, template routing and resumable chapter generation",
+    "Primary material notes can refer to package context; translation excludes supplementary excerpts",
+    "Multi-file source viewer and source mapping survive backups, history and shared rendering"
+  ],
+  "engineering": {
+    "build": "pass",
+    "targetedTestsPassed": 71,
+    "targetedTestsFailed": 0,
+    "browserSuitesPassed": [
+      "onboarding",
+      "bundles",
+      "nested-bundles",
+      "ideal-tree",
+      "settings",
+      "calibration",
+      "field-review"
+    ],
+    "bundleChecks": [
+      "nested navigation",
+      "create child bundle",
+      "source scope excludes siblings",
+      "standalone note creation",
+      "resume without duplicate chapters",
+      "shared math renderer",
+      "source switch",
+      "rename notes and materials",
+      "reload without calls",
+      "source snapshot retained"
+    ],
+    "packagedDesktopSmoke": "pass",
+    "brandAssets": "Canonical SVG and all seven native icon sizes match packaged assets",
+    "archiveRoundTrip": "all entry hashes match original files"
+  },
+  "desktopChecks": [
+    "First entry offers a blank user-authored profile and skippable model setup",
+    "Packaged application uses the canonical candle mark",
+    "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+  ],
+  "installerLifecycle": {
+    "status": "not_retested",
+    "reason": "Personal installation left untouched; packaged application tested with isolated temporary data",
+    "previousVersionEvidence": "v0.1.0-desktop.json",
+    "installerIdentityChanged": false,
+    "installerDisplayNameChanged": false
+  },
+  "privacy": {
+    "asarEntriesAudited": 13302,
+    "payloadFiles": 14025,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "preGeneratedUserNotesIncluded": false
+  },
+  "modelCalls": 0,
+  "limits": [
+    "Cross-version installation not executed against the user installation",
+    "Unsigned installer; no automatic online update",
+    "Bundle generation tested with mocked model responses; no new independent content-quality claim",
+    "Related-material context is bounded excerpts; plan coverage is not semantic completeness"
+  ]
+}

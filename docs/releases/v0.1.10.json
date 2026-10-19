@@ -1,0 +1,102 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.10",
+  "status": "verified-local-candidate",
+  "reviewedDate": "2026-10-19",
+  "timezone": "Australia/Sydney",
+  "codeRevision": "bbc41bda1edf238073aa294ec896579dbc648053",
+  "sourceFingerprint": "e9b1de7d257b47ce15385fc85aa1f573c03211f501bbbe0f4751f83a937875e8",
+  "lockSha256": "f01f370b5014beeb8cb08d9a71695c1fffc482d13b830cd0c3fca58c998525b6",
+  "changes": [
+    "Load note request schemas and harness handlers from the same module instance",
+    "Preserve complete functionality while excluding author credentials and personal learning data"
+  ],
+  "validation": {
+    "tests": 306,
+    "browserSuites": 7,
+    "stages": 13,
+    "sourceChangedDuringChecks": false,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.9",
+        "asarSha256": "d907b84ac73c7ae7fa39dc82256cc8bbd681a832854cd7d19f49b8e64f86bd3d"
+      },
+      "to": {
+        "version": "0.1.10",
+        "asarSha256": "8702409ef0d225113cc505f0a2199d36ed686f00a94ba1c5c37898250759f0b2"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "payloadFilesVerified": 12058,
+    "checkReportSha256": "e2fe523381c6a87287af26672839c91492b2c1125a56bd37f09ceee92de6a62d"
+  },
+  "distribution": {
+    "installer": {
+      "path": "output/releases/pangzhu-desktop-0.1.10/installer/Candlelight-Notes-0.1.10-Setup-x64.exe",
+      "file": "Candlelight-Notes-0.1.10-Setup-x64.exe",
+      "bytes": 138050397,
+      "sha256": "f0f5861608b058492b240f3f7d11d563668d5fa1c1aa8465f1599d45960695a0"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.10/Candlelight-Notes-0.1.10-Windows-x64.zip",
+      "bytes": 138095865,
+      "sha256": "861acbb4c637c02f51a8d9c5ac2856493e5bc952d7da090a8865c71930228abf"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "authorAndAcknowledgementsRetained": true,
+    "selfUseDataModified": false,
+    "signed": false
+  },
+  "dependencies": {
+    "production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "all": {
+      "info": 0,
+      "low": 0,
+      "moderate": 8,
+      "high": 0,
+      "critical": 0,
+      "total": 8
+    },
+    "buildOnlyAdvisoryDependenciesAbsent": true,
+    "exception": {
+      "id": "ER-07",
+      "status": "deferred-build-tool-only",
+      "revisitBy": "2026-11-19"
+    }
+  },
+  "limitations": {
+    "nsisInstallUpgradeUninstall": "not-run-protect-existing-personal-installation",
+    "remoteCI": "not-run",
+    "independentTeachingReview": "pending"
+  },
+  "modelCalls": 0,
+  "githubPushed": false,
+  "evidence": {
+    "path": "artifacts/release-0.1.10/MANIFEST.json",
+    "sha256": "6d72067f04d2d8305a1c5a1a038c0ae715f2a4b625d0a3b0047c060c738df697",
+    "files": 28
+  }
+}

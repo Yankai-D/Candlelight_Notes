@@ -1,0 +1,70 @@
+{
+  "status": "provisional-ai-review",
+  "semanticJudgment": "unverified",
+  "humanReview": null,
+  "runArtifactHash": "1f855adac664265b0da654747a90de8a409be26884e96f8ca25621a5ca39bce9",
+  "decision": "Keep experimental: the intermediate representation exposes normalization of the erroneous wording, but does not solve the observed miss; three candidates fail contract validation.",
+  "findings": [
+    {
+      "id": "extraction-normalizes-away-the-observed-weight-rule",
+      "candidates": ["mean-observed/focused", "mean-observed/calculation"],
+      "observation": "基线仍保留 b7:s2。两阶段组虽选 calculation 并引用完整原句，却把自身大小为权重解释成普通求和除以个数；比较阶段据此返回 compatible 和 retain，未指出提取与原句的偏差。最终因来源引文的换行被空格替代而未通过校验，不是成功检出内容错误。",
+      "evidence": [
+        {"candidateId":"mean-observed/focused","stage":"focused","path":"checks.1.verdict","quote":"retain"},
+        {"candidateId":"mean-observed/calculation","stage":"extract","path":"units.1.rules.0.quote","quote":"以自身大小为权重"},
+        {"candidateId":"mean-observed/calculation","stage":"extract","path":"units.1.rules.0.expression","quote":"均值 = (Σ 各观测值) / 观测个数"},
+        {"candidateId":"mean-observed/calculation","stage":"compare","path":"comparisons.0.relation","quote":"compatible"},
+        {"candidateId":"mean-observed/calculation","stage":"compare","path":"comparisons.0.source.quote","quote":"divided by the number of observations:"}
+      ],
+      "scope": "两个阶段的语义建议都未得到独立认证；来源引文仅有空白差异，不能称为伪造证据。记录暴露提取忠实度问题，不证明唯一成因。"
+    },
+    {
+      "id": "redundant-quote-fields-stop-correct-controls",
+      "candidates": ["mean-equal-control/focused", "mean-equal-control/calculation", "mean-contribution-control/focused", "mean-contribution-control/calculation"],
+      "observation": "两个正确控制在基线被保留；两阶段组的提取 JSON 增加了契约未允许的同级 quote 字段，严格校验返回 ZodError，未进行比较。不能把这些执行失败计成内容误报或正确保留。",
+      "evidence": [
+        {"candidateId":"mean-equal-control/focused","stage":"focused","path":"checks.1.verdict","quote":"retain"},
+        {"candidateId":"mean-equal-control/calculation","stage":"extract","path":"units.1.quote","quote":"每个观测的系数都是 1/n"},
+        {"candidateId":"mean-contribution-control/focused","stage":"focused","path":"checks.1.verdict","quote":"retain"},
+        {"candidateId":"mean-contribution-control/calculation","stage":"extract","path":"units.1.quote","quote":"较大的观测值对总和的数值贡献也较大"}
+      ],
+      "scope": "原始 JSON 保留，不删除字段后重算本批成绩。格式容错应另作版本化变更，不能冒充解决提取语义问题。"
+    },
+    {
+      "id": "weighted-order-and-metaphor-controls-retained",
+      "candidates": ["weighted-control/focused", "weighted-control/calculation", "center-order-control/focused", "center-order-control/calculation", "balance-metaphor/focused", "balance-metaphor/calculation"],
+      "observation": "合法加权均值、正确操作顺序和纯比喻两组均保留。纯比喻在两阶段组分为 intuition 与 context，没有强制比较或另造计算规则。",
+      "evidence": [
+        {"candidateId":"weighted-control/focused","stage":"focused","path":"checks.1.verdict","quote":"retain"},
+        {"candidateId":"weighted-control/calculation","stage":"compare","path":"comparisons.1.relation","quote":"compatible"},
+        {"candidateId":"center-order-control/focused","stage":"focused","path":"checks.1.verdict","quote":"retain"},
+        {"candidateId":"center-order-control/calculation","stage":"compare","path":"comparisons.0.relation","quote":"compatible"},
+        {"candidateId":"balance-metaphor/focused","stage":"focused","path":"checks.0.verdict","quote":"retain"},
+        {"candidateId":"balance-metaphor/calculation","stage":"extract","path":"units.0.kind","quote":"intuition"}
+      ],
+      "scope": "仅是本批控制未观察到误报，不证明更复杂直觉都能正确分流。"
+    },
+    {
+      "id": "order-error-faithfully-extracted-and-located",
+      "candidates": ["center-order-mismatch/focused", "center-order-mismatch/calculation"],
+      "observation": "两阶段组在 p1:s2 提取了先除后减，再与来源先减后除比较并定位冲突；保留 p1:s1 的正确公式。基线同样检出，所以不是额外检出收益。数值反例 x=2,a=1,b=2 的结果 0.5 与 0 可核算。",
+      "evidence": [
+        {"candidateId":"center-order-mismatch/focused","stage":"focused","path":"checks.1.verdict","quote":"contradiction"},
+        {"candidateId":"center-order-mismatch/calculation","stage":"extract","path":"units.1.rules.0.expression","quote":"先计算 x / b，再计算 (x / b) - a"},
+        {"candidateId":"center-order-mismatch/calculation","stage":"compare","path":"checks.1.conflict","quote":"x=2,a=1,b=2 时 (x-a)/b=0.5，而 x/b-a=0"}
+      ],
+      "scope": "来源本已明确操作顺序，开发探针较简单；数值核算不等于通用自然语言验证。"
+    },
+    {
+      "id": "undefined-transform-remains-a-gap-in-two-stage-arm",
+      "candidates": ["undefined-transform/focused", "undefined-transform/calculation"],
+      "observation": "基线把来源未给定义当作与笔记计算规则相反的证据，返回 contradiction；两阶段组保留 Q(x)=x/2 的提取，但比较阶段因来源未定义 Q 返回 needs-source，符合开发参考的保守分流。",
+      "evidence": [
+        {"candidateId":"undefined-transform/focused","stage":"focused","path":"checks.1.conflict","quote":"与来源相反"},
+        {"candidateId":"undefined-transform/calculation","stage":"extract","path":"units.1.rules.0.expression","quote":"Q(x) = x / 2"},
+        {"candidateId":"undefined-transform/calculation","stage":"compare","path":"checks.1.verdict","quote":"needs-source"}
+      ],
+      "scope": "参考属于 AI 初步判断；这是一次缺口分流差异，不能抵消真实漏检及执行失败，也不能宣传成独立准确率提升。"
+    }
+  ]
+}

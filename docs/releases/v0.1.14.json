@@ -1,0 +1,132 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.14",
+  "status": "verified-local-candidate",
+  "codeRevision": "da777bf0e3a9311bbe2692332ebd70fda6d83697",
+  "sourceFingerprint": "f0c8441893e6926bac56ae345538a4597f0118b960c8129e0b45ff7afa6c11f1",
+  "changes": [
+    "Consume validated workspace metadata before strict ideal tree and template commands",
+    "Retain stale-window rejection and strict domain validation",
+    "Add real HTTP/browser and packaged renderer first-entry regression"
+  ],
+  "validation": {
+    "tests": 338,
+    "browserSuites": 10,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "actualModelCalls": 0,
+    "browserEntry": {
+      "status": "pass",
+      "actualModelCalls": 0,
+      "commands": [
+        "list",
+        "list",
+        "get",
+        "export",
+        "list"
+      ],
+      "checks": [
+        "first open with no key",
+        "empty saved goals",
+        "new goal entry",
+        "reload saved goals",
+        "open saved tree",
+        "export saved tree",
+        "saved state unchanged"
+      ]
+    },
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged ideal tree opens empty goals through the real renderer and HTTP boundary",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Packaged ideal tree opens empty goals through the real renderer and HTTP boundary",
+      "Packaged ideal tree opens empty goals through the real renderer and HTTP boundary",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.13",
+        "asarSha256": "9acabbcb9dd9842b02dacfa3b7bff5d310c3b760b053e7ea3c9ac7e3684b9ee3"
+      },
+      "to": {
+        "version": "0.1.14",
+        "asarSha256": "11a67b1fd4152cc21aea918e7b0cae1368bcbdde7a3466547af45793a455d9e1"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "Packaged ideal tree opens empty goals through the real renderer and HTTP boundary",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged ideal tree opens empty goals through the real renderer and HTTP boundary",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ]
+    },
+    "payloadFilesVerified": 12063,
+    "unchangedAssets": [
+      {
+        "path": "shared/editorial-policy.mjs",
+        "sha256": "7f7ca80ee3028c62d2a4b0f1eeee4061afc824d7782171c751f473335adcbe86",
+        "comparedRevision": "66e4bf6"
+      },
+      {
+        "path": "shared/writing-templates.mjs",
+        "sha256": "2797521966a2ca83c7fea0848e5bc44a5553ce692d31a1f213d595cff6f9e12e",
+        "comparedRevision": "66e4bf6"
+      },
+      {
+        "path": "shared/course-default-sample.json",
+        "sha256": "73b12664185671b01ec6ecd10f5e2471e430d3a72e959d0d4a6029798a8e9fd1",
+        "comparedRevision": "66e4bf6"
+      },
+      {
+        "path": "packaging/desktop/uninstall.nsh",
+        "sha256": "e3a836799490feac364d0d86f3c6725910f82d33ca801e9d7d73428248b96fe5",
+        "comparedRevision": "66e4bf6"
+      }
+    ],
+    "dependencyGraphUnchanged": true,
+    "checkReportSha256": "f3cf8a631e09da38c49f87b1bfb5a243e07451b6fccb4445c15d6e313d68f4d9"
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.14-Setup-x64.exe",
+      "bytes": 138070838,
+      "sha256": "4015e481d0c446b449b29f06a2fdb6530327ab8e63a1a0a928747817872b4480",
+      "path": "output/releases/pangzhu-desktop-0.1.14/installer/Candlelight-Notes-0.1.14-Setup-x64.exe"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.14/Candlelight-Notes-0.1.14-Windows-x64.zip",
+      "bytes": 138117668,
+      "sha256": "efd1ab1b05a49de069366585da632ec2a51f470bc48d24c8f6820787e3dde915"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": {
+    "installerLifecycle": "not-run-in-blank-Windows-account",
+    "remoteCI": "not-run",
+    "currentDependencyAuditRun": false,
+    "priorDependencyAudit": "docs/releases/v0.1.12.json"
+  },
+  "review": "docs/reviews/2026-10-19-ideal-tree-entry-0.1.14.md",
+  "evidenceManifest": "artifacts/release-0.1.14/evidence/MANIFEST.json",
+  "evidenceManifestSha256": "924dac01579ec12972865c5ddcb5e1f518ecee583c9179ae9dae90385139ed26",
+  "githubPushed": false
+}

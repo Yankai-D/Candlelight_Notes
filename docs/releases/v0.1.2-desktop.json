@@ -1,0 +1,64 @@
+{
+  "kind": "windows-desktop-distribution",
+  "version": "0.1.2",
+  "status": "pass",
+  "checkedAt": "2026-10-18T11:26:19.481Z",
+  "applicationRevision": "2b29f95e2fb73c23570ade23a9750ddc537b1c39",
+  "installer": "Candlelight-Notes-0.1.2-Setup-x64.exe",
+  "bytes": 138070463,
+  "sha256": "7228d2c5f97f15d953824be75604ed21ef87b25186341f0e533097994f8f7e79",
+  "branding": {
+    "name": "旁烛笔记",
+    "englishName": "Candlelight Notes",
+    "windowTitle": "旁烛笔记 Candlelight"
+  },
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "signed": false,
+  "automaticUpdates": false,
+  "changes": [
+    "Formal English name Candlelight Notes; window and shortcut name use the bilingual display name",
+    "Recurring tagline replaced by English name; tagline retained only in help brand story",
+    "Existing app ID, executable, origin and user data location remain stable"
+  ],
+  "engineering": {
+    "build": "pass",
+    "command": "node --test tests/desktop.test.mjs tests/distribution.test.mjs",
+    "testsPassed": 5,
+    "testsFailed": 0,
+    "installerScriptSyntax": "pass"
+  },
+  "desktopChecks": [
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched",
+    "Packaged browser title and sidebar English name match the branding configuration"
+  ],
+  "installerLifecycle": {
+    "status": "not_retested",
+    "reason": "Existing personal installation left untouched; packaged executable tested with isolated temporary data",
+    "previousVersionEvidence": "v0.1.0-desktop.json",
+    "configurationChanged": true,
+    "changes": "Display and shortcut names only; installation identity remains stable"
+  },
+  "privacy": {
+    "asarEntriesAudited": 13299,
+    "payloadFiles": 14021,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "preGeneratedUserNotesIncluded": false
+  },
+  "modelCalls": 0,
+  "limits": [
+    "Cross-version installation and shortcut migration not executed against the user installation",
+    "Unsigned installer; no automatic online update"
+  ]
+}

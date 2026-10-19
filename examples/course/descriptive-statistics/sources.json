@@ -1,0 +1,483 @@
+{
+  "status": "public-source-fixture",
+  "sources": [
+    {
+      "id": "textbook",
+      "title": "OpenIntro Statistics, Fourth Edition (2019; updated 2022-10-21)",
+      "file": "01-selected-reading.pdf",
+      "sha256": "8ea99a4b6eee734e1e35fe0406f6e6f3e056627f7b39166caa4e11253ba8f8f2",
+      "authors": [
+        "David Diez",
+        "Mine Çetinkaya-Rundel",
+        "Christopher D Barr"
+      ],
+      "contributors": [],
+      "url": "https://www.openintro.org/book/os/",
+      "license": "CC-BY-SA-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "pages": [
+        {
+          "number": 1,
+          "originalPage": null,
+          "kind": "notice",
+          "text": "PANGZHU NOTES  /  COURSE MATERIAL SAMPLE\nDescriptive Statistics\nSelected textbook reading\nSOURCE\nOpenIntro Statistics, Fourth Edition (2019; updated 2022-10-21)\nDavid Diez, Mine Çetinkaya-Rundel, Christopher D Barr\nhttps://www.openintro.org/book/os/\nOriginal PDF / printed pages 45-60 and 70-78. Sections 2.1.1-2.1.6 and 2.2.\nAdded this source notice; extracted selected pages without changing their content. Omitted advanced\ntransformations, spatial maps, end-of-section exercises and the inference case study.\nCC-BY-SA-3.0\nhttps://creativecommons.org/licenses/by-sa/3.0/\nPrepared 2026-10-17. This selection is not an official OpenIntro product.\nOriginal authors retain credit. Page mapping is included in manifest.json.\n",
+          "needsReview": false
+        },
+        {
+          "number": 2,
+          "originalPage": 45,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n45\n2.1\nExamining numerical data\nIn this section we will explore techniques for summarizing numerical variables. For example,\nconsider the loan amount variable from the loan50 data set, which represents the loan size for all\n50 loans in the data set. This variable is numerical since we can sensibly discuss the numerical\ndiﬀerence of the size of two loans. On the other hand, area codes and zip codes are not numerical,\nbut rather they are categorical variables.\nThroughout this section and the next, we will apply these methods using the loan50 and\ncounty data sets, which were introduced in Section 1.2. If you’d like to review the variables from\neither data set, see Figures 1.3 and 1.5.\n2.1.1\nScatterplots for paired data\nA scatterplot provides a case-by-case view of data for two numerical variables. In Figure 1.8\non page 18, a scatterplot was used to examine the homeownership rate against the fraction of housing\nunits that were part of multi-unit properties (e.g. apartments) in the county data set. Another\nscatterplot is shown in Figure 2.1, comparing the total income of a borrower (total income) and\nthe amount they borrowed (loan amount) for the loan50 data set. In any scatterplot, each point\nrepresents a single case. Since there are 50 cases in loan50, there are 50 points in Figure 2.1.\nTotal Income\n$0\n$50k\n$100k\n$150k\n$200k\n$250k\n$300k\n$0\n$10k\n$20k\n$30k\n$40k\nLoan Amount\nFigure 2.1: A scatterplot of total income versus loan amount for the loan50\ndata set.\nLooking at Figure 2.1, we see that there are many borrowers with an income below $100,000\non the left side of the graph, while there are a handful of borrowers with income above $250,000.\nEXAMPLE 2.1 START\nExample problem: Figure 2.2 shows a plot of median household income against the poverty rate for\n3,142 counties. What can be said about the relationship between these variables?\nSolution to the example: The relationship is evidently nonlinear, as highlighted by the dashed line.\nThis is diﬀerent from previous scatterplots we’ve seen, which show relationships that do not show\nmuch, if any, curvature in the trend.\nEXAMPLE 2.1 HAS ENDED.\n",
+          "needsReview": false
+        },
+        {
+          "number": 3,
+          "originalPage": 46,
+          "kind": "content",
+          "text": "46\nCHAPTER 2. SUMMARIZING DATA\n0%\n10%\n20%\n30%\n40%\n50%\n$0\n$20k\n$40k\n$60k\n$80k\n$100k\n$120k\nPoverty Rate (Percent)\nMedian Household Income\nFigure 2.2: A scatterplot of the median household income against the poverty rate\nfor the county data set. A statistical model has also been ﬁt to the data and is\nshown as a dashed line.\nGUIDED PRACTICE 2.2 START\nWhat do scatterplots reveal about the data, and how are they useful?1\nGo to the preceding footnote\nlink for the Guided Practice solution.\nGUIDED PRACTICE 2.2 HAS ENDED.\nGUIDED PRACTICE 2.3 START\nDescribe two variables that would have a horseshoe-shaped association in a scatterplot (∩or ⌢).2\nGo to the preceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.3 HAS ENDED.\n2.1.2\nDot plots and the mean\nSometimes two variables are one too many: only one variable may be of interest. In these cases,\na dot plot provides the most basic of displays. A dot plot is a one-variable scatterplot; an example\nusing the interest rate of 50 loans is shown in Figure 2.3. A stacked version of this dot plot is shown\nin Figure 2.4.\nInterest Rate\n5%\n10%\n15%\n20%\n25%\nFigure 2.3: A dot plot of interest rate for the loan50 data set. The distribu-\ntion’s mean is shown as a red triangle.\n1Answers may vary. Scatterplots are helpful in quickly spotting associations relating variables, whether those\nassociations come in the form of simple trends or whether those relationships are more complex.\n2Consider the case where your vertical axis represents something “good” and your horizontal axis represents\nsomething that is only good in moderation. Health and water consumption ﬁt this description: we require some water\nto survive, but consume too much and it becomes toxic and can kill a person.\n",
+          "needsReview": false
+        },
+        {
+          "number": 4,
+          "originalPage": 47,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n47\nInterest Rate, Rounded to Nearest Percent\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG\nG G\nG\nG\nG G G G\nG\nG\nG\nG\nG G G\nG G\n5%\n10%\n15%\n20%\n25%\nFigure 2.4: A stacked dot plot of interest rate for the loan50 data set. The rates\nhave been rounded to the nearest percent in this plot, and the distribution’s mean\nis shown as a red triangle.\nThe mean, often called the average, is a common way to measure the center of a distribution\nof data. To compute the mean interest rate, we add up all the interest rates and divide by the number\nof observations:\n¯x = 10.90% + 9.92% + 26.30% + · · · + 6.08%\n50\n= 11.57%\nThe sample mean is often labeled ¯x. The letter x is being used as a generic placeholder for the\nvariable of interest, interest rate, and the bar over the x communicates we’re looking at the\naverage interest rate, which for these 50 loans was 11.57%. It is useful to think of the mean as the\nbalancing point of the distribution, and it’s shown as a triangle in Figures 2.3 and 2.4.\nMEAN\nThe sample mean can be computed as the sum of the observed values divided by the number\nof observations:\n¯x = x1 + x2 + · · · + xn\nn\nwhere x1, x2, . . . , xn represent the n observed values.\nGUIDED PRACTICE 2.4 START\nExamine the equation for the mean. What does x1 correspond to? And x2? Can you infer a general\nmeaning to what xi might represent?3\nGo to the preceding footnote link for the Guided Practice\nsolution.\nGUIDED PRACTICE 2.4 HAS ENDED.\nGUIDED PRACTICE 2.5 START\nWhat was n in this sample of loans?4\nGo to the preceding footnote link for the Guided Practice\nsolution.\nGUIDED PRACTICE 2.5 HAS ENDED.\nThe loan50 data set represents a sample from a larger population of loans made through\nLending Club. We could compute a mean for this population in the same way as the sample mean.\nHowever, the population mean has a special label: µ. The symbol µ is the Greek letter mu and\n3x1 corresponds to the interest rate for the ﬁrst loan in the sample (10.90%), x2 to the second loan’s interest rate\n(9.92%), and xi corresponds to the interest rate for the ith loan in the data set. For example, if i = 4, then we’re\nexamining x4, which refers to the fourth observation in the data set.\n4The sample size was n = 50.\n",
+          "needsReview": false
+        },
+        {
+          "number": 5,
+          "originalPage": 48,
+          "kind": "content",
+          "text": "48\nCHAPTER 2. SUMMARIZING DATA\nrepresents the average of all observations in the population. Sometimes a subscript, such as x, is used\nto represent which variable the population mean refers to, e.g. µx. Often times it is too expensive\nto measure the population mean precisely, so we often estimate µ using the sample mean, ¯x.\n",
+          "needsReview": false
+        },
+        {
+          "number": 6,
+          "originalPage": 49,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n49\nEXAMPLE 2.6 START\nExample problem: The average interest rate across all loans in the population can be estimated\nusing the sample data. Based on the sample of 50 loans, what would be a reasonable estimate of\nµx, the mean interest rate for all loans in the full data set?\nSolution to the example: The sample mean, 11.57%, provides a rough estimate of µx. While it’s not\nperfect, this is our single best guess of the average interest rate of all the loans in the population\nunder study.\nIn Chapter 5 and beyond, we will develop tools to characterize the accuracy of point estimates like\nthe sample mean. As you might have guessed, point estimates based on larger samples tend to be\nmore accurate than those based on smaller samples.\nEXAMPLE 2.6 HAS ENDED.\nEXAMPLE 2.7 START\nExample problem: The mean is useful because it allows us to rescale or standardize a metric into\nsomething more easily interpretable and comparable. Provide 2 examples where the mean is useful\nfor making comparisons.\nSolution to the example:\n1. We would like to understand if a new drug is more eﬀective at treating asthma attacks than the\nstandard drug. A trial of 1500 adults is set up, where 500 receive the new drug, and 1000 receive a\nstandard drug in the control group:\nNew drug\nStandard drug\nNumber of patients\n500\n1000\nTotal asthma attacks\n200\n300\nComparing the raw counts of 200 to 300 asthma attacks would make it appear that the new drug is\nbetter, but this is an artifact of the imbalanced group sizes. Instead, we should look at the average\nnumber of asthma attacks per patient in each group:\nNew drug: 200/500 = 0.4\nStandard drug: 300/1000 = 0.3\nThe standard drug has a lower average number of asthma attacks per patient than the average in\nthe treatment group.\n2. Emilio opened a food truck last year where he sells burritos, and his business has stabilized\nover the last 3 months. Over that 3 month period, he has made $11,000 while working 625 hours.\nEmilio’s average hourly earnings provides a useful statistic for evaluating whether his venture is,\nat least from a ﬁnancial perspective, worth it:\n$11000\n625 hours = $17.60 per hour\nBy knowing his average hourly wage, Emilio now has put his earnings into a standard unit that is\neasier to compare with many other jobs that he might consider.\nEXAMPLE 2.7 HAS ENDED.\n",
+          "needsReview": false
+        },
+        {
+          "number": 7,
+          "originalPage": 50,
+          "kind": "content",
+          "text": "50\nCHAPTER 2. SUMMARIZING DATA\nEXAMPLE 2.8 START\nExample problem: Suppose we want to compute the average income per person in the US. To do\nso, we might ﬁrst think to take the mean of the per capita incomes across the 3,142 counties in the\ncounty data set. What would be a better approach?\nSolution to the example: The county data set is special in that each county actually represents many\nindividual people. If we were to simply average across the income variable, we would be treating\ncounties with 5,000 and 5,000,000 residents equally in the calculations. Instead, we should compute\nthe total income for each county, add up all the counties’ totals, and then divide by the number of\npeople in all the counties. If we completed these steps with the county data, we would ﬁnd that the\nper capita income for the US is $30,861. Had we computed the simple mean of per capita income\nacross counties, the result would have been just $26,093!\nThis example used what is called a weighted mean. For more information on this topic, check out\nthe following online supplement regarding weighted means openintro.org/d?ﬁle=stat wtd mean.\nEXAMPLE 2.8 HAS ENDED.\n2.1.3\nHistograms and shape\nDot plots show the exact value for each observation. This is useful for small data sets, but they\ncan become hard to read with larger samples. Rather than showing the value of each observation, we\nprefer to think of the value as belonging to a bin. For example, in the loan50 data set, we created a\ntable of counts for the number of loans with interest rates between 5.0% and 7.5%, then the number\nof loans with rates between 7.5% and 10.0%, and so on. Observations that fall on the boundary of\na bin (e.g. 10.00%) are allocated to the lower bin. This tabulation is shown in Figure 2.5. These\nbinned counts are plotted as bars in Figure 2.6 into what is called a histogram, which resembles a\nmore heavily binned version of the stacked dot plot shown in Figure 2.4.\nInterest Rate\n5.0% - 7.5%\n7.5% - 10.0%\n10.0% - 12.5%\n12.5% - 15.0%\n· · ·\n25.0% - 27.5%\nCount\n11\n15\n8\n4\n· · ·\n1\nFigure 2.5: Counts for the binned interest rate data.\nInterest Rate\nFrequency\n0\n5\n10\n15\n5%\n10%\n15%\n20%\n25%\nFigure 2.6: A histogram of interest rate. This distribution is strongly skewed\nto the right.\nHistograms provide a view of the data density. Higher bars represent where the data are\nrelatively more common. For instance, there are many more loans with rates between 5% and 10%\nthan loans with rates between 20% and 25% in the data set. The bars make it easy to see how the\ndensity of the data changes relative to the interest rate.\nHistograms are especially convenient for understanding the shape of the data distribution.\nFigure 2.6 suggests that most loans have rates under 15%, while only a handful of loans have rates\n",
+          "needsReview": false
+        },
+        {
+          "number": 8,
+          "originalPage": 51,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n51\nabove 20%. When data trail oﬀto the right in this way and has a longer right tail, the shape is said\nto be right skewed.5\nData sets with the reverse characteristic – a long, thinner tail to the left – are said to be left\nskewed. We also say that such a distribution has a long left tail. Data sets that show roughly equal\ntrailing oﬀin both directions are called symmetric.\nLONG TAILS TO IDENTIFY SKEW\nWhen data trail oﬀin one direction, the distribution has a long tail. If a distribution has a\nlong left tail, it is left skewed. If a distribution has a long right tail, it is right skewed.\n5Other ways to describe data that are right skewed: skewed to the right, skewed to the high end, or skewed\nto the positive end.\n",
+          "needsReview": false
+        },
+        {
+          "number": 9,
+          "originalPage": 52,
+          "kind": "content",
+          "text": "52\nCHAPTER 2. SUMMARIZING DATA\nGUIDED PRACTICE 2.9 START\nTake a look at the dot plots in Figures 2.3 and 2.4. Can you see the skew in the data? Is it easier to\nsee the skew in this histogram or the dot plots?6\nGo to the preceding footnote link for the Guided\nPractice solution.\nGUIDED PRACTICE 2.9 HAS ENDED.\nGUIDED PRACTICE 2.10 START\nBesides the mean (since it was labeled), what can you see in the dot plots that you cannot see in\nthe histogram?7\nGo to the preceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.10 HAS ENDED.\nIn addition to looking at whether a distribution is skewed or symmetric, histograms can be\nused to identify modes. A mode is represented by a prominent peak in the distribution. There is\nonly one prominent peak in the histogram of loan amount.\nA deﬁnition of mode sometimes taught in math classes is the value with the most occurrences\nin the data set. However, for many real-world data sets, it is common to have no observations with\nthe same value in a data set, making this deﬁnition impractical in data analysis.\nFigure 2.7 shows histograms that have one, two, or three prominent peaks. Such distributions\nare called unimodal, bimodal, and multimodal, respectively. Any distribution with more than\n2 prominent peaks is called multimodal. Notice that there was one prominent peak in the unimodal\ndistribution with a second less prominent peak that was not counted since it only diﬀers from its\nneighboring bins by a few observations.\n0\n5\n10\n15\n0\n5\n10\n15\n20\n0\n5\n10\n15\n20\n0\n5\n10\n15\n20\n0\n5\n10\n15\n20\n0\n5\n10\n15\n20\nFigure 2.7: Counting only prominent peaks, the distributions are (left to right)\nunimodal, bimodal, and multimodal. Note that we’ve said the left plot is unimodal\nintentionally. This is because we are counting prominent peaks, not just any peak.\nEXAMPLE 2.11 START\nExample problem: Figure 2.6 reveals only one prominent mode in the interest rate. Is the distribution\nunimodal, bimodal, or multimodal?\nSolution to the example: Unimodal. Remember that uni stands for 1 (think unicycles). Similarly, bi\nstands for 2 (think bicycles). We’re hoping a multicycle will be invented to complete this analogy.\nEXAMPLE 2.11 HAS ENDED.\nGUIDED PRACTICE 2.12 START\nHeight measurements of young students and adult teachers at a K-3 elementary school were taken.\nHow many modes would you expect in this height data set?8\nGo to the preceding footnote link for\nthe Guided Practice solution.\nGUIDED PRACTICE 2.12 HAS ENDED.\n6The skew is visible in all three plots, though the ﬂat dot plot is the least useful.\nThe stacked dot plot and\nhistogram are helpful visualizations for identifying skew.\n7The interest rates for individual loans.\n",
+          "needsReview": false
+        },
+        {
+          "number": 10,
+          "originalPage": 53,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n53\nLooking for modes isn’t about ﬁnding a clear and correct answer about the number of modes in\na distribution, which is why prominent is not rigorously deﬁned in this book. The most important\npart of this examination is to better understand your data.\n8There might be two height groups visible in the data set: one of the students and one of the adults. That is, the\ndata are probably bimodal.\n",
+          "needsReview": false
+        },
+        {
+          "number": 11,
+          "originalPage": 54,
+          "kind": "content",
+          "text": "54\nCHAPTER 2. SUMMARIZING DATA\n2.1.4\nVariance and standard deviation\nThe mean was introduced as a method to describe the center of a data set, and variability in\nthe data is also important. Here, we introduce two measures of variability: the variance and the\nstandard deviation. Both of these are very useful in data analysis, even though their formulas are\na bit tedious to calculate by hand. The standard deviation is the easier of the two to comprehend,\nand it roughly describes how far away the typical observation is from the mean.\nWe call the distance of an observation from its mean its deviation. Below are the deviations\nfor the 1st, 2nd, 3rd, and 50th observations in the interest rate variable:\nx1 −¯x = 10.90 −11.57 = −0.67\nx2 −¯x = 9.92 −11.57 = −1.65\nx3 −¯x = 26.30 −11.57 = 14.73\n...\nx50 −¯x = 6.08 −11.57 = −5.49\nIf we square these deviations and then take an average, the result is equal to the sample variance,\ndenoted by s2:\ns2 = (−0.67)2 + (−1.65)2 + (14.73)2 + · · · + (−5.49)2\n50 −1\n= 0.45 + 2.72 + 216.97 + · · · + 30.14\n49\n= 25.52\nWe divide by n −1, rather than dividing by n, when computing a sample’s variance; there’s some\nmathematical nuance here, but the end result is that doing this makes this statistic slightly more\nreliable and useful.\nNotice that squaring the deviations does two things. First, it makes large values relatively\nmuch larger, seen by comparing (−0.67)2, (−1.65)2, (14.73)2, and (−5.49)2. Second, it gets rid of\nany negative signs.\nThe standard deviation is deﬁned as the square root of the variance:\ns =\n√\n25.52 = 5.05\nWhile often omitted, a subscript of x may be added to the variance and standard deviation, i.e.\ns2\nx and sx, if it is useful as a reminder that these are the variance and standard deviation of the\nobservations represented by x1, x2, ..., xn.\nVARIANCE AND STANDARD DEVIATION\nThe variance is the average squared distance from the mean. The standard deviation is the\nsquare root of the variance. The standard deviation is useful when considering how far the data\nare distributed from the mean.\nThe standard deviation represents the typical deviation of observations from the mean. Usually\nabout 70% of the data will be within one standard deviation of the mean and about 95% will\nbe within two standard deviations. However, as seen in Figures 2.8 and 2.9, these percentages\nare not strict rules.\nLike the mean, the population values for variance and standard deviation have special symbols:\nσ2 for the variance and σ for the standard deviation. The symbol σ is the Greek letter sigma.\n",
+          "needsReview": false
+        },
+        {
+          "number": 12,
+          "originalPage": 55,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n55\nInterest Rate, x = 11.57%, sx = 5.05%\n6.5%\n11.6%\n16.7%\n21.8%\n26.9%\nFigure 2.8: For the interest rate variable, 34 of the 50 loans (68%) had interest\nrates within 1 standard deviation of the mean, and 48 of the 50 loans (96%) had\nrates within 2 standard deviations.\nUsually about 70% of the data are within\n1 standard deviation of the mean and 95% within 2 standard deviations, though\nthis is far from a hard rule.\n−3\n−2\n−1\n0\n1\n2\n3\n−3\n−2\n−1\n0\n1\n2\n3\n−3\n−2\n−1\n0\n1\n2\n3\nFigure 2.9: Three very diﬀerent population distributions with the same mean µ = 0\nand standard deviation σ = 1.\nGUIDED PRACTICE 2.13 START\nOn page 50, the concept of shape of a distribution was introduced. A good description of the shape\nof a distribution should include modality and whether the distribution is symmetric or skewed to\none side. Using Figure 2.9 as an example, explain why such a description is important.9\nGo to the\npreceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.13 HAS ENDED.\nEXAMPLE 2.14 START\nExample problem: Describe the distribution of the interest rate variable using the histogram in\nFigure 2.6. The description should incorporate the center, variability, and shape of the distribution,\nand it should also be placed in context. Also note any especially unusual cases.\nSolution to the example: The distribution of interest rates is unimodal and skewed to the high end.\nMany of the rates fall near the mean at 11.57%, and most fall within one standard deviation (5.05%)\nof the mean. There are a few exceptionally large interest rates in the sample that are above 20%.\nEXAMPLE 2.14 HAS ENDED.\nIn practice, the variance and standard deviation are sometimes used as a means to an end, where\n9Figure 2.9 shows three distributions that look quite diﬀerent, but all have the same mean, variance, and standard\ndeviation. Using modality, we can distinguish between the ﬁrst plot (bimodal) and the last two (unimodal). Using\nskewness, we can distinguish between the last plot (right skewed) and the ﬁrst two. While a picture, like a histogram,\ntells a more complete story, we can use modality and shape (symmetry/skew) to characterize basic information about\na distribution.\n",
+          "needsReview": false
+        },
+        {
+          "number": 13,
+          "originalPage": 56,
+          "kind": "content",
+          "text": "56\nCHAPTER 2. SUMMARIZING DATA\nthe “end” is being able to accurately estimate the uncertainty associated with a sample statistic.\nFor example, in Chapter 5 the standard deviation is used in calculations that help us understand\nhow much a sample mean varies from one sample to the next.\n",
+          "needsReview": false
+        },
+        {
+          "number": 14,
+          "originalPage": 57,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n57\n2.1.5\nBox plots, quartiles, and the median\nA box plot summarizes a data set using ﬁve statistics while also plotting unusual observations.\nFigure 2.10 provides a vertical dot plot alongside a box plot of the interest rate variable from the\nloan50 data set.\nInterest Rate\n5%\n10%\n15%\n20%\n25%\nlower whisker\nQ1  (first quartile)\nmedian\nQ3  (third quartile)\nupper whisker\nmax whisker reach\nsuspected outliers\nFigure 2.10: A vertical dot plot, where points have been horizontally stacked, next\nto a labeled box plot for the interest rates of the 50 loans.\nThe ﬁrst step in building a box plot is drawing a dark line denoting the median, which splits the\ndata in half. Figure 2.10 shows 50% of the data falling below the median and other 50% falling above\nthe median. There are 50 loans in the data set (an even number) so the data are perfectly split into\ntwo groups of 25. We take the median in this case to be the average of the two observations closest to\nthe 50th percentile, which happen to be the same value in this data set: (9.93%+9.93%)/2 = 9.93%.\nWhen there are an odd number of observations, there will be exactly one observation that splits the\ndata into two halves, and in such a case that observation is the median (no average needed).\nMEDIAN: THE NUMBER IN THE MIDDLE\nIf the data are ordered from smallest to largest, the median is the observation right in the\nmiddle. If there are an even number of observations, there will be two values in the middle, and\nthe median is taken as their average.\nThe second step in building a box plot is drawing a rectangle to represent the middle 50% of\nthe data. The total length of the box, shown vertically in Figure 2.10, is called the interquartile\nrange (IQR, for short). It, like the standard deviation, is a measure of variability in data. The more\nvariable the data, the larger the standard deviation and IQR tend to be. The two boundaries of the\nbox are called the ﬁrst quartile (the 25th percentile, i.e. 25% of the data fall below this value) and\nthe third quartile (the 75th percentile), and these are often labeled Q1 and Q3, respectively.\n",
+          "needsReview": false
+        },
+        {
+          "number": 15,
+          "originalPage": 58,
+          "kind": "content",
+          "text": "58\nCHAPTER 2. SUMMARIZING DATA\nINTERQUARTILE RANGE (IQR)\nThe IQR is the length of the box in a box plot. It is computed as\nIQR = Q3 −Q1\nwhere Q1 and Q3 are the 25th and 75th percentiles.\nGUIDED PRACTICE 2.15 START\nWhat percent of the data fall between Q1 and the median? What percent is between the median\nand Q3?10\nGo to the preceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.15 HAS ENDED.\nExtending out from the box, the whiskers attempt to capture the data outside of the box.\nHowever, their reach is never allowed to be more than 1.5 × IQR. They capture everything within\nthis reach. In Figure 2.10, the upper whisker does not extend to the last two points, which is beyond\nQ3 + 1.5 × IQR, and so it extends only to the last point below this limit. The lower whisker stops\nat the lowest value, 5.31%, since there is no additional data to reach; the lower whisker’s limit is not\nshown in the ﬁgure because the plot does not extend down to Q1 −1.5×IQR. In a sense, the box is\nlike the body of the box plot and the whiskers are like its arms trying to reach the rest of the data.\nAny observation lying beyond the whiskers is labeled with a dot. The purpose of labeling these\npoints – instead of extending the whiskers to the minimum and maximum observed values – is to help\nidentify any observations that appear to be unusually distant from the rest of the data. Unusually\ndistant observations are called outliers. In this case, it would be reasonable to classify the interest\nrates of 24.85% and 26.30% as outliers since they are numerically distant from most of the data.\nOUTLIERS ARE EXTREME\nAn outlier is an observation that appears extreme relative to the rest of the data.\nExamining data for outliers serves many useful purposes, including\n1. Identifying strong skew in the distribution.\n2. Identifying possible data collection or data entry errors.\n3. Providing insight into interesting properties of the data.\nGUIDED PRACTICE 2.16 START\nUsing Figure 2.10, estimate the following values for interest rate in the loan50 data set:\n(a) Q1, (b) Q3, and (c) IQR.11 Go to the preceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.16 HAS ENDED.\n10Since Q1 and Q3 capture the middle 50% of the data and the median splits the data in the middle, 25% of the\ndata fall between Q1 and the median, and another 25% falls between the median and Q3.\n11These visual estimates will vary a little from one person to the next: Q1 = 8%, Q3 = 14%, IQR = Q3 −Q1 = 6%.\n(The true values: Q1 = 7.96%, Q3 = 13.72%, IQR = 5.76%.)\n",
+          "needsReview": false
+        },
+        {
+          "number": 16,
+          "originalPage": 59,
+          "kind": "content",
+          "text": "2.1. EXAMINING NUMERICAL DATA\n59\n2.1.6\nRobust statistics\nHow are the sample statistics of the interest rate data set aﬀected by the observation, 26.3%?\nWhat would have happened if this loan had instead been only 15%? What would happen to these\nsummary statistics if the observation at 26.3% had been even larger, say 35%? These scenarios are\nplotted alongside the original data in Figure 2.11, and sample statistics are computed under each\nscenario in Figure 2.12.\nInterest Rate\nG\n5%\n10%\n15%\n20%\n25%\n30%\n35%\nOriginal\nG\n26.3% to 15%\nG\n26.3% to 35%\nFigure 2.11: Dot plots of the original interest rate data and two modiﬁed data sets.\nrobust\nnot robust\nscenario\nmedian\nIQR\n¯x\ns\noriginal interest rate data\n9.93%\n5.76%\n11.57%\n5.05%\nmove 26.3% →15%\n9.93%\n5.76%\n11.34%\n4.61%\nmove 26.3% →35%\n9.93%\n5.76%\n11.74%\n5.68%\nFigure 2.12: A comparison of how the median, IQR, mean (¯x), and standard deviation\n(s) change had an extreme observations from the interest rate variable been diﬀerent.\nGUIDED PRACTICE 2.17 START\n(a) Which is more aﬀected by extreme observations, the mean or median?\nFigure 2.12 may be\nhelpful. (b) Is the standard deviation or IQR more aﬀected by extreme observations?12\nGo to the\npreceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.17 HAS ENDED.\nThe median and IQR are called robust statistics because extreme observations have little\neﬀect on their values: moving the most extreme value generally has little inﬂuence on these statistics.\nOn the other hand, the mean and standard deviation are more heavily inﬂuenced by changes in\nextreme observations, which can be important in some situations.\nEXAMPLE 2.18 START\nExample problem: The median and IQR did not change under the three scenarios in Figure 2.12.\nWhy might this be the case?\nSolution to the example: The median and IQR are only sensitive to numbers near Q1, the median,\nand Q3. Since values in these regions are stable in the three data sets, the median and IQR estimates\nare also stable.\nEXAMPLE 2.18 HAS ENDED.\n12(a) Mean is aﬀected more. (b) Standard deviation is aﬀected more. Complete explanations are provided in the\nmaterial following Guided Practice 2.17.\n",
+          "needsReview": false
+        },
+        {
+          "number": 17,
+          "originalPage": 60,
+          "kind": "content",
+          "text": "60\nCHAPTER 2. SUMMARIZING DATA\nGUIDED PRACTICE 2.19 START\nThe distribution of loan amounts in the loan50 data set is right skewed, with a few large loans\nlingering out into the right tail. If you were wanting to understand the typical loan size, should\nyou be more interested in the mean or median?13 Go to the preceding footnote link for the Guided\nPractice solution.\nGUIDED PRACTICE 2.19 HAS ENDED.\n13Answers will vary! If we’re looking to simply understand what a typical individual loan looks like, the median is\nprobably more useful. However, if the goal is to understand something that scales well, such as the total amount of\nmoney we might need to have on hand if we were to oﬀer 1,000 loans, then the mean would be more useful.\n",
+          "needsReview": false
+        },
+        {
+          "number": 18,
+          "originalPage": 70,
+          "kind": "content",
+          "text": "70\nCHAPTER 2. SUMMARIZING DATA\n2.2\nConsidering categorical data\nIn this section, we will introduce tables and other basic tools for categorical data that are\nused throughout this book. The loan50 data set represents a sample from a larger loan data set\ncalled loans. This larger data set contains information on 10,000 loans made through Lending Club.\nWe will examine the relationship between homeownership, which for the loans data can take a value\nof rent, mortgage (owns but has a mortgage), or own, and app type, which indicates whether the\nloan application was made with a partner or whether it was an individual application.\n2.2.1\nContingency tables and bar plots\nFigure 2.17 summarizes two variables: app type and homeownership. A table that summarizes\ndata for two categorical variables in this way is called a contingency table. Each value in the table\nrepresents the number of times a particular combination of variable outcomes occurred. For example,\nthe value 3496 corresponds to the number of loans in the data set where the borrower rents their\nhome and the application type was by an individual. Row and column totals are also included. The\nrow totals provide the total counts across each row (e.g. 3496 + 3839 + 1170 = 8505), and column\ntotals are total counts down each column. We can also create a table that shows only the overall\npercentages or proportions for each combination of categories, or we can create a table for a single\nvariable, such as the one shown in Figure 2.18 for the homeownership variable.\nhomeownership\nrent\nmortgage\nown\nTotal\nindividual\n3496\n3839\n1170\n8505\napp type\njoint\n362\n950\n183\n1495\nTotal\n3858\n4789\n1353\n10000\nFigure 2.17: A contingency table for app type and homeownership.\nhomeownership\nCount\nrent\n3858\nmortgage\n4789\nown\n1353\nTotal\n10000\nFigure 2.18:\nA table summarizing the frequencies of each value for the\nhomeownership variable.\nA bar plot is a common way to display a single categorical variable. The left panel of Figure 2.19\nshows a bar plot for the homeownership variable. In the right panel, the counts are converted into\nproportions, showing the proportion of observations that are in each level (e.g. 3858/10000 = 0.3858\nfor rent).\n",
+          "needsReview": false
+        },
+        {
+          "number": 19,
+          "originalPage": 71,
+          "kind": "content",
+          "text": "2.2. CONSIDERING CATEGORICAL DATA\n71\nrent\nmortgage\nown\nFrequency\n0\n1000\n2000\n3000\n4000\nHomeownership\nrent\nmortgage\nown\n0.0\n0.1\n0.2\n0.3\n0.4\nProportion\nHomeownership\nFigure 2.19: Two bar plots of number. The left panel shows the counts, and the\nright panel shows the proportions in each group.\n2.2.2\nRow and column proportions\nSometimes it is useful to understand the fractional breakdown of one variable in another, and we\ncan modify our contingency table to provide such a view. Figure 2.20 shows the row proportions\nfor Figure 2.17, which are computed as the counts divided by their row totals. The value 3496 at\nthe intersection of individual and rent is replaced by 3496/8505 = 0.411, i.e. 3496 divided by\nits row total, 8505. So what does 0.411 represent? It corresponds to the proportion of individual\napplicants who rent.\nrent\nmortgage\nown\nTotal\nindividual\n0.411\n0.451\n0.138\n1.000\njoint\n0.242\n0.635\n0.122\n1.000\nTotal\n0.386\n0.479\n0.135\n1.000\nFigure 2.20: A contingency table with row proportions for the app type and\nhomeownership variables. The row total is oﬀby 0.001 for the joint row due\nto a rounding error.\nA contingency table of the column proportions is computed in a similar way, where each column\nproportion is computed as the count divided by the corresponding column total. Figure 2.21 shows\nsuch a table, and here the value 0.906 indicates that 90.6% of renters applied as individuals for the\nloan. This rate is higher compared to loans from people with mortgages (80.2%) or who own their\nhome (86.5%). Because these rates vary between the three levels of homeownership (rent, mortgage,\nown), this provides evidence that the app type and homeownership variables are associated.\nrent\nmortgage\nown\nTotal\nindividual\n0.906\n0.802\n0.865\n0.851\njoint\n0.094\n0.198\n0.135\n0.150\nTotal\n1.000\n1.000\n1.000\n1.000\nFigure 2.21: A contingency table with column proportions for the app type and\nhomeownership variables. The total for the last column is oﬀby 0.001 due to a\nrounding error.\nWe could also have checked for an association between app type and homeownership in Fig-\nure 2.20 using row proportions.\nWhen comparing these row proportions, we would look down\ncolumns to see if the fraction of loans where the borrower rents, has a mortgage, or owns varied\nacross the individual to joint application types.\n",
+          "needsReview": false
+        },
+        {
+          "number": 20,
+          "originalPage": 72,
+          "kind": "content",
+          "text": "72\nCHAPTER 2. SUMMARIZING DATA\nGUIDED PRACTICE 2.23 START\n(a) What does 0.451 represent in Figure 2.20?\n(b) What does 0.802 represent in Figure 2.21?18\nGo to the preceding footnote link for the Guided\nPractice solution.\nGUIDED PRACTICE 2.23 HAS ENDED.\nGUIDED PRACTICE 2.24 START\n(a) What does 0.122 at the intersection of joint and own represent in Figure 2.20?\n(b) What does 0.135 represent in the Figure 2.21?19\nGo to the preceding footnote link for the\nGuided Practice solution.\nGUIDED PRACTICE 2.24 HAS ENDED.\nEXAMPLE 2.25 START\nExample problem:\nData scientists use statistics to ﬁlter spam from incoming email messages.\nBy noting speciﬁc characteristics of an email, a data scientist may be able to classify some emails\nas spam or not spam with high accuracy. One such characteristic is whether the email contains no\nnumbers, small numbers, or big numbers. Another characteristic is the email format, which indicates\nwhether or not an email has any HTML content, such as bolded text. We’ll focus on email format\nand spam status using the email data set, and these variables are summarized in a contingency\ntable in Figure 2.22. Which would be more helpful to someone hoping to classify email as spam or\nregular email for this table: row or column proportions?\nSolution to the example: A data scientist would be interested in how the proportion of spam changes\nwithin each email format. This corresponds to column proportions: the proportion of spam in plain\ntext emails and the proportion of spam in HTML emails.\nIf we generate the column proportions, we can see that a higher fraction of plain text emails are spam\n(209/1195 = 17.5%) than compared to HTML emails (158/2726 = 5.8%). This information on its\nown is insuﬃcient to classify an email as spam or not spam, as over 80% of plain text emails are not\nspam. Yet, when we carefully combine this information with many other characteristics, we stand a\nreasonable chance of being able to classify some emails as spam or not spam with conﬁdence.\nEXAMPLE 2.25 HAS ENDED.\ntext\nHTML\nTotal\nspam\n209\n158\n367\nnot spam\n986\n2568\n3554\nTotal\n1195\n2726\n3921\nFigure 2.22: A contingency table for spam and format.\nExample 2.25 points out that row and column proportions are not equivalent. Before settling\non one form for a table, it is important to consider each to ensure that the most useful table is\nconstructed. However, sometimes it simply isn’t clear which, if either, is more useful.\n18(a) 0.451 represents the proportion of individual applicants who have a mortgage.\n(b) 0.802 represents the\nfraction of applicants with mortgages who applied as individuals.\n19(a) 0.122 represents the fraction of joint borrowers who own their home. (b) 0.135 represents the home-owning\nborrowers who had a joint application for the loan.\n",
+          "needsReview": false
+        },
+        {
+          "number": 21,
+          "originalPage": 73,
+          "kind": "content",
+          "text": "2.2. CONSIDERING CATEGORICAL DATA\n73\nEXAMPLE 2.26 START\nExample problem: Look back to Tables 2.20 and 2.21. Are there any obvious scenarios where one\nmight be more useful than the other?\nSolution to the example: None that we thought were obvious! What is distinct about app type and\nhomeownership vs the email example is that these two variables don’t have a clear explanatory-\nresponse variable relationship that we might hypothesize (see Section 1.2.4 for these terms). Usually\nit is most useful to “condition” on the explanatory variable. For instance, in the email example,\nthe email format was seen as a possible explanatory variable of whether the message was spam, so\nwe would ﬁnd it more interesting to compute the relative frequencies (proportions) for each email\nformat.\nEXAMPLE 2.26 HAS ENDED.\n",
+          "needsReview": false
+        },
+        {
+          "number": 22,
+          "originalPage": 74,
+          "kind": "content",
+          "text": "74\nCHAPTER 2. SUMMARIZING DATA\n2.2.3\nUsing a bar plot with two variables\nContingency tables using row or column proportions are especially useful for examining how\ntwo categorical variables are related. Stacked bar plots provide a way to visualize the information\nin these tables.\nA stacked bar plot is a graphical display of contingency table information. For example,\na stacked bar plot representing Figure 2.21 is shown in Figure 2.23(a), where we have ﬁrst created a\nbar plot using the homeownership variable and then divided each group by the levels of app type.\nOne related visualization to the stacked bar plot is the side-by-side bar plot, where an\nexample is shown in Figure 2.23(b).\nFor the last type of bar plot we introduce, the column proportions for the app type and\nhomeownership contingency table have been translated into a standardized stacked bar plot in\nFigure 2.23(c).\nThis type of visualization is helpful in understanding the fraction of individual\nor joint loan applications for borrowers in each level of homeownership. Additionally, since the\nproportions of joint and individual vary across the groups, we can conclude that the two variables\nare associated.\nrent\nmortgage\nown\n0\n1000\n2000\n3000\n4000\njoint\nindividual\nFrequency\n(a)\nrent\nmortgage\nown\n0\n1000\n2000\n3000\n4000\njoint\nindividual\nFrequency\n(b)\nrent\nmortgage\nown\n0.0\n0.2\n0.4\n0.6\n0.8\n1.0\njoint\nindividual\nProportion\n(c)\nFigure 2.23: (a) Stacked bar plot for homeownership, where the counts have been\nfurther broken down by app type. (b) Side-by-side bar plot for homeownership\nand app type. (c) Standardized version of the stacked bar plot.\n",
+          "needsReview": false
+        },
+        {
+          "number": 23,
+          "originalPage": 75,
+          "kind": "content",
+          "text": "2.2. CONSIDERING CATEGORICAL DATA\n75\nEXAMPLE 2.27 START\nExample problem: Examine the three bar plots in Figure 2.23. When is the stacked, side-by-side,\nor standardized stacked bar plot the most useful?\nSolution to the example: The stacked bar plot is most useful when it’s reasonable to assign one\nvariable as the explanatory variable and the other variable as the response, since we are eﬀectively\ngrouping by one variable ﬁrst and then breaking it down by the others.\nSide-by-side bar plots are more agnostic in their display about which variable, if any, represents the\nexplanatory and which the response variable. It is also easy to discern the number of cases in the\nsix diﬀerent group combinations. However, one downside is that it tends to require more horizontal\nspace; the narrowness of Figure 2.23(b) makes the plot feel a bit cramped. Additionally, when two\ngroups are of very diﬀerent sizes, as we see in the own group relative to either of the other two\ngroups, it is diﬃcult to discern if there is an association between the variables.\nThe standardized stacked bar plot is helpful if the primary variable in the stacked bar plot is relatively\nimbalanced, e.g. the own category has only a third of the observations in the mortgage category,\nmaking the simple stacked bar plot less useful for checking for an association. The major downside\nof the standardized version is that we lose all sense of how many cases each of the bars represents.\nEXAMPLE 2.27 HAS ENDED.\n2.2.4\nMosaic plots\nA mosaic plot is a visualization technique suitable for contingency tables that resembles a\nstandardized stacked bar plot with the beneﬁt that we still see the relative group sizes of the primary\nvariable as well.\nTo get started in creating our ﬁrst mosaic plot, we’ll break a square into columns for each\ncategory of the homeownership variable, with the result shown in Figure 2.24(a). Each column\nrepresents a level of homeownership, and the column widths correspond to the proportion of loans\nin each of those categories. For instance, there are fewer loans where the borrower is an owner than\nwhere the borrower has a mortgage. In general, mosaic plots use box areas to represent the number\nof cases in each category.\nrent\nmortgage\nown\n(a)\nrent\nmortgage\nown\njoint\nindiv.\n(b)\nFigure 2.24: (a) The one-variable mosaic plot for homeownership. (b) Two-variable\nmosaic plot for both homeownership and app type.\nTo create a completed mosaic plot, the single-variable mosaic plot is further divided into pieces\nin Figure 2.24(b) using the app type variable. Each column is split proportional to the number\nof loans from individual and joint borrowers.\nFor example, the second column represents loans\nwhere the borrower has a mortgage, and it was divided into individual loans (upper) and joint loans\n(lower). As another example, the bottom segment of the third column represents loans where the\nborrower owns their home and applied jointly, while the upper segment of this column represents\nborrowers who are homeowners and ﬁled individually. We can again use this plot to see that the\n",
+          "needsReview": false
+        },
+        {
+          "number": 24,
+          "originalPage": 76,
+          "kind": "content",
+          "text": "76\nCHAPTER 2. SUMMARIZING DATA\nhomeownership and app type variables are associated, since some columns are divided in diﬀerent\nvertical locations than others, which was the same technique used for checking an association in the\nstandardized stacked bar plot.\nIn Figure 2.24, we chose to ﬁrst split by the homeowner status of the borrower. However, we\ncould have instead ﬁrst split by the application type, as in Figure 2.25. Like with the bar plots, it’s\ncommon to use the explanatory variable to represent the ﬁrst split in a mosaic plot, and then for the\nresponse to break up each level of the explanatory variable, if these labels are reasonable to attach\nto the variables under consideration.\nindiv.\njoint\nrent\nmortgage\nown\nFigure 2.25: Mosaic plot where loans are grouped by the homeownership variable\nafter they’ve been divided into the individual and joint application types.\n2.2.5\nThe only pie chart you will see in this book\nA pie chart is shown in Figure 2.26 alongside a bar plot representing the same information.\nPie charts can be useful for giving a high-level overview to show how a set of cases break down.\nHowever, it is also diﬃcult to decipher details in a pie chart. For example, it takes a couple seconds\nlonger to recognize that there are more loans where the borrower has a mortgage than rent when\nlooking at the pie chart, while this detail is very obvious in the bar plot. While pie charts can be\nuseful, we prefer bar plots for their ease in comparing groups.\nrent\nmortgage\nown\nrent\nmortgage\nown\nHomeownership\n0\n1000\n2000\n3000\n4000\nFrequency\nFigure 2.26: A pie chart and bar plot of homeownership.\n",
+          "needsReview": false
+        },
+        {
+          "number": 25,
+          "originalPage": 77,
+          "kind": "content",
+          "text": "2.2. CONSIDERING CATEGORICAL DATA\n77\n2.2.6\nComparing numerical data across groups\nSome of the more interesting investigations can be considered by examining numerical data\nacross groups. The methods required here aren’t really new: all that’s required is to make a numerical\nplot for each group in the same graph. Here two convenient methods are introduced: side-by-side\nbox plots and hollow histograms.\nWe will take a look again at the county data set and compare the median household income\nfor counties that gained population from 2010 to 2017 versus counties that had no gain. While we\nmight like to make a causal connection here, remember that these are observational data and so\nsuch an interpretation would be, at best, half-baked.\nThere were 1,454 counties where the population increased from 2010 to 2017, and there were\n1,672 counties with no gain (all but one were a loss). A random sample of 100 counties from the\nﬁrst group and 50 from the second group are shown in Figure 2.27 to give a better sense of some of\nthe raw median income data.\nMedian Income for 150 Counties, in $1000s\nPopulation Gain\nNo Population Gain\n38.2\n43.6\n42.2\n61.5\n51.1\n45.7\n48.3\n60.3\n50.7\n44.6\n51.8\n40.7\n48.1\n56.4\n41.9\n39.3\n40.4\n40.3\n40.6\n63.3\n52.1\n60.3\n49.8\n51.7\n57\n47.2\n45.9\n51.1\n34.1\n45.5\n52.8\n49.1\n51\n42.3\n41.5\n46.1\n80.8\n46.3\n82.2\n43.6\n39.7\n49.4\n44.9\n51.7\n46.4\n75.2\n40.6\n46.3\n62.4\n44.1\n51.3\n29.1\n51.8\n50.5\n51.9\n34.7\n54\n42.9\n52.2\n45.1\n27\n30.9\n34.9\n61\n51.4\n56.5\n62\n46\n46.4\n40.7\n51.8\n61.1\n53.8\n57.6\n69.2\n48.4\n40.5\n48.6\n43.4\n34.7\n45.7\n53.1\n54.6\n55\n46.4\n39.9\n56.7\n33.1\n21\n37\n63\n49.1\n57.2\n44.1\n50\n38.9\n52\n31.9\n45.7\n46.6\n46.5\n38.9\n50.9\n56\n34.6\n56.3\n38.7\n45.7\n74.2\n63\n49.6\n53.7\n77.5\n60\n56.2\n43\n21.7\n63.2\n47.6\n55.9\n39.1\n57.8\n42.6\n44.5\n34.5\n48.9\n50.4\n49\n45.6\n39\n38.8\n37.1\n50.9\n42.1\n43.2\n57.2\n44.7\n71.7\n35.3\n100.2\n35.4\n41.3\n33.6\n42.6\n55.5\n38.6\n52.7\n63\n43.4\n56.5\nFigure 2.27: In this table, median household income (in $1000s) from a random\nsample of 100 counties that had population gains are shown on the left. Median\nincomes from a random sample of 50 counties that had no population gain are\nshown on the right.\n",
+          "needsReview": false
+        },
+        {
+          "number": 26,
+          "originalPage": 78,
+          "kind": "content",
+          "text": "78\nCHAPTER 2. SUMMARIZING DATA\nChange in Population\nGain\nNo Gain\n$20k\n$40k\n$60k\n$80k\n$100k\n$120k\nMedian Household Income\nMedian Household Income\n$20k\n$40k\n$60k\n$80k\n$100k\nGain\nNo Gain\nFigure 2.28: Side-by-side box plot (left panel) and hollow histograms (right panel)\nfor med hh income, where the counties are split by whether there was a population\ngain or loss.\nThe side-by-side box plot is a traditional tool for comparing across groups. An example is\nshown in the left panel of Figure 2.28, where there are two box plots, one for each group, placed\ninto one plotting window and drawn on the same scale.\nAnother useful plotting method uses hollow histograms to compare numerical data across\ngroups. These are just the outlines of histograms of each group put on the same plot, as shown in\nthe right panel of Figure 2.28.\nGUIDED PRACTICE 2.28 START\nUse the plots in Figure 2.28 to compare the incomes for counties across the two groups. What do\nyou notice about the approximate center of each group? What do you notice about the variability\nbetween groups? Is the shape relatively consistent between groups? How many prominent modes\nare there for each group?20\nGo to the preceding footnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.28 HAS ENDED.\nGUIDED PRACTICE 2.29 START\nWhat components of each plot in Figure 2.28 do you ﬁnd most useful?21\nGo to the preceding\nfootnote link for the Guided Practice solution.\nGUIDED PRACTICE 2.29 HAS ENDED.\n20Answers may vary a little. The counties with population gains tend to have higher income (median of about\n$45,000) versus counties without a gain (median of about $40,000).\nThe variability is also slightly larger for the\npopulation gain group. This is evident in the IQR, which is about 50% bigger in the gain group. Both distributions\nshow slight to moderate right skew and are unimodal. The box plots indicate there are many observations far above\nthe median in each group, though we should anticipate that many observations will fall beyond the whiskers when\nexamining any data set that contain more than a couple hundred data points.\n21Answers will vary. The side-by-side box plots are especially useful for comparing centers and spreads, while the\nhollow histograms are more useful for seeing distribution shape, skew, and potential anomalies.\n",
+          "needsReview": false
+        }
+      ]
+    },
+    {
+      "id": "numerical",
+      "title": "2.1 - Examining Numerical Data",
+      "file": "02-numerical-data.pdf",
+      "sha256": "cdeccb54efc3f274c9a12fa4b34fba954c5e4122d4c2f4423d23ca1443f11ec0",
+      "authors": [
+        "Mine Çetinkaya-Rundel"
+      ],
+      "contributors": [
+        "Curry Hilton (Google Slides conversion)"
+      ],
+      "url": "https://docs.google.com/presentation/d/1YpJsHUEHPiuHlH7n0RKNYU3sQ_XX6uX36P92R8-_9sg",
+      "license": "CC-BY-SA-3.0-US",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/us/",
+      "pages": [
+        {
+          "number": 1,
+          "originalPage": null,
+          "kind": "notice",
+          "text": "PANGZHU NOTES  /  COURSE MATERIAL SAMPLE\nNumerical Data\nSelected lecture slides\nSOURCE\n2.1 - Examining Numerical Data\nMine Çetinkaya-Rundel\nCurry Hilton (Google Slides conversion)\nhttps://docs.google.com/presentation/d/1YpJsHUEHPiuHlH7n0RKNYU3sQ_XX6uX36P92R8-_9sg\nSelected original PDF pages: 6-14, 16, 25, 28, 33, 35, 38-42, 45, 47, 52-53, 55.\nAdded this source notice; retained complete teaching pages. Removed staged animation duplicates, external\ncartoon/video illustrations, advanced topics and resource advertisements. Source page 1 identifies the creators\nand links to the license below.\nCC-BY-SA-3.0-US\nhttps://creativecommons.org/licenses/by-sa/3.0/us/\nPrepared 2026-10-17. This selection is not an official OpenIntro product.\nOriginal authors retain credit. Page mapping is included in manifest.json.\n",
+          "needsReview": false
+        },
+        {
+          "number": 2,
+          "originalPage": 6,
+          "kind": "content",
+          "text": "Useful for visualizing one numerical variable. Darker colors \nrepresent areas where there are more observations.\nHow would you describe the distribution of GPAs in this data \nset? Make sure to say something about the center, shape, and \nspread of the distribution.\nDot Plots\n",
+          "needsReview": false
+        },
+        {
+          "number": 3,
+          "originalPage": 7,
+          "kind": "content",
+          "text": "Dot Plots & Mean\nThe mean, also called the average (marked with a triangle in the \nabove plot), is one way to measure the center of a distribution of \ndata.\nThe mean GPA is 3.59.\n",
+          "needsReview": false
+        },
+        {
+          "number": 4,
+          "originalPage": 8,
+          "kind": "content",
+          "text": "Mean\nThe sample mean, denoted as x̄ , can be calculated as\nwhere x1, x2, ..., xn represent the n observed values.\nThe population mean is also computed the same way but is denoted \nas µ. It is often not possible to calculate µ since population data are \nrarely available.\nThe sample mean is a sample statistic, and serves as a\npoint estimate of the population mean. This estimate may not be \nperfect, but if the sample is good (representative of the population),\nit is usually a pretty good estimate. \n",
+          "needsReview": true
+        },
+        {
+          "number": 5,
+          "originalPage": 9,
+          "kind": "content",
+          "text": "Stacked Dot Plot\nHigher bars represent areas where there are more observations, \nmakes it a little easier to judge the center and the shape of the \ndistribution.\n",
+          "needsReview": false
+        },
+        {
+          "number": 6,
+          "originalPage": 10,
+          "kind": "content",
+          "text": "Histograms - Extracurricular Hours\n●\nHistograms provide a view of the data density. Higher bars \nrepresent where the data are relatively more common.\n●\nHistograms are especially convenient for describing the shape of \nthe data distribution.\n●\nThe chosen bin width can alter the story the histogram is telling.\n",
+          "needsReview": false
+        },
+        {
+          "number": 7,
+          "originalPage": 11,
+          "kind": "content",
+          "text": "Bin Width\nWhich one(s) of these histograms are useful? Which reveal too much \nabout the data? Which hide too much?\n",
+          "needsReview": false
+        },
+        {
+          "number": 8,
+          "originalPage": 12,
+          "kind": "content",
+          "text": "Does the histogram have a single prominent peak (unimodal), several \nprominent peaks (bimodal/multimodal), or no apparent peaks (uniform)?\nNote: In order to determine modality, step back and imagine a smooth \ncurve over the histogram -- imagine that the bars are wooden blocks and \nyou drop a limp spaghetti over them, the shape the spaghetti would take \ncould be viewed as a smooth curve.\nShape of a Distribution: Modality\n",
+          "needsReview": false
+        },
+        {
+          "number": 9,
+          "originalPage": 13,
+          "kind": "content",
+          "text": "Is the histogram right skewed, left skewed, or symmetric?\nNote: Histograms are said to be skewed to the side of the long tail.\nShape of a Distribution: Skewness\n",
+          "needsReview": false
+        },
+        {
+          "number": 10,
+          "originalPage": 14,
+          "kind": "content",
+          "text": "Are there any unusual observations or potential outliers?\nShape of a Distribution:\nUnusual Observations\n",
+          "needsReview": false
+        },
+        {
+          "number": 11,
+          "originalPage": 16,
+          "kind": "content",
+          "text": "How would you describe the shape of the distribution of hours per week \nstudents spend on extracurricular activities?\nExtracurricular activities\nUnimodal and right skewed, with a potentially unusual observation at 60 \nhours/week.\n",
+          "needsReview": false
+        },
+        {
+          "number": 12,
+          "originalPage": 25,
+          "kind": "content",
+          "text": "Commonly observed shapes of \ndistributions\nModality\nSkewness\n",
+          "needsReview": false
+        },
+        {
+          "number": 13,
+          "originalPage": 28,
+          "kind": "content",
+          "text": "Sketch the expected distributions of the following variables:\n●\nnumber of piercings\n●\nscores on an exam\n●\nIQ scores\nCome up with a concise way (1-2 sentences) to teach someone \nhow to determine the expected distribution of any variable.\nApplication Activity:\nShapes of Distributions\n",
+          "needsReview": false
+        },
+        {
+          "number": 14,
+          "originalPage": 33,
+          "kind": "content",
+          "text": "Variance\nVariance is roughly the average squared deviation from the mean.\n●\nThe sample mean is\nand the sample size is n = 217.\n●\nThe variance of amount of sleep\nstudents get per night can be\ncalculated as:\n",
+          "needsReview": true
+        },
+        {
+          "number": 15,
+          "originalPage": 35,
+          "kind": "content",
+          "text": "Variance (cont.)\nWhy do we use the squared deviation in the calculation of \nvariance?\n●\nTo get rid of negatives so that observations equally distant from \nthe mean are weighed equally.\n●\nTo weigh larger deviations more heavily.\n",
+          "needsReview": false
+        },
+        {
+          "number": 16,
+          "originalPage": 38,
+          "kind": "content",
+          "text": "The standard deviation is the square root of the variance, and has the \nsame units as the data.\nStandard Deviation\n●\nWe can see that all of the data are within 3 standard deviations of the \nmean.\n●\nThe standard deviation of \namount of sleep students get \nper night can be calculated as:\n",
+          "needsReview": true
+        },
+        {
+          "number": 17,
+          "originalPage": 39,
+          "kind": "content",
+          "text": "The median is the value that splits the data in half when ordered in \nascending order.\nMedian\nIf there are an even number of observations, then the median is the \naverage of the two values in the middle.\nSince the median is the midpoint of the data, 50% of the values are below \nit. Hence, it is also the 50th percentile.\n",
+          "needsReview": false
+        },
+        {
+          "number": 18,
+          "originalPage": 40,
+          "kind": "content",
+          "text": "●\nThe 25th percentile is also called the first quartile, Q1.\n●\nThe 50th percentile is also called the median.\n●\nThe 75th percentile is also called the third quartile, Q3.\n●\nBetween Q1 and Q3 is the middle 50% of the data. The range \nthese data span is called the interquartile range, or the IQR.\n       IQR = Q3 - Q1\nQ1, Q3, and IQR\n",
+          "needsReview": false
+        },
+        {
+          "number": 19,
+          "originalPage": 41,
+          "kind": "content",
+          "text": "The box in a box plot represents the middle 50% of the data, and \nthe thick line in the box is the median.\nBox Plot\n",
+          "needsReview": false
+        },
+        {
+          "number": 20,
+          "originalPage": 42,
+          "kind": "content",
+          "text": "Anatomy of a Box Plot\n",
+          "needsReview": false
+        },
+        {
+          "number": 21,
+          "originalPage": 45,
+          "kind": "content",
+          "text": "IQR: 20 - 10 = 10\n                     max upper whisker reach = 20 + 1.5 x 10 = 35\n                     max lower whisker reach = 10 - 1.5 x 10 = -5\nWhiskers of a box plot can extend up to 1.5 x IQR away from the quartiles.\n                     max upper whisker reach = Q3 + 1.5 x IQR\n                     max lower whisker reach = Q1 - 1.5 x IQR\nWhiskers and Outliers\nA potential outlier is defined as an observation beyond the maximum reach \nof the whiskers. It is an observation that appears extreme relative to the \nrest of the data.\n",
+          "needsReview": false
+        },
+        {
+          "number": 22,
+          "originalPage": 47,
+          "kind": "content",
+          "text": "●\nIdentify extreme skew in the distribution.\n●\nIdentify data collection and entry errors.\n●\nProvide insight into interesting features of the data.\nWhy is it important to look for outliers?\nOutliers (cont.)\n",
+          "needsReview": false
+        },
+        {
+          "number": 23,
+          "originalPage": 52,
+          "kind": "content",
+          "text": "Median and IQR are more robust to skewness and outliers than \nmean and SD. Therefore,\n●\nfor skewed distributions it is often more helpful to use median \nand IQR to describe the center and spread\n●\nfor symmetric distributions it is often more helpful to use the \nmean and SD to describe the center and spread\nIf you would like to estimate the typical household income for a \nstudent, would you be more interested in the mean or median \nincome?\nMedian\nRobust Statistics\n",
+          "needsReview": false
+        },
+        {
+          "number": 24,
+          "originalPage": 53,
+          "kind": "content",
+          "text": "If the distribution is symmetric, center is often defined as the mean:\nmean ~ median\nIf the distribution is skewed or has extreme outliers, center is often defined \nas the median\n●\nRight-skewed: mean > median\n●\nLeft-skewed: mean < median\nMean vs. Median\n",
+          "needsReview": false
+        },
+        {
+          "number": 25,
+          "originalPage": 55,
+          "kind": "content",
+          "text": "Which is most likely true for the distribution of percentage of time actually \nspent taking notes in class versus on Facebook, Twitter, etc.?\nmedian: 80%\nmean: 76%\n(a) mean > median\n(b) mean ~ median\n(c) mean < median\n(d) impossible to tell\nPractice\n",
+          "needsReview": false
+        }
+      ]
+    },
+    {
+      "id": "categorical",
+      "title": "2.2 - Considering Categorical Data",
+      "file": "03-categorical-data.pdf",
+      "sha256": "25705d9c2a5446edf971ffce08fcb04423f6c0d0a795e0a5362af3223663b46e",
+      "authors": [
+        "Mine Çetinkaya-Rundel"
+      ],
+      "contributors": [
+        "Curry Hilton (Google Slides conversion)"
+      ],
+      "url": "https://docs.google.com/presentation/d/1D8PHarhuhj_FLDc2b7l7BoQ3euaHN0dv0V0T5-qttE4",
+      "license": "CC-BY-SA-3.0-US",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/us/",
+      "pages": [
+        {
+          "number": 1,
+          "originalPage": null,
+          "kind": "notice",
+          "text": "PANGZHU NOTES  /  COURSE MATERIAL SAMPLE\nCategorical Data\nSelected lecture slides\nSOURCE\n2.2 - Considering Categorical Data\nMine Çetinkaya-Rundel\nCurry Hilton (Google Slides conversion)\nhttps://docs.google.com/presentation/d/1D8PHarhuhj_FLDc2b7l7BoQ3euaHN0dv0V0T5-qttE4\nSelected original PDF pages: 3-5, 7, 11-14, 16.\nAdded this source notice; retained complete teaching pages. Removed staged animation duplicates, an\nexternally sourced pie-chart illustration and resource advertisements. Source page 1 identifies the creators and\nlinks to the license below.\nCC-BY-SA-3.0-US\nhttps://creativecommons.org/licenses/by-sa/3.0/us/\nPrepared 2026-10-17. This selection is not an official OpenIntro product.\nOriginal authors retain credit. Page mapping is included in manifest.json.\n",
+          "needsReview": false
+        },
+        {
+          "number": 2,
+          "originalPage": 3,
+          "kind": "content",
+          "text": "A table that summarizes data for two categorical variables is called a \ncontingency table.\nContingency Tables\n",
+          "needsReview": false
+        },
+        {
+          "number": 3,
+          "originalPage": 4,
+          "kind": "content",
+          "text": "A table that summarizes data for two categorical variables is called a \ncontingency table.\nContingency Tables\nThe contingency table below shows the distribution of students' genders \nand whether or not they are looking for a spouse while in college.\n",
+          "needsReview": false
+        },
+        {
+          "number": 4,
+          "originalPage": 5,
+          "kind": "content",
+          "text": "Bar Plots\nA bar plot is a common way to display a single categorical variable. A bar \nplot where proportions instead of frequencies are shown is called a relative \nfrequency bar plot.\n",
+          "needsReview": false
+        },
+        {
+          "number": 5,
+          "originalPage": 7,
+          "kind": "content",
+          "text": "How are bar plots different than histograms?\nBar plots are used for displaying distributions of categorical variables, while \nhistograms are used for numerical variables. The x-axis in a histogram is a \nnumber line,  hence the order of the bars cannot be changed, while in a bar plot \nthe categories can be listed in any order (though some orderings make more \nsense than others, especially for ordinal variables.)\nBar Plots\nA bar plot is a common way to display a single categorical variable. A bar \nplot where proportions instead of frequencies are shown is called a relative \nfrequency bar plot.\n",
+          "needsReview": false
+        },
+        {
+          "number": 6,
+          "originalPage": 11,
+          "kind": "content",
+          "text": "To answer this question we examine the row proportions: \n●\n% Females looking for a spouse: 51 / 137 ~ 0.37\n●\n% Males looking for a spouse: 18 / 70 ~ 0.26\nDoes there appear to be a relationship between gender and whether the \nstudent is looking for a spouse in college?\nChoosing the\nAppropriate Proportion\n",
+          "needsReview": false
+        },
+        {
+          "number": 7,
+          "originalPage": 12,
+          "kind": "content",
+          "text": "Bar plots with two variables\n●\nStacked bar plot: Graphical display of contingency table information, \nfor counts.\n●\nSide-by-side bar plot: Displays the same information by placing bars \nnext to, instead of on top of, each other.\n●\nStandardized stacked bar plot: Graphical display of contingency table \ninformation, for proportions.\n",
+          "needsReview": false
+        },
+        {
+          "number": 8,
+          "originalPage": 13,
+          "kind": "content",
+          "text": "Segmented Bar and Mosaic Plots\nWhat are the differences between the three visualizations\nshown below?\n",
+          "needsReview": false
+        },
+        {
+          "number": 9,
+          "originalPage": 14,
+          "kind": "content",
+          "text": "Mosaic plots\nWhat are the differences between the two visualizations\nshown below?\n",
+          "needsReview": false
+        },
+        {
+          "number": 10,
+          "originalPage": 16,
+          "kind": "content",
+          "text": "Comparing Numerical Data\nAcross Groups\nDoes there appear to be a relationship between class year and \nnumber of clubs students are in?\n",
+          "needsReview": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "name": "reading-tree",
+  "version": "0.1.14",
+  "private": true,
+  "author": {
+    "name": "Yankai-D",
+    "url": "https://github.com/Yankai-D/Candlelight_Notes"
+  },
+  "homepage": "https://github.com/Yankai-D/Candlelight_Notes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yankai-D/Candlelight_Notes.git"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.mjs --dev",
+    "dev:public": "node scripts/start-public.mjs",
+    "prepare:materials": "node scripts/prepare-public-materials.mjs",
+    "build": "tsc -b && vite build",
+    "brand:assets": "node scripts/generate-brand-assets.mjs",
+    "start": "node server/index.mjs",
+    "package:windows": "node scripts/package-windows.mjs",
+    "package:desktop": "node scripts/package-desktop.mjs",
+    "test": "node scripts/test.mjs",
+    "test:e2e": "node scripts/test-browser.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "check": "node scripts/check.mjs",
+    "demo:harness": "node scripts/demo-harness.mjs",
+    "eval:notes": "node scripts/evaluate-notes.mjs",
+    "eval:notes:pdf": "node scripts/export-note-review.mjs",
+    "eval:claims": "node scripts/evaluate-claims.mjs",
+    "eval:field": "node scripts/evaluate-field.mjs",
+    "eval:calibrate": "node scripts/calibrate-notes.mjs",
+    "demo:pdf": "node scripts/create-demo.mjs",
+    "review:style": "node scripts/render-editorial-reference.mjs",
+    "review:course": "node scripts/render-course-reference.mjs"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.32.0",
+    "@tiptap/extension-placeholder": "^3.32.0",
+    "@tiptap/react": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
+    "idb": "^8.0.3",
+    "jsdom": "^29.1.1",
+    "lucide-react": "^0.577.0",
+    "markdown-it": "^15.0.3",
+    "mathjax-full": "^3.2.2",
+    "pdfjs-dist": "^6.4.299",
+    "puppeteer-core": "^25.14.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "undici": "^7.30.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "electron": "44.9.0",
+    "electron-builder": "26.15.3",
+    "fake-indexeddb": "^6.2.5",
+    "pdf-lib": "^1.17.1",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4"
+  }
+}

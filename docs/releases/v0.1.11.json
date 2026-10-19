@@ -1,0 +1,92 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.11",
+  "status": "verified-local-candidate",
+  "reviewedDate": "2026-10-19",
+  "timezone": "Australia/Sydney",
+  "codeRevision": "ebbf7cbcfa96d817273fb21b644ebbbf40034141",
+  "sourceFingerprint": "79f8a6e7bb0206e678300e59da6aa7c38d63e72bfb17736d4fc99e5cef430690",
+  "lockSha256": "bc33fddf1ab810e82c15ba8f571af1b5243b52ada09123fc1c577dc7295021e0",
+  "changes": [
+    "Confirm and remember each successful import location; default to the Documents known folder / 烛光笔记",
+    "Store material copies and full notebooks as independent files, retaining only paths and lightweight preferences in the app profile",
+    "Verify legacy data migration before deleting old browser copies; preserve originals on conflict or incomplete migration",
+    "Detect externally missing files and remove stale records without recreating or deleting surviving files",
+    "Clear saved and temporary API keys on actual uninstall, preserve them on upgrade, and retain user materials and notes"
+  ],
+  "validation": {
+    "tests": 316,
+    "browserSuites": 8,
+    "stages": 13,
+    "sourceChangedDuringChecks": false,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.10",
+        "asarSha256": "8702409ef0d225113cc505f0a2199d36ed686f00a94ba1c5c37898250759f0b2"
+      },
+      "to": {
+        "version": "0.1.11",
+        "asarSha256": "1ad16806d91d191e2c1d1e8681c37f53ba033884e14563172676ef177aa0db59"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "uninstallCleanupHook": {
+      "scope": "Compiled production cleanup hook, isolated profile; no personal installation or registry changes",
+      "hookSha256": "e3a836799490feac364d0d86f3c6725910f82d33ca801e9d7d73428248b96fe5",
+      "checks": [
+        "upgrade preserves credentials",
+        "uninstall deletes saved and temporary keys",
+        "browser cache and logs removed after verified migration",
+        "user materials, notes, index and profile survive",
+        "repeated uninstall is idempotent"
+      ]
+    },
+    "payloadFilesVerified": 12059,
+    "privateStoragePathsAbsent": true,
+    "checkReportSha256": "ec411a5676231d8054cf074ee20dcb3b907804bafbe56209b5dee6fab09b4316"
+  },
+  "distribution": {
+    "installer": {
+      "path": "output/releases/pangzhu-desktop-0.1.11/installer/Candlelight-Notes-0.1.11-Setup-x64.exe",
+      "file": "Candlelight-Notes-0.1.11-Setup-x64.exe",
+      "bytes": 138055971,
+      "sha256": "5df5edfcca41d662051ef17ed626ae874f76d3f6dbdd3b7190d52b2d7c79519e"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.11/Candlelight-Notes-0.1.11-Windows-x64.zip",
+      "bytes": 138102156,
+      "sha256": "7a5694a94695deb85c7ebc86be2dd1a5c29d1b75d48d1d187c1bdfa89b5eece4"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "authorAndAcknowledgementsRetained": true,
+    "signed": false
+  },
+  "limitations": {
+    "nsisInstallUpgradeUninstall": "not-run-in-blank-Windows-account; production cleanup hook tested in isolated temporary profile",
+    "remoteCI": "not-run",
+    "independentTeachingReview": "pending"
+  },
+  "modelCalls": 0,
+  "githubPushed": false,
+  "evidence": {
+    "path": "artifacts/release-0.1.11/evidence/MANIFEST.json",
+    "sha256": "2ebdb1f5f9c2ead8e69e375ab8ca24db07b284be76d2b973e1a791144b669eaf",
+    "files": 26
+  }
+}

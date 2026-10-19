@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "archive": "pangzhu-notes-0.1.0-statistics-portable-win64.zip",
+  "sha256": "f5a994f17a769e07805e753bbe0fcc05974322b818b420d7ea195469e0746092",
+  "checkedAt": "2026-10-18T08:51:37.975Z",
+  "filesVerified": 13958,
+  "materials": 3,
+  "modelCalls": 0,
+  "checks": [
+    "Archive fingerprints, exactly three PDFs, no pre-existing user data or credentials",
+    "Bundled runtime starts outside repository in a Unicode/spaced path; parent settings ignored; repeated start reuses service",
+    "Public source hashes match, fresh learning-tree storage and course reference route work",
+    "Fresh isolated browser shows only the statistics bundle and three files; PDF reader and persisted library verified",
+    "Actual packaged PDF endpoint renders selectable Chinese and math with bundled dependencies",
+    "Settings saved only in portable data directory, survive restart, and service stops independently",
+    "Occupied port is rejected; stop does not terminate an unrelated service"
+  ],
+  "kind": "windows-portable-distribution",
+  "baseRelease": "v0.1.0",
+  "applicationRevision": "ecdf8fdcab99965c76540724c3800f533cbaca41",
+  "bytes": 97143185,
+  "runtime": {
+    "version": "v24.14.1",
+    "sha256": "58e74bf02fc5bbacc41dcb8bef089961cd5bddd37830b87784e4fc624d145d1f"
+  },
+  "includedMaterialIds": [
+    "descriptive-statistics-textbook",
+    "descriptive-statistics-numerical",
+    "descriptive-statistics-categorical"
+  ],
+  "personalDataIncluded": false,
+  "credentialsIncluded": false,
+  "preGeneratedUserNotesIncluded": false,
+  "relatedTests": {
+    "command": "node --test tests/distribution.test.mjs tests/collection.test.mjs tests/bundles.test.mjs tests/library.test.mjs",
+    "passed": 20
+  },
+  "verificationCommand": "node scripts/test-portable.mjs output/releases/pangzhu-notes-0.1.0-statistics-portable-win64.zip"
+}

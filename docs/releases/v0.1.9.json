@@ -1,0 +1,293 @@
+{
+  "schema": "local-engineering-release-v2",
+  "version": "0.1.9",
+  "tag": "v0.1.9-review",
+  "status": "verified-local-candidate",
+  "reviewedAt": "2026-10-18T14:46:44.027Z",
+  "baseline": {
+    "tag": "v0.1.0",
+    "codeRevision": "68cfe7a0e920d8ea9081b4190b314525471d9f80",
+    "inputRevision": "68bfb22"
+  },
+  "codeRevision": "5df10c74c8ff1a747d55a5ea38537158b56da5e3",
+  "sourceFingerprint": "17235221d6a7ca19c6f93f33a1f09b7387f9071a2594caba5eea34b6ec498644",
+  "lockSha256": "0ae92ed6f72e0f66bfad2ce8067b379c10207b1190407b4587bb478cf633bb7b",
+  "closedFindings": [
+    "ER-01",
+    "ER-02",
+    "ER-03",
+    "ER-04",
+    "ER-05",
+    "ER-06",
+    "ER-08",
+    "ER-09",
+    "ER-10"
+  ],
+  "unresolvedP0P1": [],
+  "riskException": {
+    "id": "ER-07",
+    "status": "deferred-build-tool-only",
+    "advisory": "https://github.com/advisories/GHSA-hp3w-g68c-fv3c",
+    "allDependencyCounts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 8,
+      "high": 0,
+      "critical": 0,
+      "total": 8
+    },
+    "productionDependencyCounts": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "absentFromPackagedRuntime": true,
+    "revisitBy": "2026-11-19"
+  },
+  "validation": {
+    "freshLockedInstall": "pass",
+    "command": "npm run check -- --require-clean --out artifacts/check-accepted",
+    "checkReportSha256": "9d0b701da5ee8a4aa41b63a97ee35a85482999c83e11e98a47aed7101c7c7511",
+    "tests": {
+      "tests": 305,
+      "pass": 305,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browserSuites": [
+      "onboarding",
+      "bundles",
+      "nested-bundles",
+      "ideal-tree",
+      "settings",
+      "calibration",
+      "field-review"
+    ],
+    "report": {
+      "schema": "engineering-check-v2",
+      "startedAt": "2026-10-18T14:30:24.452Z",
+      "status": "pass",
+      "environment": {
+        "node": "24.14.1",
+        "platform": "win32",
+        "arch": "x64",
+        "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+      },
+      "source": {
+        "revision": "5df10c74c8ff1a747d55a5ea38537158b56da5e3",
+        "status": "",
+        "fileCount": 324,
+        "fingerprint": "17235221d6a7ca19c6f93f33a1f09b7387f9071a2594caba5eea34b6ec498644",
+        "lockSha256": "0ae92ed6f72e0f66bfad2ce8067b379c10207b1190407b4587bb478cf633bb7b"
+      },
+      "stages": [
+        {
+          "name": "types",
+          "status": "pass",
+          "startedAt": 1792333824908,
+          "elapsedMs": 5816,
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "build",
+          "status": "pass",
+          "startedAt": 1792333830724,
+          "elapsedMs": 1034,
+          "logSha256": "bd7c526f8b8a5cddcb85fc51c25c70a68c297982c5be1439c9a3e0c5ca393fd3"
+        },
+        {
+          "name": "tests",
+          "status": "pass",
+          "startedAt": 1792333831760,
+          "elapsedMs": 156988,
+          "logSha256": "f2f8933075850a811e492ed6b9f35415f1055115c65a378028f45b6f26374343"
+        },
+        {
+          "name": "browser",
+          "status": "pass",
+          "startedAt": 1792333988750,
+          "elapsedMs": 67772,
+          "logSha256": "110b50bb9c537c12af89d53c1095a3f413872155d71febd611b4c646a6911653"
+        },
+        {
+          "name": "harness-demo",
+          "status": "pass",
+          "startedAt": 1792334056524,
+          "elapsedMs": 1701,
+          "logSha256": "b4196c76dcf212d188a9aa703c1c58b473c42cd316631dd48051927901495014"
+        },
+        {
+          "name": "note-eval-demo",
+          "status": "pass",
+          "startedAt": 1792334058227,
+          "elapsedMs": 1802,
+          "logSha256": "d6d2783e1b05fce950b86c873775da1870e69a90eb3750f388928852e6f43779"
+        },
+        {
+          "name": "note-calibration",
+          "status": "pass",
+          "startedAt": 1792334060031,
+          "elapsedMs": 1839,
+          "logSha256": "95819dcf6c70b31ec49c2882c1855f5b186d3edc6bbc64955daeec3bc41b6fda"
+        },
+        {
+          "name": "claim-eval-demo",
+          "status": "pass",
+          "startedAt": 1792334061872,
+          "elapsedMs": 2069,
+          "logSha256": "5131cd28af19f6ae2ab75997eee4c8e1cdd014a83216fe990dc96deb01811ec8"
+        },
+        {
+          "name": "claim-comparison-demo",
+          "status": "pass",
+          "startedAt": 1792334063943,
+          "elapsedMs": 2229,
+          "logSha256": "7e26ca88f07a15ed26f54e7640427d57f96cbb217f696c280915e2ed28e9d574"
+        },
+        {
+          "name": "claim-focused-demo",
+          "status": "pass",
+          "startedAt": 1792334066174,
+          "elapsedMs": 1898,
+          "logSha256": "f4e03418e7970e126d6c9eb0121a9f441bc09aa49c8e7b6d62da5d13c7eaaf79"
+        },
+        {
+          "name": "claim-meaning-demo",
+          "status": "pass",
+          "startedAt": 1792334068074,
+          "elapsedMs": 1794,
+          "logSha256": "40b96892d770a6e7688fbaa04c89616022121ce7a9832366f066d0faf82c4344"
+        },
+        {
+          "name": "claim-calculation-demo",
+          "status": "pass",
+          "startedAt": 1792334069870,
+          "elapsedMs": 1852,
+          "logSha256": "a7394b90a6934409bc3eaef7df1ffa23b72f95dcb2d827440241e89fb4615afd"
+        },
+        {
+          "name": "field-review-demo",
+          "status": "pass",
+          "startedAt": 1792334071724,
+          "elapsedMs": 1717,
+          "logSha256": "5116c8005b32830a6e35c1dd90665299be57ef12e826e77f2f38dea45c1f5032"
+        }
+      ],
+      "finishedAt": "2026-10-18T14:34:33.442Z",
+      "sourceAfter": {
+        "revision": "5df10c74c8ff1a747d55a5ea38537158b56da5e3",
+        "status": "",
+        "fileCount": 324,
+        "fingerprint": "17235221d6a7ca19c6f93f33a1f09b7387f9071a2594caba5eea34b6ec498644",
+        "lockSha256": "0ae92ed6f72e0f66bfad2ce8067b379c10207b1190407b4587bb478cf633bb7b"
+      }
+    },
+    "realModelCalls": 0,
+    "firstAttempt": {
+      "revision": "96921fb",
+      "pass": 303,
+      "fail": 2,
+      "reason": "ER-08: historical/current prompt identity incorrectly conflated"
+    },
+    "secondAttempt": {
+      "revision": "6496b49",
+      "status": "pass",
+      "stages": 13
+    }
+  },
+  "desktop": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.9-Setup-x64.exe",
+      "bytes": 138050209,
+      "sha256": "60b1f3b12e3e3d5d12aec433316b8c810ce1a1ff615b7e56290241d141d6351b"
+    },
+    "archive": {
+      "file": "Candlelight-Notes-0.1.9-Windows-x64.zip",
+      "bytes": 138095686,
+      "sha256": "ecd3e5ad711358f63bcab5ba56686d9a469b9ee05681f95b158eafeeb5823423"
+    },
+    "payload": {
+      "asarEntries": 13302,
+      "manifestFiles": 14025,
+      "verifiedFiles": 12058,
+      "normalizedPackageManifests": 136,
+      "omittedDependencies": 1970,
+      "relocatedDependencies": [
+        {
+          "path": "node_modules/string-width/index.js",
+          "original": "app/node_modules/cliui/node_modules/string-width/index.js",
+          "sha256": "16421893c66e7c45a68251f0708caaa8d49d74e9570ae574371d21356e9d30a6"
+        },
+        {
+          "path": "node_modules/string-width/package.json",
+          "original": "app/node_modules/cliui/node_modules/string-width/package.json",
+          "sha256": "cb1c27cf5182c2d4598e0002892fb507805e85baa3a16d2df663459bb9f4fa71"
+        },
+        {
+          "path": "node_modules/yargs/node_modules/string-width/index.js",
+          "original": "app/node_modules/string-width/index.js",
+          "sha256": "abc20775da6b552188b098688ebec671e29f5416d6339d3534bb7b016174003e"
+        },
+        {
+          "path": "node_modules/yargs/node_modules/string-width/license",
+          "original": "app/node_modules/string-width/license",
+          "sha256": "5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3"
+        },
+        {
+          "path": "node_modules/yargs/node_modules/string-width/package.json",
+          "original": "app/node_modules/string-width/package.json",
+          "sha256": "b1733805c878b7b7c3cd358b636c67fb7964e1fac097ca5ef2b543d8d5fba04d"
+        }
+      ],
+      "includedMaterialIds": [
+        "descriptive-statistics-textbook",
+        "descriptive-statistics-numerical",
+        "descriptive-statistics-categorical"
+      ],
+      "buildOnlyAdvisoryDependenciesAbsent": true,
+      "forbiddenPathsAbsent": true
+    },
+    "auditToolSha256": "7d54c7f396d4a7bc1fdbe1e854f10753d2ccd2ea4afa50bdb5bfcc8f2a682cf7",
+    "checks": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "signed": false,
+    "automaticUpdates": false
+  },
+  "gates": {
+    "source": "pass",
+    "packagedApplication": "pass",
+    "artifactPrivacyAndHashes": "pass",
+    "installerUpgradeLifecycle": "not-run-no-isolated-windows-host",
+    "remoteCI": "not-run",
+    "publicRelease": "not-authorized",
+    "independentTeachingQuality": "pending"
+  },
+  "evidence": {
+    "directory": "artifacts/review-0.1.9",
+    "manifestSha256": "2814aa04c5b26ac22a782d743f215aee6c467c7141e1bf7d5e97b113d5c06af7",
+    "files": 108
+  },
+  "limits": [
+    "Windows x64 local verification only",
+    "No installation/upgrade/uninstall on personal profile; no Windows Sandbox available",
+    "Unsigned candidate, no automatic updates",
+    "One moderate build-tool advisory deferred; runtime npm audit has no known advisories at review time",
+    "No live model calls or new independent content-quality conclusion",
+    "Large frontend chunks, React act warning and PDF.js wasm fallback remain non-blocking",
+    "Review performed by the implementing assistant; not an independent third-party audit"
+  ],
+  "closureRule": "Local source and packaged candidate verified; installer lifecycle, independent content quality and any public release require their separate gates. No remote push."
+}

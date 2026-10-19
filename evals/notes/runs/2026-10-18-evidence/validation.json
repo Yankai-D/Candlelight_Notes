@@ -1,0 +1,119 @@
+{
+  "codeRevision": "b337557",
+  "checkedAt": "2026-10-18T05:42:51.680Z",
+  "status": "pass",
+  "tests": {
+    "total": 279,
+    "passed": 279,
+    "failed": 0
+  },
+  "browserSuites": 5,
+  "stages": [
+    {
+      "name": "types",
+      "status": "pass",
+      "elapsedMs": 3466
+    },
+    {
+      "name": "build",
+      "status": "pass",
+      "elapsedMs": 845
+    },
+    {
+      "name": "tests",
+      "status": "pass",
+      "elapsedMs": 124530
+    },
+    {
+      "name": "browser",
+      "status": "pass",
+      "elapsedMs": 45455
+    },
+    {
+      "name": "harness-demo",
+      "status": "pass",
+      "elapsedMs": 1307
+    },
+    {
+      "name": "note-eval-demo",
+      "status": "pass",
+      "elapsedMs": 1622
+    },
+    {
+      "name": "note-calibration",
+      "status": "pass",
+      "elapsedMs": 1635
+    },
+    {
+      "name": "claim-eval-demo",
+      "status": "pass",
+      "elapsedMs": 1675
+    },
+    {
+      "name": "claim-comparison-demo",
+      "status": "pass",
+      "elapsedMs": 1665
+    },
+    {
+      "name": "claim-focused-demo",
+      "status": "pass",
+      "elapsedMs": 1635
+    },
+    {
+      "name": "claim-meaning-demo",
+      "status": "pass",
+      "elapsedMs": 1611
+    },
+    {
+      "name": "claim-calculation-demo",
+      "status": "pass",
+      "elapsedMs": 1715
+    },
+    {
+      "name": "field-review-demo",
+      "status": "pass",
+      "elapsedMs": 1611
+    }
+  ],
+  "extraArtifactCheck": {
+    "status": "pass",
+    "checks": [
+      {
+        "name": "comparison",
+        "width": 1440,
+        "height": 1000,
+        "horizontalOverflow": false,
+        "mathErrors": 0
+      },
+      {
+        "name": "comparison",
+        "width": 390,
+        "height": 844,
+        "horizontalOverflow": false,
+        "mathErrors": 0
+      },
+      {
+        "name": "reference",
+        "width": 1440,
+        "height": 1000,
+        "horizontalOverflow": false,
+        "mathErrors": 0
+      },
+      {
+        "name": "reference",
+        "width": 390,
+        "height": 844,
+        "horizontalOverflow": false,
+        "mathErrors": 0
+      }
+    ],
+    "realModelCalls": 0
+  },
+  "realModelCallsDuringCheck": 0,
+  "remoteCI": "not-run",
+  "independentReview": "pending",
+  "notes": [
+    "Candidate check failed its historical prompt hash; production suffix withdrawn, original assertion unchanged.",
+    "This report describes local engineering checks, not semantic certification."
+  ]
+}

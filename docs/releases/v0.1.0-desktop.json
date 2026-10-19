@@ -1,0 +1,63 @@
+{
+  "kind": "windows-desktop-distribution",
+  "baseRelease": "v0.1.0",
+  "applicationRevision": "ffbb7f2f8ad0669133fba18c182ab44447fd7846",
+  "status": "pass",
+  "checkedAt": "2026-10-18T10:05:37.7471486Z",
+  "installer": "Pangzhu-Notes-0.1.0-Setup-x64.exe",
+  "bytes": 138068114,
+  "sha256": "77dd87c310a262375ed03839b3768875c7f5daa02b75a8bd9a71d5533d247637",
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "platform": "Windows x64",
+  "signed": false,
+  "automaticUpdates": false,
+  "materials": [
+    "descriptive-statistics-textbook",
+    "descriptive-statistics-numerical",
+    "descriptive-statistics-categorical"
+  ],
+  "personalDataIncluded": false,
+  "credentialsIncluded": false,
+  "preGeneratedUserNotesIncluded": false,
+  "modelCalls": 0,
+  "engineering": {
+    "command": "npm run check",
+    "status": "pass",
+    "stages": 13,
+    "testsPassed": 284,
+    "testsFailed": 0,
+    "browserSuites": 5
+  },
+  "applicationChecks": [
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+  ],
+  "installerChecks": [
+    "Silent per-user installation succeeds in a Unicode/spaced directory; desktop and start-menu shortcuts target the installed executable",
+    "Installed binary passes native reading, PDF export, single-instance and close/restart verification",
+    "Reinstall preserves separate user data",
+    "Uninstall removes the application and shortcuts while preserving user data"
+  ],
+  "packageChecks": [
+    "Packaged ASAR path audit: 13298 entries; no prohibited private paths",
+    "Fresh bundled materials contain exactly three public PDFs, attribution and source records",
+    "Staged application/material fingerprints recorded in PACKAGE-MANIFEST.json",
+    "Installer fingerprint agrees with verified install/uninstall report and checksum sidecar"
+  ],
+  "pdfCheck": "Native Electron export visually checked with Poppler: selectable Chinese text, inline/display formulas, symmetric margins and consistent paper background",
+  "verificationCommands": [
+    "node scripts/test-desktop.mjs <packaged executable>",
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/test-desktop-installer.ps1 -Installer <absolute installer path>"
+  ],
+  "limits": [
+    "Unsigned Windows installer; no automatic updater",
+    "Tested same-version reinstall and ordinary uninstall; future cross-version migrations require separate validation",
+    "Existing browser/portable data is not automatically migrated",
+    "Forced termination or power loss bypasses the normal close/save flow"
+  ]
+}

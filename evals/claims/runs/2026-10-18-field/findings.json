@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "status": "provisional-ai-review",
+  "semanticJudgment": "unverified",
+  "runArtifactHash": "7626f4fd23e2a1b43605887418e7cdf4f44a810e430c0550e3355bbbc6c1fe0d",
+  "findings": [
+    {
+      "id": "mean-weight-wording-retained",
+      "units": ["b7:s2"],
+      "observation": "生成讲义将算术均值描述成各观测以自身大小为权重、观测个数为分母的平均。来源公式是观测值求和后除以个数，每个观测的系数都是 1/n。该表述至少混淆了观测值大小与数学权重，复核器却给出 retain。若按数学权重理解，对 1 和 3，算术均值为 2，以自身为权重再除以个数会得到 5；若按权重和归一化则为 2.5。算例是事后补充的局部反证，不是预先答案或通用语义验证。",
+      "evidence": [
+        {"stage":"generation","path":"blocks.6.text","quote":"各观测值以自身大小为权重、以观测个数为分母"},
+        {"stage":"review","windowId":"w4","path":"checks.1.verdict","quote":"retain"}
+      ],
+      "sourceEvidence": [
+        {"page":4,"quote":"The sample mean can be computed as the sum of the observed values divided by the number\nof observations"}
+      ]
+    },
+    {
+      "id": "repeated-sensitivity-classification-differs",
+      "units": ["b7:s3", "b11:s5"],
+      "observation": "复核器保留正文中极端值会拉动均值的说法，却对列表中的相近说法要求补充定义或定理。这不是同一窗口的相同句子，不能据此证明分批是原因。输入中已经有均值定义，在固定 n、其余观测不变的条件下，单个观测增加 delta 会使均值增加 delta/n，可以从公式推导；因此缺少原文逐字陈述不等于缺少一切推理依据。是否构成过度谨慎留给独立审阅，不自动改写标签。",
+      "evidence": [
+        {"stage":"generation","path":"blocks.6.text","quote":"当分布一侧出现少数极端值时，均值会被拉向那一侧"},
+        {"stage":"review","windowId":"w4","path":"checks.2.verdict","quote":"retain"},
+        {"stage":"review","windowId":"w6","path":"checks.4.missing","quote":"需补充该性质的定义或定理内容才能判定"}
+      ],
+      "sourceEvidence": [
+        {"page":4,"quote":"The sample mean can be computed as the sum of the observed values divided by the number\nof observations"}
+      ]
+    }
+  ]
+}

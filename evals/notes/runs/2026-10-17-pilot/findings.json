@@ -1,0 +1,48 @@
+{
+  "version": "note-findings-v1",
+  "runId": "68d2cb9a-59de-4f50-89bd-57bfcec2a5d4",
+  "artifactHash": "eedb33a210b7ac725d3e4f87e61b7c88dc1862fe375729536c56e547ca97414e",
+  "reviewKind": "ai-preliminary",
+  "independentReview": "pending",
+  "reviewer": "Codex；参与本项目开发，已看到方法标签，不是独立盲评",
+  "findings": [
+    {
+      "id": "operation-order",
+      "category": "prose-equation-disagreement",
+      "severity": "substantive",
+      "noteEvidence": [{"candidateId":"diagonal-penalty/fluent/1/no-sample","block":4,"quote":"先只用数据梯度做缩放更新，再对结果施加一个与"}],
+      "sourceEvidence": [{"caseId":"diagonal-penalty/fluent","page":1,"quote":"Applying shrinkage separately gives w_next = (1 - alpha lambda)w - alpha Dg."}],
+      "reason": "正文公式正确，但“再对结果”把独立衰减说成缩放整个梯度步结果。按文字执行得到 (1-alpha*lambda)*(w-alpha*D*g)，梯度项也被额外收缩，与所列公式不同。其余若干候选也有“先更新再收缩”的含糊措辞，未据此一概判错。",
+      "counterexample": {"w":[2,4],"g":[1,1],"D":[1,0.25],"alpha":0.1,"lambda":0.2,"sourceUpdate":[1.86,3.895],"literalSequentialUpdate":[1.862,3.8955]},
+      "hypothesis": "在语义审阅中增加文字步骤与方程的交叉核对，明确操作对象和更新前后状态；若增加生成约束，先只试这一条变化。",
+      "counterRisk": "要求所有公式都展开成算法步骤会显著加长笔记，也可能制造原文没有的步骤。",
+      "verification": "复核本例并增加改变变量、参数和顺序的独立用例；对合法的先衰减原参数再减梯度设正向对照。不能用“先”或“再”的关键词直接拒绝文本。"
+    },
+    {
+      "id": "quote-support",
+      "category": "anchor-does-not-support-claim",
+      "severity": "source-attribution",
+      "noteEvidence": [{"candidateId":"diagonal-penalty/fluent/1/harness","block":9,"quote":"回到最初的问题：二次惩罚与独立权重衰减在对角缩放下为何不同？","attachedSourceQuote":"These equations alone establish neither a convergence theorem nor better prediction accuracy."}],
+      "sourceEvidence": [{"caseId":"diagonal-penalty/fluent","page":1,"quote":"These equations alone establish neither a convergence theorem nor better prediction accuracy."}],
+      "reason": "此段解释两种更新的机制差异，却绑定了说明不保证收敛或预测优势的句子。引文确实存在，精确字符串校验通过，但不足以作为该段机制说明的直接依据。该段机制在同页其他句子中有依据，不能把错绑引文夸大成整段凭空编造。",
+      "hypothesis": "将语义审阅中的“引文支持段落”独立于“引文在原文存在”；生成约束优先选择直接支撑主张的短句，无合适精确引文时退回页级来源。",
+      "counterRisk": "强制每个解释句都附精确引文会排斥合法推导，并增加重复原文和输出 token。",
+      "verification": "加入原文真实但不支持主张的负例，以及解释由多句共同支持的正例；检测准确性须单独人工标注，不能把字符串命中率当事实正确率。"
+    },
+    {
+      "id": "known-background",
+      "category": "known-prerequisites-repeated",
+      "severity": "pedagogical",
+      "noteEvidence": [
+        {"candidateId":"diagonal-penalty/fluent/1/harness","block":1,"quote":"梯度缩放系数"},
+        {"candidateId":"diagonal-penalty/fluent/1/harness","block":2,"quote":"这个梯度与坐标本身成正比，所以参数离零越远，惩罚施加的“拉回”越强。"},
+        {"candidateId":"diagonal-penalty/foundation/1/harness","block":2,"quote":"这个梯度与参数本身成正比，所以惩罚的作用是让参数朝零收缩，且参数越大，收缩的推动越强。"}
+      ],
+      "sourceEvidence": [{"caseId":"diagonal-penalty/fluent","page":1,"quote":"The gradient of (lambda/2)||w||_2^2 is lambda w."}],
+      "reason": "fluent 画像已明确熟悉梯度下降与对角预条件，输出仍逐一解释 D 的坐标缩放和二次项求导，且比基础画像多出相关入门解释。两版总体保持长文口吻；问题是铺垫未明显收束，而非已经证明文风漂移。输出更长本身不构成错误，这里依据具体重复内容提出疑点。",
+      "hypothesis": "让画像只调节局部推理所缺的前提，以当前推理确实需要的过渡句替代整段基础重讲。",
+      "counterRisk": "硬性删除已知概念或按字数压缩可能损伤解释的自足性和数学条件。",
+      "verification": "独立审阅两画像正文，先判定重复内容是否必要，再比较变化；包含基础画像仍需要铺垫的反向对照，不设‘熟练版必须更短’的机械指标。"
+    }
+  ]
+}

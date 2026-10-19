@@ -1,0 +1,140 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.12",
+  "status": "verified-local-candidate",
+  "reviewedDate": "2026-10-19",
+  "timezone": "Australia/Sydney",
+  "codeRevision": "53a675b70053b6bbf7f8327b09763a8adf7acea2",
+  "sourceFingerprint": "2010ffe4de64ce7dbad973320c128b63ef2ce7cf3dca29ccd71db6f813c45654",
+  "lockSha256": "d6fe835448b5523d836a9b322532c7af79359a348741de9dd39709488b0e5575",
+  "changes": [
+    "Discover existing saved notebooks in default and explicitly remembered directories after legacy migration",
+    "Preview and link nested folders, deduplicate records, and explicitly relink moved files without rewriting notebooks",
+    "Preserve saved notebook editions when originals are missing, with read-only access",
+    "Guard shared-file saves and deletions with snapshots and exclusive locks; recover exited-writer locks",
+    "Keep preview memory bounded to metadata and exclude user files and credentials from public releases"
+  ],
+  "validation": {
+    "tests": 325,
+    "browserSuites": 8,
+    "stages": 13,
+    "sourceChangedDuringChecks": false,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched",
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "A second clean application profile automatically recognizes the saved shared notebook byte-for-byte without inheriting the API Key or startup preference"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.11",
+        "asarSha256": "1ad16806d91d191e2c1d1e8681c37f53ba033884e14563172676ef177aa0db59"
+      },
+      "to": {
+        "version": "0.1.12",
+        "asarSha256": "fd9b93bb5e3942ded34c97ded0309eeac30d3b67b49f3fb24de63495a5d80cf6"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "uninstallCleanupHook": {
+      "scope": "Compiled production cleanup hook, isolated profile; no personal installation or registry changes",
+      "reusedEvidence": true,
+      "hookSha256": "e3a836799490feac364d0d86f3c6725910f82d33ca801e9d7d73428248b96fe5",
+      "checks": [
+        "upgrade preserves credentials",
+        "uninstall deletes saved and temporary keys",
+        "browser cache and logs removed after verified migration",
+        "user materials, notes, index and profile survive",
+        "repeated uninstall is idempotent"
+      ]
+    },
+    "cleanDependencyInstall": {
+      "status": "pass",
+      "separateDirectory": true,
+      "packages": 445,
+      "electronBinaryDownloadSkipped": true,
+      "fullCheckInSeparateCheckout": false
+    },
+    "dependencyAudit": {
+      "production": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "all": {
+        "info": 0,
+        "low": 0,
+        "moderate": 8,
+        "high": 0,
+        "critical": 0,
+        "total": 8
+      }
+    },
+    "discoveryLoad": {
+      "schema": "local-discovery-load-v1",
+      "count": 200,
+      "modelCalls": 0,
+      "scope": "Synthetic local SSD run, not a UI latency or maximum-capacity guarantee",
+      "timingsMs": {
+        "scan": 657,
+        "attach": 638,
+        "listIncludingFirstAutoScan": 861
+      },
+      "previewBytes": 52649,
+      "notebookBytes": 3721580,
+      "processMaxRssKiB": 127920,
+      "status": "pass"
+    },
+    "payloadFilesVerified": 12060,
+    "privateStoragePathsAbsent": true,
+    "checkReportSha256": "92fca6a7d7b00ab31a9e1187041d35fd7742cd8a97ad6ca38f60256f0f5c9f60"
+  },
+  "distribution": {
+    "installer": {
+      "path": "output/releases/pangzhu-desktop-0.1.12/installer/Candlelight-Notes-0.1.12-Setup-x64.exe",
+      "file": "Candlelight-Notes-0.1.12-Setup-x64.exe",
+      "bytes": 138062270,
+      "sha256": "1af8f7cadca2a49ec84a23b389197bf260561f3cd283af043b311ba9dcd60a89"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.12/Candlelight-Notes-0.1.12-Windows-x64.zip",
+      "bytes": 138108857,
+      "sha256": "6fddd0c7866836853c9681cdad0298a9c219d70d6370f5b5f5f1d5bea4b7d9e6"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "authorAndAcknowledgementsRetained": true,
+    "signed": false
+  },
+  "limitations": {
+    "nsisInstallUpgradeUninstall": "not-run-in-blank-Windows-account; unchanged production cleanup hook has isolated verification",
+    "remoteCI": "not-run",
+    "independentTeachingReview": "pending",
+    "largeLibraryAndNetworkDrives": "not-benchmarked"
+  },
+  "modelCalls": 0,
+  "githubPushed": false,
+  "engineeringReview": {
+    "path": "docs/reviews/2026-10-19-complete-0.1.12.md",
+    "sha256": "b48539ab5fa5ab50b4ffa6e1acd12065bd182bc616ef693a4331b607cf5c41b9"
+  },
+  "evidence": {
+    "path": "artifacts/release-0.1.12/evidence/MANIFEST.json",
+    "sha256": "897d7c13fa06de055b277c2e63738f4fc9f7824496740b7937f33fbc944a6ca9",
+    "files": 43
+  }
+}

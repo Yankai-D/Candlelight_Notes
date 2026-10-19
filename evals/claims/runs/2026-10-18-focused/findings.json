@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "status": "provisional-ai-review",
+  "semanticJudgment": "unverified",
+  "runArtifactHash": "b93668d2365a1aa641d49d1198f2afdf1bbb80f21c5497248b1009bd88d09ab7",
+  "findings": [
+    {
+      "id": "valid-normalization-format-burden",
+      "candidates": ["normalization-valid/v2", "normalization-valid/focused"],
+      "observation": "v2 再次在 unitIds 数组中插入键值字段，JSON 无法解析；965 输出 tokens、finish_reason=stop，不是截断。focused 保留三个原句单元，输出 50 tokens。只证明这次运行的结构差别，不推断普遍可靠性。",
+      "evidence": [
+        {"candidateId":"normalization-valid/v2","path":"$raw","quote":"\"unitIds\":[\"p1:s2\",\"unitIds_placeholder\":\"\""},
+        {"candidateId":"normalization-valid/focused","path":"checks.2.verdict","quote":"retain"}
+      ]
+    },
+    {
+      "id": "aggregate-label-hides-wrong-target",
+      "candidates": ["normalization-overclaim/v2", "normalization-overclaim/focused"],
+      "observation": "v2 的段落级 issue 恰好与参考标签一致，但错误方向结论被 preserve：推导仍称乘以 ±1 不改变方向。触发 issue 的是前一句正确公式，因推导恒等式只出现在来源而被 qualify。不能把这一项算成发现目标错误。focused 保留公式，定位 p1:s2 并指出 a<0 导致反向。",
+      "evidence": [
+        {"candidateId":"normalization-overclaim/v2","path":"blocks.0.claims.1.support.steps.2","quote":"乘以 ±1 不改变向量方向"},
+        {"candidateId":"normalization-overclaim/v2","path":"blocks.0.claims.0.premises.1.text","quote":"欧几里得范数满足 ‖a·v‖ = |a|·‖v‖。"},
+        {"candidateId":"normalization-overclaim/focused","path":"checks.1.conflict","quote":"当 a<0 时系数为 -1，得到的是相反方向，而非相同方向"}
+      ]
+    },
+    {
+      "id": "domain-error-and-wrong-evidence-channel",
+      "candidates": ["log-domain-overclaim/v2", "log-domain-overclaim/focused"],
+      "observation": "两组都在第二句识别 xy>0 不足以定义两个实数对数。v2 却将笔记中的中文定义句当作原文页引文，整份响应被 AUDIT_SOURCE 拒绝；这是引用通道失败，不能描述为没理解定义域。focused 引用实际英文来源，并用 x=y=-1 举例。",
+      "evidence": [
+        {"candidateId":"log-domain-overclaim/v2","path":"blocks.0.claims.0.support.evidence.0.quote","quote":"指实数自然对数"},
+        {"candidateId":"log-domain-overclaim/v2","path":"blocks.0.claims.1.support.reason","quote":"仅 xy>0 不足以使右侧两个对数有定义"},
+        {"candidateId":"log-domain-overclaim/focused","path":"checks.1.conflict","quote":"x=y=-1 时 xy=1>0，但 ln x 与 ln y 在实数范围内无定义"}
+      ]
+    },
+    {
+      "id": "positive-domain-control",
+      "candidates": ["log-domain-valid/v2", "log-domain-valid/focused"],
+      "observation": "两组都保留已在上下文说明正数条件的乘积对数恒等式。focused 未要求重复条件或补指数函数推导；本例未观察到诊断差别。",
+      "evidence": [
+        {"candidateId":"log-domain-valid/v2","path":"blocks.0.claims.0.support.reason","quote":"与目标段结论一致"},
+        {"candidateId":"log-domain-valid/focused","path":"checks.1.verdict","quote":"retain"}
+      ]
+    },
+    {
+      "id": "unavailable-theorem-is-gap-not-refutation",
+      "candidates": ["theorem-unavailable/v2", "theorem-unavailable/focused"],
+      "observation": "两组原始语义都指出缺少定理，未宣称已证伪。v2 将要求为数组的 missing 写成字符串，结构拒绝；focused 返回可接受的 needs-source。改善是这次响应的契约适配，不能夸大成只有新协议理解来源缺口。",
+      "evidence": [
+        {"candidateId":"theorem-unavailable/v2","path":"blocks.0.claims.1.support.missing","quote":"附录定理 2 的陈述、假设与证明"},
+        {"candidateId":"theorem-unavailable/focused","path":"checks.1.missing","quote":"无法判定“线性收敛率”结论是否成立及其适用条件"}
+      ]
+    },
+    {
+      "id": "cautious-observation-control",
+      "candidates": ["experiment-cautious/v2", "experiment-cautious/focused"],
+      "observation": "两组保留实验观测及对缺少定理的谨慎表述，没有凭空要求更多条件或判定错误。所有诊断均未执行改写。",
+      "evidence": [
+        {"candidateId":"experiment-cautious/v2","path":"blocks.0.claims.1.support.reason","quote":"不能据此判断一般收敛率"},
+        {"candidateId":"experiment-cautious/focused","path":"checks.1.verdict","quote":"retain"}
+      ]
+    }
+  ]
+}

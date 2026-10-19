@@ -1,0 +1,56 @@
+来源与署名
+
+本资料包由烛光笔记选编，供联合资料包功能测试使用。
+它不是 OpenIntro 官方产品，也不表示 OpenIntro 对烛光笔记的认可或背书。
+
+一、教材
+作品：OpenIntro Statistics, Fourth Edition
+作者：David Diez、Mine Çetinkaya-Rundel、Christopher D Barr
+原版版权年份：2019；本次下载版本更新日期：2022-10-21。
+来源：https://www.openintro.org/book/os/
+下载：https://www.openintro.org/go/?id=os4_for_screen_reader
+许可：Creative Commons Attribution-ShareAlike 3.0 Unported（CC BY-SA 3.0）
+许可链接：https://creativecommons.org/licenses/by-sa/3.0/
+原作者说明：https://github.com/OpenIntroStat/openintro-statistics/blob/master/LICENSE.md
+本包中的教材节选及新增来源说明按 CC BY-SA 3.0 提供。
+修改：抽取原始 PDF / 印刷页码 45–60、70–78，增加来源说明页。
+保留原页正文、图表和脚注，未翻译或重排正文。
+
+二、数值数据课件
+作品：2.1 - Examining Numerical Data
+课件作者：Mine Çetinkaya-Rundel（OpenIntro）
+Google Slides 转制：Curry Hilton（OpenIntro）
+来源：https://docs.google.com/presentation/d/1YpJsHUEHPiuHlH7n0RKNYU3sQ_XX6uX36P92R8-_9sg
+许可：CC BY-SA 3.0 United States（原课件第 1 页链接指向此版本）
+许可链接：https://creativecommons.org/licenses/by-sa/3.0/us/
+本包中的课件节选及新增来源说明按 CC BY-SA 3.0 US 提供。
+修改：导出 PDF 后保留原始页码 6–14、16、25、28、33、35、38–42、45、47、52–53、55。
+增加来源说明页，删去部分动画展开重复页、外部漫画和视频截图、进阶内容及资源广告页。
+未改变所保留教学页的内容。
+
+三、分类数据课件
+作品：2.2 - Considering Categorical Data
+课件作者：Mine Çetinkaya-Rundel（OpenIntro）
+Google Slides 转制：Curry Hilton（OpenIntro）
+来源：https://docs.google.com/presentation/d/1D8PHarhuhj_FLDc2b7l7BoQ3euaHN0dv0V0T5-qttE4
+许可：CC BY-SA 3.0 United States（原课件第 1 页链接指向此版本）
+许可链接：https://creativecommons.org/licenses/by-sa/3.0/us/
+本包中的课件节选及新增来源说明按 CC BY-SA 3.0 US 提供。
+修改：导出 PDF 后保留原始页码 3–5、7、11–14、16。
+增加来源说明页，删去部分动画展开重复页、外部饼图插图和资源广告页。
+未改变所保留教学页的内容。
+
+来源与许可核对日期：2026-10-17。
+OpenIntro 的资源许可说明：https://www.openintro.org/license/
+
+后续改编与署名
+分享基于这些材料改编的讲义时，应保留作者、原作名、来源和适用许可链接，
+说明翻译、重写、选编等修改，并遵守适用许可的相同方式共享条款。
+不能只留下模糊的 “Thanks to OpenIntro” 而删去上述信息。
+原材料中单独标注的第三方内容仍遵循其自身权利声明；不要把原作标识作为产品标识。
+
+可在完成讲义后使用的署名示例（应按实际使用情况调整）
+本讲义由烛光笔记基于 OpenIntro Statistics（David Diez、Mine Çetinkaya-Rundel、
+Christopher D Barr）及配套课件（Mine Çetinkaya-Rundel；Curry Hilton 转制）改编。
+原始来源、许可及逐页对应关系见附带的来源清单。本讲义进行了中文改写、
+教学重组和新增例子，并按 CC BY-SA 3.0 许可分享。它不是 OpenIntro 官方产品。

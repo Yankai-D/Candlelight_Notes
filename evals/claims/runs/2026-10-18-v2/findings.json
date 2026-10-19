@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "status": "provisional-ai-review",
+  "semanticJudgment": "unverified",
+  "runArtifactHash": "b26534720fd1dc096d30872a6aec2bfa3a2cd0985183f47baa2b2623d77341d5",
+  "findings": [
+    {
+      "id": "matrix-corrections",
+      "candidates": ["matrix-overclaim/v1", "matrix-overclaim/v2"],
+      "observation": "两版都用全 1 矩阵反驳四元素非零即可逆，并保留前面的行列式定义。v2 的受限计算器精确核出 1*1-1*1=0；数值检查通过不认证来源映射。v2 修订句额外带入这个例子，仍限制在指定原句范围。未观察到该案例的语义收益差别。",
+      "evidence": [
+        {"candidateId":"matrix-overclaim/v1","stage":"review","path":"checks.0.counterexample","quote":"取 a=1,b=1,c=1,d=1，四个元素全非零，但 det(A)=1*1-1*1=0，故 A 不可逆。"},
+        {"candidateId":"matrix-overclaim/v2","stage":"review","path":"blocks.0.claims.1.support.refutation.explanation","quote":"该矩阵四个元素全非零，但行列式 ad-bc=1*1-1*1=0"}
+      ]
+    },
+    {
+      "id": "matrix-controls",
+      "candidates": ["matrix-valid/v1", "matrix-valid/v2"],
+      "observation": "两版各一次请求，保留正确的行列式充要条件，没有修订。",
+      "evidence": [
+        {"candidateId":"matrix-valid/v1","stage":"review","path":"checks.0.reason","quote":"逆存在当且仅当行列式非零"},
+        {"candidateId":"matrix-valid/v2","stage":"review","path":"blocks.0.claims.0.support.reason","quote":"可逆的充要条件"}
+      ]
+    },
+    {
+      "id": "valid-normalization-rejected",
+      "candidates": ["normalization-valid/v1", "normalization-valid/v2"],
+      "observation": "正确向量对照两版都执行失败。v1 对同段返回两项 checks，v2 在 unitIds 数组中插入键值字段，JSON 无法解析。两者 finish_reason 都为 stop，输出分别为 337 和 944 tokens，不是预算截断；不得事后修复响应再算成功。",
+      "evidence": [
+        {"candidateId":"normalization-valid/v1","stage":"review","path":"checks.1.reason","quote":"这是对非零 a 的分情况说明，未推广到 a=0。"},
+        {"candidateId":"normalization-valid/v2","stage":"review","path":"$raw","quote":"\"unitIds\":[\"p1:s2\",\"unitIds_placeholder\":\"\""}
+      ]
+    },
+    {
+      "id": "wrong-premise-stopped-not-corrected",
+      "candidates": ["normalization-overclaim/v1", "normalization-overclaim/v2"],
+      "observation": "v1 给出 a=-1 的反例并生成正确方向区分。v2 却把乘以 ±1 不改变方向作为推导步骤；该步骤作为前提时没有任何笔记或来源引文，程序将原本声称支持的判断挡到 needs-source，没有修订。按预注册标签仍算未达到目标：资料充分，应识别错误，而不是要求更多来源。代码阻断与语义识别必须分开计数。",
+      "evidence": [
+        {"candidateId":"normalization-overclaim/v1","stage":"review","path":"checks.0.counterexample","quote":"取 a=-1、v=(1,0)，则 (a*v)/||a*v||=(-1,0)，而 v/||v||=(1,0)，方向相反。"},
+        {"candidateId":"normalization-overclaim/v2","stage":"review","path":"blocks.0.claims.1.support.steps.2","quote":"乘以 ±1 不改变非零向量的方向"},
+        {"candidateId":"normalization-overclaim/v2","stage":"review","path":"blocks.0.claims.1.premises.1.text","quote":"a≠0 时 a/|a| 为 +1 或 -1，因此只改变符号而不改变方向。"}
+      ]
+    },
+    {
+      "id": "premise-and-assertion-roles",
+      "candidates": ["matrix-overclaim/v2", "normalization-overclaim/v2"],
+      "observation": "v2 暴露了两个字段语义问题：矩阵错误句的 assertion 被提前写成修正后的否定句；向量第一句将用于推导的范数恒等式放入必要前提，并因该恒等式只在来源出现而触发 qualify。后者没有实际修订，因为同批缺依据分支先停止。不能把推导依据未重复写出都视为笔记遗漏适用条件。",
+      "evidence": [
+        {"candidateId":"matrix-overclaim/v2","stage":"review","path":"blocks.0.claims.1.assertion","quote":"并非只要 a、b、c、d 四个元素全都非零，A 就必然可逆"},
+        {"candidateId":"normalization-overclaim/v2","stage":"review","path":"blocks.0.claims.0.premises.1.text","quote":"欧几里得范数满足 ‖a·v‖ = |a|·‖v‖。"}
+      ]
+    }
+  ]
+}

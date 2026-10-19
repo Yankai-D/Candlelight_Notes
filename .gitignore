@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.cache/
+.env
+.env.*
+!.env.example
+*.log
+artifacts/
+*.tsbuildinfo
+tmp/
+output/
+.local-library/
+.local-ideal-trees/
+.local-storage/
+examples/course-packages/**/originals/*.pdf

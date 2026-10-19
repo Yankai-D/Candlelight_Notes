@@ -1,0 +1,19 @@
+{
+  "schema": "product-use-evidence-v1",
+  "recordedOn": "2026-10-19",
+  "provenance": "项目作者在持续实际使用中的反馈，来自本项目对话；记录日期不是反馈发生日期。未统计使用时长、独立用户数或错误发生率。",
+  "reviewerRole": "project-owner-and-primary-user",
+  "scope": "产品要求与已知失败的回归依据；不当作独立用户实验或未见材料测试集。",
+  "styleAssets": ["shared/editorial-policy.mjs", "shared/writing-templates.mjs", "shared/course-default-sample.json"],
+  "observations": [
+    { "id": "voice-and-pacing", "userWords": "以这个为基础做到张弛有度, 让用户明白局部数学细节和问题背景的关系就好", "requirement": "长文连贯推进，关键推理展开，局部数学回到问题；背景、直觉、原理融合在需要的位置。", "coverage": ["tests/editorial.test.mjs", "tests/note-calibration.test.mjs"], "humanEvidence": "evals/notes/runs/2026-10-18-evidence/user-feedback.json", "remaining": "自动检查只能保护契约和已知反例；新输出的阅读效果需人工审阅。" },
+    { "id": "stable-profile-voice", "userWords": "我希望的是同样的风格, 风格不会随着背景知识的变化而改变", "requirement": "画像调整铺垫和展开深度，叙述视角与文风稳定。学习树不推断用户掌握程度。", "coverage": ["tests/editorial.test.mjs", "tests/learning.test.mjs", "tests/operation-consistency.test.mjs"], "remaining": "跨模型与跨材料风格稳定性未被普遍证明。" },
+    { "id": "formula-and-export", "userWords": "统一阅读笔记和小纸条和导出的全部渲染格式为一样的", "requirement": "正文、纸条和 PDF 共用内容规范与数学渲染；保护行内布局。", "coverage": ["tests/note-format.test.mjs", "tests/formula-layout.test.mjs", "tests/pdf.test.mjs"], "remaining": "PDF 提取已损坏的数学语义不能靠渲染修复。" },
+    { "id": "reading-continuity", "userWords": "主笔记应当是用滚轮滑动而不翻页的长文", "requirement": "章节定位、原文跟随和选区交互支持连续阅读。", "coverage": ["tests/reading.test.mjs", "tests/source-follow.test.mjs", "tests/editor.test.mjs"], "remaining": "不同设备上的长期交互体验仍需实际使用。" },
+    { "id": "separate-editions", "userWords": "不同风格切换的同时不会让其他笔记消失", "requirement": "阅读版本独立保存，模板快照可追溯，重生成需明确操作。", "coverage": ["tests/notebooks.test.mjs", "tests/writing-templates.test.mjs", "tests/browser/settings.mjs"], "remaining": "结构通过不等于每版内容质量一致。" },
+    { "id": "nested-source-bundles", "userWords": "每份文件在建立时有权参考所有的文件", "requirement": "嵌套资料包及独立笔记保留明确来源范围，后续文件变化不静默改写。", "coverage": ["tests/nested-bundles.test.mjs", "tests/browser/nested-bundles.mjs"], "remaining": "跨文件规划的内容完整性仍需来源对照。" },
+    { "id": "recoverable-local-learning", "userWords": "软件应该增加识别功能", "requirement": "资料可独立保存、重新识别、恢复；文件移动和并发修改不会被当成可静默覆盖的情况。", "coverage": ["tests/file-library.test.mjs", "tests/workspace-maintenance.test.mjs", "tests/file-storage-api.test.mjs", "tests/browser/workspace-maintenance.mjs"], "remaining": "网络盘、断电与多进程同时维护尚未验证；备份不是云同步。" }
+  ],
+  "scores": null,
+  "independentTeachingReview": "pending"
+}

@@ -1,0 +1,101 @@
+{
+  "kind": "windows-desktop-distribution",
+  "version": "0.1.4",
+  "status": "pass",
+  "checkedAt": "2026-10-18T11:59:01.568Z",
+  "applicationRevision": "8a060db206a5af4df82dba82c29c878237395085",
+  "installer": "Candlelight-Notes-0.1.4-Setup-x64.exe",
+  "bytes": 138074602,
+  "sha256": "9d7a040ead4b69a29016197cd0f7ad2556fc871d97858a6132288563767c4df0",
+  "archive": {
+    "file": "Candlelight-Notes-0.1.4-Windows-x64.zip",
+    "bytes": 138120200,
+    "sha256": "5a0ab9eab8224530a92b683d40bdb8f4e77b2ad1ebbd6cb2b8a77da09139107e",
+    "verifiedEntries": [
+      {
+        "name": "Candlelight-Notes-0.1.4-Setup-x64.exe",
+        "sha256": "9d7a040ead4b69a29016197cd0f7ad2556fc871d97858a6132288563767c4df0"
+      },
+      {
+        "name": "Candlelight-Notes-0.1.4-Setup-x64.exe.sha256",
+        "sha256": "d04f437cbafc49fb6f67a71fbec426391f8331b5f77daaaf16335bd236380499"
+      },
+      {
+        "name": "使用说明.txt",
+        "sha256": "7338d84a882b45dc00100b60d5701d8d595e9b3b122d3987360e2ac62f75771d"
+      },
+      {
+        "name": "ACKNOWLEDGEMENTS.md",
+        "sha256": "231e44535aa9e5cb03b68b727e0e7d47afbd95a89e9b34077a6ac4a8152588fd"
+      },
+      {
+        "name": "THIRD-PARTY-NOTICES.txt",
+        "sha256": "0a693f3622364f57567e1ad6d345da891f342d069a3eae645f2b2ab22228d27a"
+      },
+      {
+        "name": "materials/ATTRIBUTION.txt",
+        "sha256": "f49aa71639345fa1687bb77d482ed2836af8777d82b521387a7cbc13cbce0c40"
+      },
+      {
+        "name": "materials/SOURCES.json",
+        "sha256": "64b86925f37e2ff77ba6c3eeaf31a51c0eb4daf627485b4a2bd222a7a87f90d0"
+      }
+    ]
+  },
+  "branding": {
+    "name": "烛光笔记",
+    "englishName": "Candlelight Notes",
+    "windowTitle": "烛光笔记 Candlelight",
+    "authorName": "Yankai-D",
+    "projectUrl": "https://github.com/Yankai-D/Candlelight_Notes"
+  },
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "signed": false,
+  "automaticUpdates": false,
+  "changes": [
+    "Chinese product identity renamed; window, menus, errors and shortcuts share the brand configuration",
+    "Candlelight Notes remains the formal English name; installation ID, executable, origins and data directory remain stable",
+    "Project introduction, acknowledgements and descriptive-statistics materials retained"
+  ],
+  "engineering": {
+    "build": "pass",
+    "targetedTestsPassed": 19,
+    "targetedTestsFailed": 0,
+    "packagedDesktopSmoke": "pass",
+    "archiveRoundTrip": "all entry hashes match original files"
+  },
+  "desktopChecks": [
+    "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+  ],
+  "installerLifecycle": {
+    "status": "not_retested",
+    "reason": "Personal installation left untouched; packaged application tested with isolated temporary data",
+    "previousVersionEvidence": "v0.1.0-desktop.json",
+    "installerIdentityChanged": false,
+    "installerDisplayNameChanged": true
+  },
+  "privacy": {
+    "asarEntriesAudited": 13298,
+    "payloadFiles": 14021,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "preGeneratedUserNotesIncluded": false
+  },
+  "modelCalls": 0,
+  "limits": [
+    "Cross-version installation not executed against the user installation",
+    "Unsigned installer; no automatic online update"
+  ]
+}

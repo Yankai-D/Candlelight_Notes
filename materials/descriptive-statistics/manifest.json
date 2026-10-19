@@ -1,0 +1,501 @@
+{
+  "schema_version": 1,
+  "id": "descriptive-statistics-example",
+  "name": "描述性统计入门 · 联合资料包样例",
+  "prepared_date": "2026-10-17",
+  "status": "local_fixture_not_imported",
+  "note": "This manifest describes a sample fixture, not an implemented application import protocol.",
+  "intended_package_behavior": {
+    "kind": "joint_material_package",
+    "in_tree": false,
+    "member_in_tree": false,
+    "artifacts_per_generation": 1
+  },
+  "scope": {
+    "include": [
+      "数值与分类变量",
+      "均值与中位数",
+      "方差与标准差",
+      "直方图与偏态",
+      "四分位数、IQR与箱线图",
+      "离群值与稳健性",
+      "频数与比例",
+      "列联表的分母选择",
+      "条形图与分组比较"
+    ],
+    "exclude": [
+      "统计推断",
+      "假设检验",
+      "回归分析",
+      "数据变换",
+      "编程练习"
+    ]
+  },
+  "sample_learning_goal": "根据这三份资料生成一份连贯的中文描述性统计复习讲义。面向会基础代数、尚未系统学习统计的读者，围绕如何看懂和概括一组数据展开，讲清每个统计量解决什么问题、如何计算、何时适用及常见误区。连接直观解释、公式与小数据例子，覆盖约定范围，合并资料间重复内容，保留可追溯到文件和页码的来源。只输出这一份讲义。",
+  "acceptance_checks": [
+    "只生成一份连贯讲义，不机械拼接三份资料",
+    "每个核心概念有源文件及页码依据",
+    "不把课件封面、署名、许可页当成学习内容",
+    "跨课件和教材的概念去重，例子与符号保持一致",
+    "准确区分样本方差与总体方差、频数与比例、直方图与条形图",
+    "检查课件中以图像保存的公式，不能仅凭抽取文本忽略公式",
+    "若生成模拟试卷，另起一次生成，使用新情境和合成数据并独立验算，不复用原题题面",
+    "正文、小纸条和导出走同一 Markdown/LaTeX 格式约定"
+  ],
+  "attribution_file": "ATTRIBUTION.txt",
+  "sources": [
+    {
+      "id": "textbook",
+      "original": "openintro-statistics-4e.pdf",
+      "output": "01-selected-reading.pdf",
+      "title": "Descriptive Statistics",
+      "subtitle": "Selected textbook reading",
+      "source_title": "OpenIntro Statistics, Fourth Edition (2019; updated 2022-10-21)",
+      "authors": [
+        "David Diez",
+        "Mine Çetinkaya-Rundel",
+        "Christopher D Barr"
+      ],
+      "source_url": "https://www.openintro.org/book/os/",
+      "download_url": "https://www.openintro.org/go/?id=os4_for_screen_reader",
+      "license": "CC-BY-SA-3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "pages": [
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78
+      ],
+      "selection": "Original PDF / printed pages 45-60 and 70-78. Sections 2.1.1-2.1.6 and 2.2.",
+      "changes": "Added this source notice; extracted selected pages without changing their content. Omitted advanced transformations, spatial maps, end-of-section exercises and the inference case study.",
+      "sha256": "8ea99a4b6eee734e1e35fe0406f6e6f3e056627f7b39166caa4e11253ba8f8f2",
+      "original_sha256": "e261e4aea0eb4f0fd2b9d340604918ee7145e1a98e00313575c88977b671cb40",
+      "original_page_count": 465,
+      "page_count": 26,
+      "content_pdf_pages": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26
+      ],
+      "page_mapping": [
+        {
+          "pdf_page": 2,
+          "source_pdf_page": 45
+        },
+        {
+          "pdf_page": 3,
+          "source_pdf_page": 46
+        },
+        {
+          "pdf_page": 4,
+          "source_pdf_page": 47
+        },
+        {
+          "pdf_page": 5,
+          "source_pdf_page": 48
+        },
+        {
+          "pdf_page": 6,
+          "source_pdf_page": 49
+        },
+        {
+          "pdf_page": 7,
+          "source_pdf_page": 50
+        },
+        {
+          "pdf_page": 8,
+          "source_pdf_page": 51
+        },
+        {
+          "pdf_page": 9,
+          "source_pdf_page": 52
+        },
+        {
+          "pdf_page": 10,
+          "source_pdf_page": 53
+        },
+        {
+          "pdf_page": 11,
+          "source_pdf_page": 54
+        },
+        {
+          "pdf_page": 12,
+          "source_pdf_page": 55
+        },
+        {
+          "pdf_page": 13,
+          "source_pdf_page": 56
+        },
+        {
+          "pdf_page": 14,
+          "source_pdf_page": 57
+        },
+        {
+          "pdf_page": 15,
+          "source_pdf_page": 58
+        },
+        {
+          "pdf_page": 16,
+          "source_pdf_page": 59
+        },
+        {
+          "pdf_page": 17,
+          "source_pdf_page": 60
+        },
+        {
+          "pdf_page": 18,
+          "source_pdf_page": 70
+        },
+        {
+          "pdf_page": 19,
+          "source_pdf_page": 71
+        },
+        {
+          "pdf_page": 20,
+          "source_pdf_page": 72
+        },
+        {
+          "pdf_page": 21,
+          "source_pdf_page": 73
+        },
+        {
+          "pdf_page": 22,
+          "source_pdf_page": 74
+        },
+        {
+          "pdf_page": 23,
+          "source_pdf_page": 75
+        },
+        {
+          "pdf_page": 24,
+          "source_pdf_page": 76
+        },
+        {
+          "pdf_page": 25,
+          "source_pdf_page": 77
+        },
+        {
+          "pdf_page": 26,
+          "source_pdf_page": 78
+        }
+      ],
+      "qa": {
+        "all_retained_page_text_identical": true,
+        "all_retained_pages_render_compared": true,
+        "max_normalized_mean_pixel_difference": 0.0,
+        "compared_at_scale": 2
+      }
+    },
+    {
+      "id": "numerical",
+      "original": "numerical-data-slides.pdf",
+      "output": "02-numerical-data.pdf",
+      "title": "Numerical Data",
+      "subtitle": "Selected lecture slides",
+      "source_title": "2.1 - Examining Numerical Data",
+      "authors": [
+        "Mine Çetinkaya-Rundel"
+      ],
+      "contributors": [
+        "Curry Hilton (Google Slides conversion)"
+      ],
+      "source_url": "https://docs.google.com/presentation/d/1YpJsHUEHPiuHlH7n0RKNYU3sQ_XX6uX36P92R8-_9sg",
+      "license": "CC-BY-SA-3.0-US",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/us/",
+      "pages": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        16,
+        25,
+        28,
+        33,
+        35,
+        38,
+        39,
+        40,
+        41,
+        42,
+        45,
+        47,
+        52,
+        53,
+        55
+      ],
+      "selection": "Selected original PDF pages: 6-14, 16, 25, 28, 33, 35, 38-42, 45, 47, 52-53, 55.",
+      "changes": "Added this source notice; retained complete teaching pages. Removed staged animation duplicates, external cartoon/video illustrations, advanced topics and resource advertisements. Source page 1 identifies the creators and links to the license below.",
+      "sha256": "cdeccb54efc3f274c9a12fa4b34fba954c5e4122d4c2f4423d23ca1443f11ec0",
+      "original_sha256": "fe86dc812e3e953fe0fa476b0d28ef8756bf584af4822277e2217a645f45f322",
+      "original_page_count": 62,
+      "page_count": 25,
+      "content_pdf_pages": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "page_mapping": [
+        {
+          "pdf_page": 2,
+          "source_pdf_page": 6
+        },
+        {
+          "pdf_page": 3,
+          "source_pdf_page": 7
+        },
+        {
+          "pdf_page": 4,
+          "source_pdf_page": 8
+        },
+        {
+          "pdf_page": 5,
+          "source_pdf_page": 9
+        },
+        {
+          "pdf_page": 6,
+          "source_pdf_page": 10
+        },
+        {
+          "pdf_page": 7,
+          "source_pdf_page": 11
+        },
+        {
+          "pdf_page": 8,
+          "source_pdf_page": 12
+        },
+        {
+          "pdf_page": 9,
+          "source_pdf_page": 13
+        },
+        {
+          "pdf_page": 10,
+          "source_pdf_page": 14
+        },
+        {
+          "pdf_page": 11,
+          "source_pdf_page": 16
+        },
+        {
+          "pdf_page": 12,
+          "source_pdf_page": 25
+        },
+        {
+          "pdf_page": 13,
+          "source_pdf_page": 28
+        },
+        {
+          "pdf_page": 14,
+          "source_pdf_page": 33
+        },
+        {
+          "pdf_page": 15,
+          "source_pdf_page": 35
+        },
+        {
+          "pdf_page": 16,
+          "source_pdf_page": 38
+        },
+        {
+          "pdf_page": 17,
+          "source_pdf_page": 39
+        },
+        {
+          "pdf_page": 18,
+          "source_pdf_page": 40
+        },
+        {
+          "pdf_page": 19,
+          "source_pdf_page": 41
+        },
+        {
+          "pdf_page": 20,
+          "source_pdf_page": 42
+        },
+        {
+          "pdf_page": 21,
+          "source_pdf_page": 45
+        },
+        {
+          "pdf_page": 22,
+          "source_pdf_page": 47
+        },
+        {
+          "pdf_page": 23,
+          "source_pdf_page": 52
+        },
+        {
+          "pdf_page": 24,
+          "source_pdf_page": 53
+        },
+        {
+          "pdf_page": 25,
+          "source_pdf_page": 55
+        }
+      ],
+      "qa": {
+        "all_retained_page_text_identical": true,
+        "all_retained_pages_render_compared": true,
+        "max_normalized_mean_pixel_difference": 0.000341281368514484,
+        "compared_at_scale": 2
+      }
+    },
+    {
+      "id": "categorical",
+      "original": "categorical-data-slides.pdf",
+      "output": "03-categorical-data.pdf",
+      "title": "Categorical Data",
+      "subtitle": "Selected lecture slides",
+      "source_title": "2.2 - Considering Categorical Data",
+      "authors": [
+        "Mine Çetinkaya-Rundel"
+      ],
+      "contributors": [
+        "Curry Hilton (Google Slides conversion)"
+      ],
+      "source_url": "https://docs.google.com/presentation/d/1D8PHarhuhj_FLDc2b7l7BoQ3euaHN0dv0V0T5-qttE4",
+      "license": "CC-BY-SA-3.0-US",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/us/",
+      "pages": [
+        3,
+        4,
+        5,
+        7,
+        11,
+        12,
+        13,
+        14,
+        16
+      ],
+      "selection": "Selected original PDF pages: 3-5, 7, 11-14, 16.",
+      "changes": "Added this source notice; retained complete teaching pages. Removed staged animation duplicates, an externally sourced pie-chart illustration and resource advertisements. Source page 1 identifies the creators and links to the license below.",
+      "sha256": "25705d9c2a5446edf971ffce08fcb04423f6c0d0a795e0a5362af3223663b46e",
+      "original_sha256": "7b65c4e1b628ab75c938173ab9b29e94a0b921bd687dd13a8fdaa8011d5cf409",
+      "original_page_count": 17,
+      "page_count": 10,
+      "content_pdf_pages": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "page_mapping": [
+        {
+          "pdf_page": 2,
+          "source_pdf_page": 3
+        },
+        {
+          "pdf_page": 3,
+          "source_pdf_page": 4
+        },
+        {
+          "pdf_page": 4,
+          "source_pdf_page": 5
+        },
+        {
+          "pdf_page": 5,
+          "source_pdf_page": 7
+        },
+        {
+          "pdf_page": 6,
+          "source_pdf_page": 11
+        },
+        {
+          "pdf_page": 7,
+          "source_pdf_page": 12
+        },
+        {
+          "pdf_page": 8,
+          "source_pdf_page": 13
+        },
+        {
+          "pdf_page": 9,
+          "source_pdf_page": 14
+        },
+        {
+          "pdf_page": 10,
+          "source_pdf_page": 16
+        }
+      ],
+      "qa": {
+        "all_retained_page_text_identical": true,
+        "all_retained_pages_render_compared": true,
+        "max_normalized_mean_pixel_difference": 0.0,
+        "compared_at_scale": 2
+      }
+    }
+  ]
+}

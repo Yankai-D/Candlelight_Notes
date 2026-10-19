@@ -1,0 +1,39 @@
+{
+  "version": "note-qualitative-feedback-v1",
+  "runId": "cd0c0e87-60e4-4885-8e6a-ea0e8ac0d269",
+  "artifactHash": "a44b7afb92ef6f6207e53585163d142453dc87b7fb959d3a90bbfe7528739d13",
+  "status": "partial-qualitative-feedback",
+  "reviewerRole": "project-owner",
+  "methodIdentityDisclosedDuringThisFeedback": false,
+  "caseId": "resnet-residual/foundation",
+  "preferredLabel": "A",
+  "scope": "用户对当前 ResNet 对照的阅读偏好，并以退化现象的解释为具体例子；不延伸到另外两组材料。",
+  "userVerbatim": "我要怎么做, 说哪个版本更好? 我觉得A更有沉浸性, 更关注局部问题和背景的因果关系, B有些疏远\n例如段落2, 更深模型不该比浅模型更差和事实退化的逻辑关系明显比B的更有逻辑, 展开更易读",
+  "assistantInterpretation": {
+    "dimensions": ["reasoning", "organization"],
+    "finding": "A 先展开恒等映射带来的预期，再呈现训练退化与该预期的冲突，随后在下一段解释残差形式如何回应困难。B 也包含这些关系，但将预期、反例、困难和残差方案集中于同一段。用户偏好 A 的展开节奏与问题驱动的承接。",
+    "candidateStylePrinciple": "围绕关键推理转折分配解释篇幅，让局部数学步骤回应刚刚提出的问题；必要限定贴着相关主张说明。",
+    "locatorNote": "用户称为段落2；以下位置由助手按所述论证在最新导出的对照中匹配，保留用户原始表述。",
+    "evidence": [
+      {
+        "recordId": "resnet-residual/foundation/1/A",
+        "paragraph": 3,
+        "quote": "这个改写来自退化现象带来的反直觉观察。按常理推理：如果在一个较浅模型上再堆叠若干层，而这些新增层被构造成恒等映射，那么更深的模型至少应该和浅模型表现一样好，训练误差不应更大。退化现象却显示，更深的模型训练误差反而更高。作者由此推断，问题可能出在求解器难以用多个非线性层去逼近恒等映射，而不是这些层没有能力表示它。"
+      },
+      {
+        "recordId": "resnet-residual/foundation/1/A",
+        "paragraph": 4,
+        "quote": "残差形式恰好绕开了这个难点。"
+      },
+      {
+        "recordId": "resnet-residual/foundation/1/B",
+        "paragraph": 4,
+        "quote": "退化现象却显示深层模型训练误差反而更大，这说明求解器在用多个非线性层逼近恒等映射时遇到了困难。残差形式针对的正是这个困难"
+      }
+    ]
+  },
+  "numericScores": null,
+  "factualReview": "pending",
+  "overallExperimentConclusion": null,
+  "productionPromptChanged": false
+}

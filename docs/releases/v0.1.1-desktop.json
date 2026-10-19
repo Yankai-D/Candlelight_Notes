@@ -1,0 +1,78 @@
+{
+  "kind": "windows-desktop-distribution",
+  "version": "0.1.1",
+  "status": "pass",
+  "checkedAt": "2026-10-18T11:06:43.407Z",
+  "applicationRevision": "ff8d3da87a304ed44bc945a6eae2674389252481",
+  "installer": "Pangzhu-Notes-0.1.1-Setup-x64.exe",
+  "bytes": 138070588,
+  "sha256": "a25d61cdd56b3980b420309d0090e696694fde3953ae80c4c9594136a7074bb0",
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "signed": false,
+  "automaticUpdates": false,
+  "changes": [
+    "Terminal completion is separate from retained review findings; completed trees never resume content edits implicitly",
+    "Explicit rebuild requires suggestions and rationale, supports opt-in old review context, and creates an isolated new version",
+    "Rebuild has idempotent retry and source revision checks; failures never overwrite the source",
+    "Learning-path traceability connects objectives to tasks, outcomes, deliverables, feedback and a prerequisite order",
+    "Content review compares the original goal, stable profile and mapping; semantic quality remains unverified"
+  ],
+  "engineering": {
+    "command": "npm run check",
+    "status": "pass",
+    "testsPassed": 288,
+    "testsFailed": 0,
+    "browserSuites": 5,
+    "stages": 13
+  },
+  "targetedTests": {
+    "passed": 29,
+    "scope": "ideal-tree and node-paper workflows; included in the full suite"
+  },
+  "browserRebuild": {
+    "status": "pass",
+    "mockedRequests": 30,
+    "checks": [
+      "Completed legacy review displayed as terminal",
+      "Required suggestion and reason; prior review opt-in",
+      "Lost response retry uses the same request ID",
+      "New version and original can both be opened",
+      "Rebuild does not modify source documents",
+      "Desktop and mobile modal layout; path report navigation"
+    ]
+  },
+  "desktopChecks": [
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+  ],
+  "installerLifecycle": {
+    "status": "not_retested",
+    "reason": "Existing personal desktop data detected; no installation, upgrade or uninstall was performed against the user installation",
+    "previousVersionEvidence": "v0.1.0-desktop.json",
+    "configurationChanged": false
+  },
+  "privacy": {
+    "asarEntriesAudited": 13298,
+    "payloadFiles": 14020,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "preGeneratedUserNotesIncluded": false
+  },
+  "modelCalls": 0,
+  "limits": [
+    "No claim of semantic completeness or teaching effectiveness; independent domain benchmarks and human evaluation remain necessary",
+    "Cross-branch prerequisites remain branch-level",
+    "Cross-version installer migration was not executed; legacy tree handling was checked in isolated regression tests",
+    "Unsigned installer; no automatic online update"
+  ]
+}

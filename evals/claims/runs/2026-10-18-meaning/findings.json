@@ -1,0 +1,45 @@
+{
+  "status": "provisional-ai-review",
+  "semanticJudgment": "unverified",
+  "runArtifactHash": "9cd892e41f20b1eab5d77a7eb34a7cc98eb9f7083bd38fbe467f6ca6bb1f4d2d",
+  "decision": "Do not promote the suffix: identical unit verdicts in this development batch; the known wording issue remains retained.",
+  "humanReview": null,
+  "findings": [
+    {
+      "id": "observed-weight-wording-still-missed",
+      "candidates": ["mean-observed/focused", "mean-observed/meaning"],
+      "observation": "两组都在 b7:s2 返回 retain，实验组未指出各观测值以自身大小为权重的说法。来源的算术均值是相加除以个数；数值贡献和数学系数仍未区分。",
+      "evidence": [
+        {"candidateId": "mean-observed/focused", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "mean-observed/meaning", "path": "checks.1.verdict", "quote": "retain"}
+      ],
+      "scope": "已见回归而非留出集；只说明本次单项提醒未解决该漏检，不能据此判定唯一原因或所有提示策略无效。"
+    },
+    {
+      "id": "correct-controls-retained",
+      "candidates": ["mean-equal-control/focused", "mean-equal-control/meaning", "mean-contribution-control/focused", "mean-contribution-control/meaning", "weighted-control/focused", "weighted-control/meaning", "center-order-control/focused", "center-order-control/meaning"],
+      "observation": "两组对四个正确控制的全部目标单元均返回 retain；这批未观察到新增误报，不能推广为不会误报。",
+      "evidence": [
+        {"candidateId": "mean-equal-control/focused", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "mean-equal-control/meaning", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "mean-contribution-control/focused", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "mean-contribution-control/meaning", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "weighted-control/focused", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "weighted-control/meaning", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "center-order-control/focused", "path": "checks.1.verdict", "quote": "retain"},
+        {"candidateId": "center-order-control/meaning", "path": "checks.1.verdict", "quote": "retain"}
+      ],
+      "scope": "AI 编写开发参考，非人工独立认证；retain 不证明正确。"
+    },
+    {
+      "id": "order-mismatch-located-in-both-arms",
+      "candidates": ["center-order-mismatch/focused", "center-order-mismatch/meaning"],
+      "observation": "两组均保留 p1:s1 的正确公式，在 p1:s2 指出先除后减与先减后除的不同。实验组多给出一组数值反例，算术可核实，但检出结果与基线相同。",
+      "evidence": [
+        {"candidateId": "center-order-mismatch/focused", "path": "checks.1.conflict", "quote": "两者运算顺序相反，且一般结果不同。"},
+        {"candidateId": "center-order-mismatch/meaning", "path": "checks.1.conflict", "quote": "例如 x=1,a=1,b=2 时，原句操作得 1/2-1=-0.5，而公式得 (1-1)/2=0。"}
+      ],
+      "scope": "新编开发探针不是真实生成稿；来源本身已用文字明确顺序。这个容易检出的例子不能抵消真实窗口的漏检。"
+    }
+  ]
+}

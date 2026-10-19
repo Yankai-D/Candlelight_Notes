@@ -1,0 +1,64 @@
+# 烛光笔记 · Candlelight Notes
+
+> 流光旁烛，知识成林
+
+导入论文、课件或讲义，让 AI 由浅入深、张弛有度地讲解学习资料，与你共同维护一份可编辑的学习笔记。选中内容即可追问、补充讲解或局部改写；“小纸条”融入正文，成为学习过程的一部分。
+
+学习树整理已有资料，也可围绕学习目标构建理想路径。知识节点区分阅读和实践，支持寻找可获取的论文、导入本地并继续学习。
+
+作者：[Yankai-D](https://github.com/Yankai-D) · [项目仓库](https://github.com/Yankai-D/Candlelight_Notes)
+
+## 下载与使用
+
+[下载 Windows x64 安装包](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.14)。这是本机验收通过的 0.1.14 候选版本，安装包未签名，完整安装器生命周期仍待空白 Windows 环境验证。
+
+安装后从桌面或开始菜单打开“烛光笔记 Candlelight”，无需安装 Node 或浏览器。首次引导可填写学习画像和 DeepSeek 连接，也可直接跳过，之后在设置中调整。发行包只附三份描述性统计公开选编，附完整来源、页码映射和致谢；不含作者的 Key、画像、个人资料或笔记。
+
+资料和笔记默认保存在“文档／烛光笔记”，每次导入前确认保存位置。设置 → 资料存储提供完整备份、恢复及回收站管理。模型连接保存在本机 `.env`，卸载会清除 Key，资料文件保留。生成请求会将相关资料与上下文发送给用户配置的模型服务。
+
+## 源码运行
+
+需要 Node.js 24、npm 和 Git。浏览器版 PDF 导出与界面验收需要 Chrome、Edge 或 Chromium；Linux 还需中文字体。
+
+```sh
+npm ci
+npm run dev:public
+```
+
+打开 <http://127.0.0.1:5173>。公开启动入口会校验并准备随仓库附带的三份资料，不下载私人论文，也不写入 Key。Windows PowerShell 若阻止 `npm.ps1`，使用 `npm.cmd`。Key 在应用设置中填写；配置字段见 [.env.example](.env.example)。
+
+`npm run dev` 为普通源码入口，使用调用者已有的本机资料配置。两种入口共用完整应用代码，个人配置、缓存、笔记和生成记录均被 Git 忽略。
+
+## 产品与 harness
+
+- 连续长文阅读、章节定位、原文跟随、三种视觉主题、统一数学与 PDF 渲染。
+- 翻译与适应性讲解独立保存；论文长文、结构化讲义两套模板，可添加自定义模板。
+- 稳定画像、学习目标、来源范围及模板快照各自约束生成；画像改变铺垫深度，核心文风保持稳定。
+- 结构化编辑、修订校验、来源定位、有界修复和逐章恢复，保护已有笔记与用户修改。
+- 嵌套联合资料包、独立笔记、资料学习树和可重建的理想学习树。
+- 完整空间备份、缺失原文关联、冲突另存及生成请求追溯。
+
+架构见 [架构说明](docs/architecture.md)，完整演示路线见 [项目 walkthrough](docs/project-walkthrough.md)。论文讲述模板与长期使用反馈是持续维护的产品资产，相关证据和边界见 [产品质量](docs/product-quality.md)。
+
+## 验证与构建
+
+```sh
+npm run check
+npm run prepare:materials
+# Windows x64：构建桌面安装包
+npm run package:desktop
+```
+
+`check` 使用隔离数据与模拟供应商，不读取个人 Key。源码保留测试、原创校准材料、公开材料选编和版本化开发实验记录，以便重放。历史本机修订号是来源标识，不代表这些旧提交已包含在本次公开 Git 历史。
+
+0.1.14 应用版本的本机验收包含 338 项测试、10 套浏览器流程、14 个检查阶段，以及实际打包程序的启动、PDF、保存退出和跨版本数据验证；新增公开分发工具的验证另列于 [公开发布说明](PUBLICATION.md)。这些结果不代表已证明普遍教学优势、无内存泄漏或完整跨平台兼容。远程 CI 结果以 GitHub Actions 的实际运行状态为准。
+
+安装包放在 Releases，不进入 Git 历史。源码快照保留来源清单，发行资产附 SHA-256。开发环境的历史、运行数据及临时产物不属于公开仓库。
+
+## 致谢与许可
+
+详见 [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md)。感谢 EasyRead、DeepTutor 的产品思路参考，以及 React、Tiptap、PDF.js、MathJax、Electron 等开源组件。
+
+描述性统计选编与样稿的作者、来源、改编说明及 CC BY-SA 许可见 [材料署名](materials/descriptive-statistics/ATTRIBUTION.txt)和 [课程说明](examples/course/README.md)。内置原创 Attention 示例用于演示与回归；论文开发探针保留具体来源和原文定位，不附用户导入的整篇论文。
+
+项目代码的开源许可证尚未指定；本次上传保留当前状态，不自动添加 MIT、Apache 或其他许可证。第三方组件和学习材料各自的声明继续适用。

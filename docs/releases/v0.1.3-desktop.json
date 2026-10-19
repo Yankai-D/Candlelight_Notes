@@ -1,0 +1,98 @@
+{
+  "kind": "windows-desktop-distribution",
+  "version": "0.1.3",
+  "status": "pass",
+  "checkedAt": "2026-10-18T11:44:00.061Z",
+  "applicationRevision": "56c7593c9a696cb208ee5aa19b89988cbc5dfa0f",
+  "installer": "Candlelight-Notes-0.1.3-Setup-x64.exe",
+  "bytes": 138074993,
+  "sha256": "572d5dc5e6473b0a00a2e5524bba1169d315a0742d64c4ec99fdc024f0ddd727",
+  "archive": {
+    "file": "Candlelight-Notes-0.1.3-Windows-x64.zip",
+    "bytes": 138120647,
+    "sha256": "a52302adcbd1391fa34e3221be60ad9ae35ded8ef32dc6460e7f49daa8a8c7c2",
+    "verifiedEntries": [
+      {
+        "name": "Candlelight-Notes-0.1.3-Setup-x64.exe",
+        "sha256": "572d5dc5e6473b0a00a2e5524bba1169d315a0742d64c4ec99fdc024f0ddd727"
+      },
+      {
+        "name": "Candlelight-Notes-0.1.3-Setup-x64.exe.sha256",
+        "sha256": "3b22b1f57759678e8989da22fd33ea8d0372b620924fcf8aeaa7acdecbf69712"
+      },
+      {
+        "name": "使用说明.txt",
+        "sha256": "f22153479b49e05d69ed2e165498956e82e6e2d2148c344cc363070477fb6e51"
+      },
+      {
+        "name": "ACKNOWLEDGEMENTS.md",
+        "sha256": "231e44535aa9e5cb03b68b727e0e7d47afbd95a89e9b34077a6ac4a8152588fd"
+      },
+      {
+        "name": "THIRD-PARTY-NOTICES.txt",
+        "sha256": "0a693f3622364f57567e1ad6d345da891f342d069a3eae645f2b2ab22228d27a"
+      },
+      {
+        "name": "materials/ATTRIBUTION.txt",
+        "sha256": "0777cf8781dfee8721e806082b3e0a07f344ddace6630b6762f5ceb0881dfadf"
+      },
+      {
+        "name": "materials/SOURCES.json",
+        "sha256": "64b86925f37e2ff77ba6c3eeaf31a51c0eb4daf627485b4a2bd222a7a87f90d0"
+      }
+    ]
+  },
+  "branding": {
+    "name": "旁烛笔记",
+    "englishName": "Candlelight Notes",
+    "windowTitle": "旁烛笔记 Candlelight",
+    "authorName": "Yankai-D",
+    "projectUrl": "https://github.com/Yankai-D/Candlelight_Notes"
+  },
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "signed": false,
+  "automaticUpdates": false,
+  "changes": [
+    "Updated product introduction and author/project link",
+    "Expandable in-app acknowledgements and bundled project/source/third-party credit files",
+    "Download ZIP contains the same verified installer and accompanying notices"
+  ],
+  "engineering": {
+    "build": "pass",
+    "packagedDesktopSmoke": "pass",
+    "archiveRoundTrip": "all entry hashes match original files"
+  },
+  "desktopChecks": [
+    "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+  ],
+  "installerLifecycle": {
+    "status": "not_retested",
+    "reason": "Personal installation left untouched; packaged application tested with isolated temporary data",
+    "previousVersionEvidence": "v0.1.0-desktop.json",
+    "installerIdentityChanged": false
+  },
+  "privacy": {
+    "asarEntriesAudited": 13299,
+    "payloadFiles": 14022,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "preGeneratedUserNotesIncluded": false
+  },
+  "modelCalls": 0,
+  "limits": [
+    "Cross-version installation not executed against the user installation",
+    "Unsigned installer; no automatic online update"
+  ]
+}

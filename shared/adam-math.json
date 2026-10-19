@@ -1,0 +1,281 @@
+{
+  "source": "https://arxiv.org/abs/1412.6980",
+  "verifiedPages": [
+    4,
+    8,
+    9
+  ],
+  "formulas": [
+    {
+      "page": 4,
+      "extracted": "R(T) =\nT\nX\nt=1\n[ft(θt) −ft(θ∗)]\n(5)",
+      "latex": "R(T)=\\sum_{t=1}^{T}\\left[f_t(\\theta_t)-f_t(\\theta^*)\\right]\\tag{5}",
+      "display": true,
+      "aliases": [
+        "R(T) = ∑_{t=1}^{T} [ft(θt) − ft(θ∗)] (5)"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "R(T) ≤\nD2\n2α(1 −β1)\nd\nX\ni=1\np\nTbvT,i+\nα(1 + β1)G∞\n(1 −β1)√1 −β2(1 −γ)2\nd\nX\ni=1\n∥g1:T,i∥2+\nd\nX\ni=1\nD2\n∞G∞\n√1 −β2\n2α(1 −β1)(1 −λ)2",
+      "latex": "\\begin{aligned}R(T)\\le{}&\\frac{D^2}{2\\alpha(1-\\beta_1)}\\sum_{i=1}^{d}\\sqrt{T\\hat v_{T,i}}\\\\&+\\frac{\\alpha(1+\\beta_1)G_\\infty}{(1-\\beta_1)\\sqrt{1-\\beta_2}(1-\\gamma)^2}\\sum_{i=1}^{d}\\lVert g_{1:T,i}\\rVert_2\\\\&+\\sum_{i=1}^{d}\\frac{D_\\infty^2G_\\infty\\sqrt{1-\\beta_2}}{2\\alpha(1-\\beta_1)(1-\\lambda)^2}\\end{aligned}",
+      "display": true,
+      "aliases": [
+        "R(T) ≤ (D²/(2α(1 − β1))) ∑_{i=1}^{d} √(T v̂T,i) + (α(1 + β1)G∞/((1 − β1)√(1 − β2)(1 − γ)²)) ∑_{i=1}^{d} ∥g1:T,i∥2 + ∑_{i=1}^{d} (D∞²G∞√(1 − β2))/(2α(1 − β1)(1 − λ)²)"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "∥∇ft(θ)∥2 ≤G",
+      "latex": "\\lVert\\nabla f_t(\\theta)\\rVert_2\\le G",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "∥∇ft(θ)∥∞≤\nG∞",
+      "latex": "\\lVert\\nabla f_t(\\theta)\\rVert_\\infty\\le G_\\infty",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "θ ∈Rd",
+      "latex": "\\theta\\in\\mathbb R^d",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "∥θn −θm∥2 ≤D",
+      "latex": "\\lVert\\theta_n-\\theta_m\\rVert_2\\le D",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "∥θm −θn∥∞≤D∞",
+      "latex": "\\lVert\\theta_m-\\theta_n\\rVert_\\infty\\le D_\\infty",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "m, n ∈{1, ..., T}",
+      "latex": "m,n\\in\\{1,\\ldots,T\\}",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "β1, β2 ∈[0, 1)",
+      "latex": "\\beta_1,\\beta_2\\in[0,1)",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "β2\n1\n√β2",
+      "latex": "\\frac{\\beta_1^2}{\\sqrt{\\beta_2}}",
+      "display": false,
+      "aliases": [
+        "β1²/√β2"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "αt =\nα\n√\nt",
+      "latex": "\\alpha_t=\\frac{\\alpha}{\\sqrt t}",
+      "display": false,
+      "aliases": [
+        "αt = α/√t"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "β1,t = β1λt−1",
+      "latex": "\\beta_{1,t}=\\beta_1\\lambda^{t-1}",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "λ ∈(0, 1)",
+      "latex": "\\lambda\\in(0,1)",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "T ≥1",
+      "latex": "T\\ge1",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "Pd\ni=1 ∥g1:T,i∥2\n<< dG∞\n√\nT",
+      "latex": "\\sum_{i=1}^{d}\\lVert g_{1:T,i}\\rVert_2\\ll dG_\\infty\\sqrt T",
+      "display": false,
+      "aliases": [
+        "∑_{i=1}^{d} ∥g1:T,i∥2 << dG∞√T"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "Pd\ni=1\np\nTbvT,i << dG∞\n√\nT",
+      "latex": "\\sum_{i=1}^{d}\\sqrt{T\\hat v_{T,i}}\\ll dG_\\infty\\sqrt T",
+      "display": false,
+      "aliases": [
+        "∑_{i=1}^{d} √(T v̂T,i) << dG∞√T"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "E[Pd\ni=1 ∥g1:T,i∥2]",
+      "latex": "\\mathbb E[\\sum_{i=1}^{d}\\lVert g_{1:T,i}\\rVert_2]",
+      "display": false,
+      "aliases": [
+        "E[∑_{i=1}^{d} ∥g1:T,i∥2]"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "O(log d\n√\nT)",
+      "latex": "O(\\log d\\sqrt T)",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "O(\n√\ndT)",
+      "latex": "O(\\sqrt{dT})",
+      "display": false,
+      "aliases": [
+        "O(√(dT))"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "O(\n√\nT)",
+      "latex": "O(\\sqrt T)",
+      "display": false,
+      "aliases": []
+    },
+    {
+      "page": 4,
+      "extracted": "R(T)\nT\n= O( 1\n√\nT\n)",
+      "latex": "\\frac{R(T)}{T}=O\\!\\left(\\frac1{\\sqrt T}\\right)",
+      "display": false,
+      "aliases": [
+        "R(T)/T = O(1/√T)"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "Pd\ni=1 ∥g1:T,i∥2 ≤dG∞\n√\nT",
+      "latex": "\\sum_{i=1}^{d}\\lVert g_{1:T,i}\\rVert_2\\le dG_\\infty\\sqrt T",
+      "display": false,
+      "aliases": [
+        "∑_{i=1}^{d} ∥g1:T,i∥2 ≤dG∞√T"
+      ]
+    },
+    {
+      "page": 4,
+      "extracted": "limT →∞\nR(T )\nT\n= 0",
+      "latex": "\\lim_{T\\to\\infty}\\frac{R(T)}{T}=0",
+      "display": false,
+      "aliases": [
+        "lim_{T→∞} R(T)/T = 0"
+      ]
+    },
+    {
+      "page": 8,
+      "extracted": "vt = βp\n2vt−1 + (1 −βp\n2)|gt|p\n(6)",
+      "latex": "v_t=\\beta_2^p v_{t-1}+(1-\\beta_2^p)|g_t|^p\\tag{6}",
+      "display": true,
+      "aliases": [
+        "vt = β^p_2 vt−1 + (1 − β^p_2)|gt|^p (6)"
+      ]
+    },
+    {
+      "page": 8,
+      "extracted": "= (1 −βp\n2)\nt\nX\ni=1\nβp(t−i)\n2\n· |gi|p\n(7)",
+      "latex": "v_t=(1-\\beta_2^p)\\sum_{i=1}^{t}\\beta_2^{p(t-i)}\\cdot|g_i|^p\\tag{7}",
+      "display": true,
+      "aliases": [
+        "= (1 − β^p_2) Σ_{i=1}^{t} β^{p(t−i)}_2 · |gi|^p (7)"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "ut = lim\np→∞(vt)1/p = lim\np→∞\n \n(1 −βp\n2)\nt\nX\ni=1\nβp(t−i)\n2\n· |gi|p\n!1/p\n(8)",
+      "latex": "u_t=\\lim_{p\\to\\infty}(v_t)^{1/p}=\\lim_{p\\to\\infty}\\left((1-\\beta_2^p)\\sum_{i=1}^{t}\\beta_2^{p(t-i)}|g_i|^p\\right)^{1/p}\\tag{8}",
+      "display": true,
+      "aliases": [
+        "ut = lim_{p→∞} (vt)^{1/p} = lim_{p→∞} ( (1 − β^p_2) Σ_{i=1}^{t} β^{p(t−i)}_2 · |gi|^p )^{1/p} (8)"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "= lim\np→∞(1 −βp\n2)1/p\n \nt\nX\ni=1\nβp(t−i)\n2\n· |gi|p\n!1/p\n(9)",
+      "latex": "\\quad=\\lim_{p\\to\\infty}(1-\\beta_2^p)^{1/p}\\left(\\sum_{i=1}^{t}\\beta_2^{p(t-i)}|g_i|^p\\right)^{1/p}\\tag{9}",
+      "display": true,
+      "aliases": [
+        "= lim_{p→∞} (1 − β^p_2)^{1/p} ( Σ_{i=1}^{t} β^{p(t−i)}_2 · |gi|^p )^{1/p} (9)"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "= lim\np→∞\n \nt\nX\ni=1\n\u0010\nβ(t−i)\n2\n· |gi|\n\u0011p\n!1/p\n(10)",
+      "latex": "\\quad=\\lim_{p\\to\\infty}\\left(\\sum_{i=1}^{t}\\left(\\beta_2^{t-i}|g_i|\\right)^p\\right)^{1/p}\\tag{10}",
+      "display": true,
+      "aliases": [
+        "= lim_{p→∞} ( Σ_{i=1}^{t} ( β^{(t−i)}_2 · |gi| )^p )^{1/p} (10)"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "= max\n\u0000βt−1\n2\n|g1|, βt−2\n2\n|g2|, . . . , β2|gt−1|, |gt|\n\u0001\n(11)",
+      "latex": "\\quad=\\max\\!\\left(\\beta_2^{t-1}|g_1|,\\beta_2^{t-2}|g_2|,\\ldots,\\beta_2|g_{t-1}|,|g_t|\\right)\\tag{11}",
+      "display": true,
+      "aliases": [
+        "= max( β^{t−1}_2 |g1|, β^{t−2}_2 |g2|, …, β2|gt−1|, |gt| ) (11)"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "ut = max(β2 · ut−1, |gt|)\n(12)",
+      "latex": "u_t=\\max(\\beta_2\\cdot u_{t-1},|g_t|)\\tag{12}",
+      "display": true,
+      "aliases": []
+    },
+    {
+      "page": 9,
+      "extracted": "ut = limp→∞(vt)1/p",
+      "latex": "u_t=\\lim_{p\\to\\infty}(v_t)^{1/p}",
+      "display": false,
+      "aliases": [
+        "ut = lim_{p→∞} (vt)^{1/p}"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "βp\n2",
+      "latex": "\\beta_2^p",
+      "display": false,
+      "aliases": [
+        "β^p_2"
+      ]
+    },
+    {
+      "page": 9,
+      "extracted": "|∆t| ≤α",
+      "latex": "|\\Delta_t|\\le\\alpha",
+      "display": false,
+      "aliases": [
+        "|Δt| ≤α"
+      ]
+    }
+  ]
+}

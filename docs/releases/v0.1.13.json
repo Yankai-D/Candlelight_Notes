@@ -1,0 +1,125 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.13",
+  "status": "verified-local-candidate",
+  "codeRevision": "af0b24465b4f12acedd24724b26343bbb5fc786e",
+  "sourceFingerprint": "d6b5cbed65b6f9c62e6af9cd13a633002f438d5c3e04bbb8a0bd2789b890bf9b",
+  "lockSha256": "0d938d8cd5a6da76c4fec62f61e51b92dc875066e6a807e2d37f743ffb506f65",
+  "changes": [
+    "Recoverable removal and explicit permanent deletion",
+    "Complete workspace backup, verified restore and undo",
+    "Missing original relink and keep-both conflict resolution",
+    "Frozen generation context and actual model call evidence",
+    "Versioned long-use feedback linked to unchanged production style assets"
+  ],
+  "validation": {
+    "tests": 338,
+    "browserSuites": 9,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.12",
+        "asarSha256": "fd9b93bb5e3942ded34c97ded0309eeac30d3b67b49f3fb24de63495a5d80cf6"
+      },
+      "to": {
+        "version": "0.1.13",
+        "asarSha256": "9acabbcb9dd9842b02dacfa3b7bff5d310c3b760b053e7ea3c9ac7e3684b9ee3"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "acceleratedLifecycle": {
+      "status": "pass",
+      "modelCalls": 0,
+      "elapsedMs": 14802,
+      "acceleratedCycles": 16,
+      "heapSamplesBytes": [
+        15369100,
+        16110376
+      ],
+      "heapInterpretation": "Two diagnostic samples; not a leak or hours-long stability conclusion.",
+      "checks": [
+        "recoverable removal preserves originals",
+        "complete backup and verified preview",
+        "explicit restore and return to original workspace",
+        "missing-original relink",
+        "frozen generation evidence",
+        "16 edit/save/navigation cycles with 4 reloads",
+        "conflict preview and keep-both copy",
+        "mobile maintenance layout"
+      ]
+    },
+    "payloadFilesVerified": 12063,
+    "privateStoragePathsAbsent": true,
+    "dependencyGraphUnchanged": true,
+    "priorDependencyAudit": "docs/releases/v0.1.12.json",
+    "currentDependencyAuditRun": false,
+    "productionStyleUnchanged": [
+      {
+        "path": "shared/editorial-policy.mjs",
+        "sha256": "7f7ca80ee3028c62d2a4b0f1eeee4061afc824d7782171c751f473335adcbe86",
+        "comparedRevision": "53a675b70053b6bbf7f8327b09763a8adf7acea2"
+      },
+      {
+        "path": "shared/writing-templates.mjs",
+        "sha256": "2797521966a2ca83c7fea0848e5bc44a5553ce692d31a1f213d595cff6f9e12e",
+        "comparedRevision": "53a675b70053b6bbf7f8327b09763a8adf7acea2"
+      },
+      {
+        "path": "shared/course-default-sample.json",
+        "sha256": "73b12664185671b01ec6ecd10f5e2471e430d3a72e959d0d4a6029798a8e9fd1",
+        "comparedRevision": "53a675b70053b6bbf7f8327b09763a8adf7acea2"
+      }
+    ],
+    "uninstallHook": {
+      "reusedEvidence": "artifacts/uninstall-policy/report.json",
+      "unchanged": true
+    },
+    "checkReportSha256": "8e384fbd0a2c1510de15c8505778dd39bbcb953a8b9182f0a762faf7caac94be"
+  },
+  "distribution": {
+    "installer": {
+      "path": "output/releases/pangzhu-desktop-0.1.13/installer/Candlelight-Notes-0.1.13-Setup-x64.exe",
+      "file": "Candlelight-Notes-0.1.13-Setup-x64.exe",
+      "bytes": 138070792,
+      "sha256": "70cb8a75c9ff1bc4b6280313434edac6f2d243973c5710700cc7bd02f21329a1"
+    },
+    "archive": {
+      "path": "output/releases/pangzhu-desktop-0.1.13/Candlelight-Notes-0.1.13-Windows-x64.zip",
+      "bytes": 138117611,
+      "sha256": "2f32e4b658f864369adcc9df57713f5a7726e591c8ad4f3b58cfee6c970d6fa3"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "publicMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "authorAndAcknowledgementsRetained": true,
+    "signed": false
+  },
+  "limitations": {
+    "nsisInstallUpgradeUninstall": "not-run-in-blank-Windows-account",
+    "remoteCI": "not-run",
+    "independentTeachingReview": "pending",
+    "hoursLongSoak": "not-run; accelerated UI cycles are recorded separately",
+    "multiProcessWholeWorkspaceTransactions": "not-supported",
+    "backupLimits": "128 MB per file, 4 GB total, 10000 files, 2000 entries; no cancellation endpoint yet"
+  },
+  "modelCalls": 0,
+  "githubPushed": false,
+  "review": "docs/reviews/2026-10-19-maintenance-0.1.13.md",
+  "evidenceManifest": "artifacts/release-0.1.13/evidence/MANIFEST.json",
+  "evidenceManifestSha256": "7d05da4d9c84c5fef3339bcb6f365a575c72b2b2e7fdd90491fb947fd9b607be"
+}

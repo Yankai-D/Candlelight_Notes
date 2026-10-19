@@ -1,0 +1,105 @@
+{
+  "kind": "windows-desktop-distribution",
+  "version": "0.1.6",
+  "status": "pass",
+  "checkedAt": "2026-10-18T12:44:22.206Z",
+  "applicationRevision": "cb0ca4ed6d4407f2f2f96835e1c46ca1fdf70438",
+  "installer": "Candlelight-Notes-0.1.6-Setup-x64.exe",
+  "bytes": 138033870,
+  "sha256": "412a46cf30259ce257dde1d947df7b567507227809294b8110e1e154efd0e65c",
+  "archive": {
+    "file": "Candlelight-Notes-0.1.6-Windows-x64.zip",
+    "bytes": 138078950,
+    "sha256": "953c365c8602997fc01682e9872db074fc4fb0fa5f0fbc0aa01111b6f7a9b614",
+    "verifiedEntries": [
+      {
+        "name": "Candlelight-Notes-0.1.6-Setup-x64.exe",
+        "sha256": "412a46cf30259ce257dde1d947df7b567507227809294b8110e1e154efd0e65c"
+      },
+      {
+        "name": "Candlelight-Notes-0.1.6-Setup-x64.exe.sha256",
+        "sha256": "c7a2c3067d25428d1a7e4960e5faa927c173862306534a7393a2674b6e902c13"
+      },
+      {
+        "name": "使用说明.txt",
+        "sha256": "7338d84a882b45dc00100b60d5701d8d595e9b3b122d3987360e2ac62f75771d"
+      },
+      {
+        "name": "ACKNOWLEDGEMENTS.md",
+        "sha256": "b37bba3d41f2624d0d0463d1a7c2bc7e2f1ea3d88566396ce410f92dde71fd32"
+      },
+      {
+        "name": "THIRD-PARTY-NOTICES.txt",
+        "sha256": "0a693f3622364f57567e1ad6d345da891f342d069a3eae645f2b2ab22228d27a"
+      },
+      {
+        "name": "materials/ATTRIBUTION.txt",
+        "sha256": "f49aa71639345fa1687bb77d482ed2836af8777d82b521387a7cbc13cbce0c40"
+      },
+      {
+        "name": "materials/SOURCES.json",
+        "sha256": "64b86925f37e2ff77ba6c3eeaf31a51c0eb4daf627485b4a2bd222a7a87f90d0"
+      }
+    ]
+  },
+  "branding": {
+    "name": "烛光笔记",
+    "englishName": "Candlelight Notes",
+    "windowTitle": "烛光笔记 Candlelight",
+    "authorName": "Yankai-D",
+    "projectUrl": "https://github.com/Yankai-D/Candlelight_Notes",
+    "selectedDesign": "A - Quiet Candle",
+    "matchesSelectedProposal": true
+  },
+  "runtime": {
+    "electron": "44.9.0"
+  },
+  "signed": false,
+  "automaticUpdates": false,
+  "changes": [
+    "User-selected A Quiet Candle design adopted, including its line weight and colors",
+    "UI mark, favicon and native icon sizes are rendered from one vector source without raster upscaling",
+    "Brand provenance and third-party acknowledgements retained; installation identity and data directory unchanged"
+  ],
+  "engineering": {
+    "build": "pass",
+    "targetedTestsPassed": 5,
+    "targetedTestsFailed": 0,
+    "packagedDesktopSmoke": "pass",
+    "brandAssets": "Canonical SVG and all seven native icon sizes match packaged assets",
+    "archiveRoundTrip": "all entry hashes match original files"
+  },
+  "desktopChecks": [
+    "Packaged application uses the canonical candle mark",
+    "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+    "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+    "Repeated launch returns to the same application window",
+    "Embedded reader and Chinese/math PDF export work without an external browser",
+    "Window close flushes a pending edit and stops the internal service",
+    "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+  ],
+  "installerLifecycle": {
+    "status": "not_retested",
+    "reason": "Personal installation left untouched; packaged application tested with isolated temporary data",
+    "previousVersionEvidence": "v0.1.0-desktop.json",
+    "installerIdentityChanged": false,
+    "installerDisplayNameChanged": false
+  },
+  "privacy": {
+    "asarEntriesAudited": 13299,
+    "payloadFiles": 14022,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "preGeneratedUserNotesIncluded": false
+  },
+  "modelCalls": 0,
+  "limits": [
+    "Cross-version installation not executed against the user installation",
+    "Unsigned installer; no automatic online update"
+  ]
+}

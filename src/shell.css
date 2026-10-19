@@ -1,0 +1,217 @@
+/* One frame for the collection, knowledge tree and reading workspace.
+   These tokens only style app chrome; note and PDF typography stays in the
+   shared note renderer. */
+.application-shell {
+  --rail-width: 64px;
+  --context-width: clamp(248px, 24vw, 344px);
+  --header-height: 64px;
+  --shell-rail: var(--rail, #e9ede3);
+  --shell-sidebar: var(--sidebar, #f0f2eb);
+  --shell-inset: var(--inset, #e6ebdf);
+  --shell-hover: var(--hover, #dfe7d7);
+  --shell-raised: var(--raised, #fffef9);
+  --shell-muted: #737d70;
+  display: grid;
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+}
+:root:is([data-theme="dark"], [data-theme="light"]) .application-shell { --shell-muted: var(--muted); }
+:root .application-shell :is(.library-home, .workspace) {
+  display: grid;
+  grid-template-columns: var(--context-width) minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  --shelf-sidebar: var(--shell-sidebar);
+  --shelf-inset: var(--shell-inset);
+  --shelf-hover: var(--shell-hover);
+}
+:root .application-shell .workspace.focus-mode { grid-template-columns: 0 minmax(0, 1fr); }
+
+/* Navigation keeps its position and labels when a document is opened. */
+:root .application-shell .app-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--shell-rail);
+  border-right: 1px solid var(--line);
+  height: 100%;
+  min-height: 0;
+  z-index: 40;
+}
+:root .application-shell .brand-mark {
+  height: var(--header-height);
+  width: 100%;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--green);
+}
+:root .application-shell :is(.rail-main, .rail-bottom, .rail-secondary) { display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; padding: 0; }
+:root .application-shell .rail-main { margin: 18px 0 0; }
+:root .application-shell .rail-secondary { margin: 16px 0 0; padding-top: 16px; border-top: 1px solid var(--line); width: 38px; }
+:root .application-shell .rail-bottom { margin-top: auto; padding: 14px 0; }
+:root .application-shell .rail-button {
+  width: 46px;
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  color: var(--shell-muted);
+  background: transparent;
+  touch-action: manipulation;
+}
+:root .application-shell .rail-button>span { display: block; margin: 0; flex: none; font: 10px/1.2 var(--sans); }
+:root .application-shell .rail-button.active { background: var(--shell-hover); color: var(--green); }
+:root .application-shell .rail-button.active::before { display: none; }
+:root .application-shell .rail-button:not(:disabled):hover { background: var(--shell-inset); color: var(--green); }
+:root .application-shell .rail-button:disabled { opacity: .35; cursor: default; }
+
+/* The contextual sidebar has identical geometry and branding in both views. */
+:root .application-shell :is(.collection-sidebar, .study-sidebar) {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  padding: 0 24px;
+  border-right: 1px solid var(--line);
+  background: var(--shell-sidebar);
+  overflow: hidden;
+}
+:root .application-shell .collection-sidebar { display: flex; flex-direction: column; }
+:root .application-shell .shell-brand-row {
+  height: var(--header-height);
+  min-height: var(--header-height);
+  flex-shrink: 0;
+  margin: 0 -24px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+:root .application-shell .collection-brand { display: flex; padding: 0; text-align: left; color: var(--green); }
+:root .application-shell .collection-brand>span { display: block; font: 600 19px/1.3 var(--serif); letter-spacing: .5px; }
+:root .application-shell .collection-brand small { display: block; margin: 3px 0 0; font: 8px/1.4 var(--sans); letter-spacing: 1px; color: var(--shell-muted); }
+:root .application-shell :is(.collection-context, .document-meta) { padding-top: 22px; }
+:root .application-shell .eyebrow { font: 10px/1.5 var(--sans); letter-spacing: 1px; color: var(--shell-muted); }
+:root .application-shell .collection-context h2 { margin: 10px 0 6px; font: 500 22px/1.5 var(--serif); color: var(--ink); }
+:root .application-shell .collection-context p { margin: 0; font: 11px/1.8 var(--sans); color: var(--shell-muted); }
+:root .application-shell .folder-heading { margin: 32px 0 12px; font-size: 11px; color: var(--shell-muted); }
+:root .application-shell .collection-folders { display: grid; gap: 4px; margin: 0 -8px; overflow: auto; }
+:root .application-shell .collection-folders>button { padding: 11px 10px; border-radius: 7px; color: var(--shell-muted); }
+:root .application-shell .collection-sidebar-bottom { position: static; display: block; margin-top: auto; padding-top: 24px; }
+:root .application-shell .resume-reading { display: block; width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 9px; text-align: left; background: var(--paper); }
+:root .application-shell .resume-reading>span { display: flex; align-items: center; gap: 7px; color: var(--shell-muted); font-size: 10px; }
+.resume-reading>span>svg:last-child { margin-left: auto; }
+:root .application-shell .resume-reading strong { display: block; font: 500 16px/1.6 var(--serif); margin-top: 12px; color: var(--ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+:root .application-shell .resume-reading small { display: block; font-size: 10px; margin-top: 5px; color: var(--shell-muted); }
+:root .application-shell .resume-reading:hover { border-color: var(--shell-muted); }
+:root .application-shell .sidebar-footer { padding: 14px 0; font-size: 9px; color: var(--shell-muted); white-space: nowrap; }
+:root .application-shell .study-sidebar .sidebar-source { border-color: var(--line); }
+:root .application-shell :is(.intent-pill, .learning-controls select) { border-radius: 6px; }
+:root .application-shell .source-context-viewport { border-color: var(--line); border-radius: 6px; }
+:root .application-shell .focus-mode .study-sidebar { visibility: hidden; padding: 0; }
+
+/* The same header, breadcrumb, action sizes and theme picker everywhere. */
+:root .application-shell .shell-header {
+  height: var(--header-height);
+  min-height: var(--header-height);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--shell-muted);
+}
+:root .application-shell .breadcrumb { display: flex; align-items: center; gap: 10px; min-width: 0; font: 11px/1.5 var(--sans); color: var(--shell-muted); }
+.shell-header .breadcrumb>svg, .shell-header .breadcrumb>button { flex-shrink: 0; }
+:root .application-shell .breadcrumb-home { padding: 5px 0; color: var(--shell-muted); font-size: 11px; white-space: nowrap; }
+:root .application-shell .breadcrumb-home:hover { color: var(--green); }
+:root .application-shell .breadcrumb-current { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:root .application-shell .header-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+:root .application-shell .header-actions :is(.icon-button, .quiet-button) { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 30px; padding: 0 6px; border-radius: 6px; color: var(--shell-muted); font-size: 11px; }
+:root .application-shell .header-actions :is(.icon-button, .quiet-button):hover { background: var(--shell-inset); }
+:root .application-shell .theme-trigger { color: var(--shell-muted); }
+:root .application-shell .save-indicator { color: var(--shell-muted); font-size: 10px; }
+:root .application-shell .save-indicator.save-error { color: var(--error, #a85640); }
+:root .application-shell .reading-toolbar { border-color: var(--line); padding-inline: 28px; }
+.shell-header .export-menu { z-index: 50; }
+
+@media (max-width: 1200px) {
+  .application-shell { --context-width: 276px; --rail-width: 60px; }
+  :root .application-shell :is(.collection-sidebar, .study-sidebar) { padding-inline: 20px; }
+  :root .application-shell .shell-brand-row { padding-inline: 20px; margin-inline: -20px; }
+  :root .application-shell .shell-header { padding-inline: 22px; }
+  :root .application-shell .header-actions { gap: 7px; }
+}
+@media (max-width: 1000px) {
+  .application-shell { --context-width: 248px; --rail-width: 56px; }
+  :root .application-shell .collection-context h2 { font-size: 20px; }
+  :root .application-shell .shell-header { padding-inline: 16px; }
+  :root .application-shell .breadcrumb { gap: 7px; }
+  :root .application-shell .reading-toolbar { padding-inline: 16px; }
+  :root .application-shell .save-indicator { display: none; }
+}
+@media (max-height: 750px) {
+  .application-shell { --header-height: 56px; }
+  :root .application-shell :is(.collection-context, .document-meta) { padding-top: 12px; }
+  :root .application-shell .sidebar-footer { padding: 8px 0; }
+  :root .application-shell .rail-button { height: 44px; gap: 4px; }
+  :root .application-shell .rail-main { margin-top: 10px; }
+  :root .application-shell .rail-bottom { gap: 4px; padding: 8px 0; }
+}
+@media (max-width: 780px) {
+  .application-shell { --header-height: 56px; }
+  :root .application-shell :is(.library-home, .workspace, .workspace.focus-mode) { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  :root .application-shell :is(.collection-main, .main-workspace) { grid-column: 1; min-height: 0; overflow: hidden; }
+  :root .application-shell :is(.collection-sidebar, .study-sidebar, .focus-mode .study-sidebar) {
+    position: fixed; left: var(--rail-width); top: 0; bottom: 0; width: min(310px, calc(100vw - var(--rail-width)));
+    height: 100dvh; max-height: 100dvh; padding: 0 20px; z-index: 35; visibility: hidden; pointer-events: none;
+    transform: translateX(-120%); transition: transform .18s ease-out, visibility .18s;
+  }
+  :root .application-shell .sidebar-open :is(.collection-sidebar, .study-sidebar) { transform: translateX(0); visibility: visible; pointer-events: auto; }
+  :root .application-shell .collection-content { overflow: auto; padding: 28px 24px 24px; }
+  :root .application-shell .mobile-shade { position: fixed; inset: 0 0 0 var(--rail-width); z-index: 30; background: var(--shade, #25332235); }
+  :root .application-shell .knowledge-garden { overflow-y: auto; min-height: 0; flex: 1; }
+  :root .application-shell .garden-shell { flex-shrink: 0; }
+  :root .application-shell .collection-folders>button { flex-shrink: 0; }
+}
+@media (max-width: 600px) {
+  .application-shell { --rail-width: 0px; --header-height: 54px; grid-template-columns: minmax(0, 1fr); padding-bottom: 62px; }
+  :root .application-shell .app-rail { position: fixed; left: 0; right: 0; bottom: 0; height: 62px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 5px 4px; border-right: 0; border-top: 1px solid var(--line); }
+  :root .application-shell .brand-mark { display: none; }
+  :root .application-shell :is(.rail-main, .rail-secondary, .rail-bottom) { display: contents; }
+  :root .application-shell .rail-button { width: 100%; height: 48px; border-radius: 7px; gap: 4px; }
+  :root .application-shell .rail-button>span { font-size: 9px; }
+  :root .application-shell .rail-button>svg { width: 18px; height: 18px; }
+  :root .application-shell :is(.collection-sidebar, .study-sidebar, .focus-mode .study-sidebar) { height: calc(100dvh - 62px); max-height: calc(100dvh - 62px); bottom: 62px; }
+  :root .application-shell .mobile-shade { bottom: 62px; }
+  :root .application-shell .shell-header { padding: 0 12px; gap: 8px; }
+  :root .application-shell .header-actions { gap: 3px; }
+  :root .application-shell .header-actions .quiet-button>span { display: none; }
+  :root .application-shell .workspace-header .breadcrumb-home, .workspace-header .breadcrumb-home+svg { display: none; }
+  :root .application-shell .workspace-header .theme-trigger>span:not(.theme-swatch) { display: none; }
+  :root .application-shell .collection-content { padding: 24px 18px; }
+  :root .application-shell .reading-toolbar { padding-inline: 12px; }
+}
+@media (max-height: 550px) and (min-width: 601px) {
+  :root .application-shell .rail-button { height: 34px; }
+  :root .application-shell .rail-button>span { display: none; }
+  :root .application-shell .rail-secondary { padding-top: 8px; margin-top: 8px; }
+  :root .application-shell .document-meta { padding-top: 5px; }
+  :root .application-shell .sidebar-footer { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .application-shell :is(.collection-sidebar, .study-sidebar) { transition: none; }
+}

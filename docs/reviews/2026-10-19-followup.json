@@ -1,0 +1,65 @@
+{
+  "schema": "engineering-followup-v1",
+  "checkedAt": "2026-10-18T15:17:04.652Z",
+  "verifiedRevision": "d9587acd872ce442ad929dc95197285522a440ab",
+  "sourceFingerprint": "4dc963391ebaf2095b36373ac9432bb905ada68413b781de6bfb19af7d0df04d",
+  "sourceCheck": {
+    "status": "pass",
+    "tests": 306,
+    "browserSuites": 7,
+    "stages": 13,
+    "report": "artifacts/check-runtime-followup/report.json"
+  },
+  "liveService": {
+    "status": 200,
+    "hasTreeList": true,
+    "modelConfigured": true
+  },
+  "applicationDataUpgrade": {
+    "status": "pass",
+    "previous": {
+      "version": "0.1.8",
+      "asarSha256": "c44941ad183b4342240a4f0fd02681497b2dd21b91abb542bd8154316d8ad539"
+    },
+    "target": {
+      "version": "0.1.9",
+      "asarSha256": "d907b84ac73c7ae7fa39dc82256cc8bbd681a832854cd7d19f49b8e64f86bd3d"
+    },
+    "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+  },
+  "productionVulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "allDependencyVulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 8,
+    "high": 0,
+    "critical": 0,
+    "total": 8
+  },
+  "dependencyCandidate": {
+    "status": "isolated-probe-only",
+    "adopted": false,
+    "report": "artifacts/engineering-followup/proxy-compatibility.json"
+  },
+  "remaining": [
+    "NSIS installation/upgrade/uninstall in an isolated Windows environment",
+    "Remote CI and Linux validation",
+    "Complete dependency-candidate compatibility and packaging validation",
+    "Independent human content review"
+  ],
+  "newModelCalls": 0,
+  "githubPushed": false,
+  "newInstallerPublished": false,
+  "evidence": {
+    "path": "artifacts/engineering-followup/manifest.json",
+    "sha256": "80c73101da316d668caa7d6e80f7ea3992315a78bb53f29fb56829b85f8f966f",
+    "files": 27
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "status": "provisional-ai-review",
+  "semanticJudgment": "unverified",
+  "runArtifactHash": "54e4a558ae70a7a716f690370b36335793905b003feca361699b9b29103d9b72",
+  "findings": [
+    {
+      "id": "diagnosis-granularity-conflict",
+      "kind": "execution-failure",
+      "cases": ["shrink-observed", "affine-valid"],
+      "observation": "两例都针对 p1 返回两项 checks，违反每目标段一项的契约，被拒绝且没有进入修订。收缩例第二项的 reason 和 counterexample 已承认反例，却仍标 no-issue-found；claim 还改写了公式定界符。仿射正确对照的数学解释看来合理，但不能因此把执行失败计为成功。段落含多个主张，而契约只允许一个诊断，是需要重新设计的粒度问题。",
+      "evidence": [
+        {"caseId":"shrink-observed","stage":"review","path":"checks.1.reason","quote":"不过“只要 P 偏离单位矩阵就不同”这一说法在 ρ=0 或 (P-I)u=0 时并不成立，属于把局部结论推广成必然。"},
+        {"caseId":"affine-valid","stage":"review","path":"checks.1.reason","quote":"因此对所有 x 相等以及仅当 (c-1)b≠0 时不同，均与来源一致。"}
+      ]
+    },
+    {
+      "id": "silent-added-assumption",
+      "kind": "semantic-miss",
+      "cases": ["affine-overclaim"],
+      "observation": "响应结构、原句和引文匹配均通过，却把笔记未给出的 b!=0 当作隐含语境，判定无问题。原来源明确允许 b=0；预先固定的 x=2,b=0,c=4 给出 T=S=8，反驳无条件的不同结论。引文存在不能防止模型替作者补齐前提。",
+      "evidence": [
+        {"caseId":"affine-overclaim","stage":"review","path":"checks.0.reason","quote":"笔记的“只要 c≠1”未排除 b=0 的情形，但结合前句“差为 (c-1)b”可理解为在 b≠0 的语境下讨论"}
+      ]
+    },
+    {
+      "id": "sampling-local-repair",
+      "kind": "plausible-repair",
+      "cases": ["sampling-overclaim"],
+      "observation": "诊断指出理论标准误与逐次误差保证的区别；候选只替换错误句，保留固定总体方差、独立抽样的前句。模型的示意反例可以由等概率 0/1 总体实例化：n=4 的观测为 0,0,1,1，n=16 全为 1，绝对误差分别为 0 和 0.5。预注册的 n=2/8 反例也独立成立。该候选初步看来有依据，尚无独立人工审阅。",
+      "evidence": [
+        {"caseId":"sampling-overclaim","stage":"review","path":"checks.0.reason","quote":"笔记把关于标准误（样本均值的离散程度）的结论推广成了每次抽样绝对误差必然减半。"},
+        {"caseId":"sampling-overclaim","stage":"patch","path":"edits.0.after","quote":"但这只说明理论标准误减半，并不保证每次抽样得到的均值与总体均值的绝对误差也减半。"}
+      ]
+    },
+    {
+      "id": "missing-context-routing",
+      "kind": "policy-disagreement",
+      "cases": ["context-missing"],
+      "observation": "来源缺更新方程和步长条件，预注册策略要求 needs-context 并停止。模型把缺少证明写进 counterexample，返回 issue，触发了第二次修订请求。程序只能验证该字段存在，不能证明它是反例。候选实际撤回保证并说明资料缺失，没有捏造收敛定理；这是停止策略与撤回无依据结论的分歧，不应直接归为数学修订错误。",
+      "evidence": [
+        {"caseId":"context-missing","stage":"review","path":"checks.0.counterexample","quote":"来源明确说明本摘录没有收敛定理或证明，且可容许步长条件在未包含的附录 A 中；仅凭“步长为正”不能保证收敛。"},
+        {"caseId":"context-missing","stage":"patch","path":"edits.0.after","quote":"来源只说明迭代使用正步长，并指出更新方程与可容许步长条件在未包含的附录 A 中，本摘录未给出收敛定理或证明。"}
+      ]
+    },
+    {
+      "id": "three-clear-controls",
+      "kind": "preserved-controls",
+      "cases": ["shrink-corrected", "sampling-valid", "context-cautious"],
+      "observation": "三个正确对照各一请求，返回 no-issue-found，没有生成修订。第四个正确对照 affine-valid 因重复项执行失败，已单列，不能合并宣传为四个对照全通过。",
+      "evidence": [
+        {"caseId":"shrink-corrected","stage":"review","path":"checks.0.reason","quote":"差仍为零，与笔记的“可能相同”一致。"},
+        {"caseId":"sampling-valid","stage":"review","path":"checks.0.reason","quote":"该段也正确限定为理论标准误，并说明不保证每个样本的实际估计误差都减小。"},
+        {"caseId":"context-cautious","stage":"review","path":"checks.0.reason","quote":"因此笔记的限定结论与来源一致。"}
+      ]
+    }
+  ]
+}
