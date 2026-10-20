@@ -36,7 +36,9 @@ test('template selection and ordinary generation automatically retry transient p
  let calls=0;await assert.rejects(runModel(config,[{role:'user',content:'x'}],undefined,async()=>{calls++;return new Response('unauthorized',{status:401})},{retryDelays:[0]}),/Key/);assert.equal(calls,1);
 });
 test('generation evidence storage disappearing after start cannot suppress a successful provider response',async()=>{
- const dir=await fs.mkdtemp(join(tmpdir(),'candlelight-record-')),document=createDemo(),chapter=document.chapters[0];let calls=0;
+ // FileLibrary supplies a canonical system directory in production. Windows
+ // runners may expose the temporary directory through a short-path alias.
+ const dir=await fs.realpath(await fs.mkdtemp(join(tmpdir(),'candlelight-record-'))),document=createDemo(),chapter=document.chapters[0];let calls=0;
  try{
   const record=await createGenerationRecord(dir,{action:'generate',scope:'chapter',documentId:document.id,revision:document.revision,chapterId:chapter.id,instruction:'整理',document},'test',async()=>{calls++;return new Response('{}')});
   await fs.rm(join(dir,'generation-records'),{recursive:true,force:true});

@@ -1,7 +1,7 @@
 {
   "schema": "candlelight-public-source-v1",
   "version": "0.1.19",
-  "sourceRevision": "20cbba4394d7d8a4cb51eeb167170e468fe5409e",
+  "sourceRevision": "9fa3abb7e95575377aa980a1701ef916b47e9cca",
   "applicationRevision": "966ecc49539096a9c2919908b70e22ddda579df6",
   "applicationFilesVerified": 136,
   "installer": {
@@ -317,8 +317,8 @@
     },
     {
       "path": "docs/reviews/2026-10-20-recovery-batch-update-0.1.19.md",
-      "bytes": 5410,
-      "sha256": "33fd47f6acfc9c3d852d8f7cb338c070859dbb55c9c5749e6d50906a01a1a37f"
+      "bytes": 5902,
+      "sha256": "bcbb888b7ff7ef281383383ddb4458cb2c82dec07bea5ecb42845bd1728fb39d"
     },
     {
       "path": "docs/workspace-recovery.md",
@@ -1997,8 +1997,8 @@
     },
     {
       "path": "tests/recovery.test.mjs",
-      "bytes": 5654,
-      "sha256": "f984b6e04dc84c1c514dd05f6c2ca31eebe62e6863f50f221f03edad3e10b930"
+      "bytes": 5825,
+      "sha256": "50944eb0d45d3c421f6a3ea079ba37c905b1698029f978a90d142cd864e31a23"
     },
     {
       "path": "tests/review-boundaries.test.mjs",
