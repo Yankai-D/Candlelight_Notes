@@ -46,7 +46,7 @@ await copy(join(root, 'ACKNOWLEDGEMENTS.md'), join(stage, 'ACKNOWLEDGEMENTS.md')
 const tracked = execFileSync('git', ['ls-files', '-z', 'server', 'shared', 'src/styles.css', 'src/learning.css', 'src/themes.css',
   'scripts/render-course-reference.mjs', 'scripts/render-editorial-reference.mjs', 'examples/course/descriptive-statistics', 'examples/editorial/adam-bias-correction.mjs'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
 // These are runtime modules, not user material. New desktop files are explicit.
-for (const file of [...new Set([...tracked, 'shared/brand.mjs', 'shared/print-layout.mjs', 'desktop/main.mjs', 'desktop/policy.mjs', 'desktop/preload.cjs', 'desktop/pdf.mjs'])].filter(file => /\.(mjs|cjs|json|css)$/.test(file))) await copy(join(root, file), join(app, file));
+for (const file of [...new Set([...tracked, 'shared/brand.mjs', 'shared/print-layout.mjs', 'desktop/main.mjs', 'desktop/policy.mjs', 'desktop/preload.cjs', 'desktop/pdf.mjs', 'desktop/updates.mjs'])].filter(file => /\.(mjs|cjs|json|css)$/.test(file))) await copy(join(root, file), join(app, file));
 await writeFile(join(app, 'package.json'), JSON.stringify({ name: 'pangzhu-notes', version: pkg.version, private: true, type: 'module',
   main: 'desktop/main.mjs', description: `${brand.englishName} · 本地学习笔记与 AI 协作工具`,
   author: { name: brand.authorName, url: brand.projectUrl }, homepage: brand.projectUrl, repository: pkg.repository,

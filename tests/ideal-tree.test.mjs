@@ -8,6 +8,8 @@ import { idealInput, idealCommandSchema, validateContract, validateSkeleton, val
 import { IdealRunner, IdealStore, publicJob } from '../server/ideal-tree/runner.mjs';
 import { publicAddress, safeURL, publicFetch, createResearchTools, sourceContext, evidenceExcerpts } from '../server/ideal-tree/research.mjs';
 import { idealMessages } from '../server/ideal-tree/prompts.mjs';
+import * as filesystem from 'node:fs/promises';
+import { atomicWrite } from '../server/atomic-file.mjs';
 
 const input = { goal: '理解检索原理并实现一个有评估结果的资料查询工具', profile: { background: '本科生，会 Python', foundations: ['基础概率论'] }, library: [] };
 const contract = { title: '可靠的资料检索', summary: '先理解表示和检索，再用固定问题集检验方案。',
@@ -49,6 +51,39 @@ async function finish(runner, id) { await runner.active.get(id)?.promise; return
 const create = runner => ({ action: 'ideal-tree', command: 'create', input, requestId: randomUUID() });
 const rebuild = job => ({ action:'ideal-tree', command:'rebuild', id:job.id, revision:job.revision, requestId:randomUUID(),
   suggestion:'加强评价标准并保留原有基础内容', reason:'我希望用具体成果检验是否真正理解', includeReview:false });
+
+test('tree creation and rebuild survive transient checkpoint locks without extra model repair',async()=>{
+  const directory=await mkdtemp(join(tmpdir(),'ideal-lock-'));let failures=0;
+  try{
+    const store=new IdealStore(directory,(path,data)=>{
+      let attempts=0;return atomicWrite(path,data,{sleep:async()=>{},io:{...filesystem,rename:async(...args)=>{if(attempts++===0){failures++;throw Object.assign(new Error('OneDrive lock'),{code:'EPERM'})}return filesystem.rename(...args)}}});
+    });
+    const runner=new IdealRunner({store,tools:tools()});const log=[];
+    const first=await runner.command(create(runner),provider(log),'fixture');const job=await finish(runner,first.job.id);
+    assert.equal(job.status,'complete');assert.equal(job.metrics.repairs,0);assert.equal(log.filter(c=>c.stage==='contract').length,1);
+    const next=await runner.command(rebuild(job),provider(log),'fixture');assert.equal((await finish(runner,next.job.id)).status,'complete');
+    assert.equal(log.filter(c=>c.stage==='contract').length,2);assert.ok(failures>20);
+    assert.ok((await filesystem.readdir(directory)).every(name=>name.endsWith('.json')));
+  }finally{await filesystem.rm(directory,{recursive:true,force:true})}
+});
+
+test('exhausted checkpoint recovery pauses with the accepted result and never repairs it as model output',async()=>{
+  const directory=await mkdtemp(join(tmpdir(),'ideal-checkpoint-'));let failed=false;
+  try{
+    const store=new IdealStore(directory,async(path,data)=>{if(JSON.parse(data).contract&&!failed){failed=true;throw Object.assign(new Error('storage busy'),{code:'STORAGE_BUSY'})}await atomicWrite(path,data)});
+    const runner=new IdealRunner({store,tools:tools()}),log=[];
+    const first=await runner.command(create(runner),provider(log),'fixture');const paused=await finish(runner,first.job.id);
+    assert.equal(paused.status,'paused');assert.deepEqual(paused.contract,contract);assert.equal(log.length,1);assert.equal(paused.metrics.repairs,0);
+    await runner.command({command:'resume',id:paused.id},provider(log),'fixture');assert.equal((await finish(runner,paused.id)).status,'complete');
+    assert.equal(log.filter(c=>c.stage==='contract').length,1);
+  }finally{await filesystem.rm(directory,{recursive:true,force:true})}
+});
+
+test('token-extension requests consume the same tree budget before another provider request starts',async()=>{
+  const {runner}=await setup({maxCalls:1});let sent=0;
+  const first=await runner.command(create(runner),async(_messages,task)=>{task.onRequest();sent++;task.onRequest();sent++;return JSON.stringify(contract)},'fixture');
+  const job=await finish(runner,first.job.id);assert.equal(job.status,'paused');assert.equal(job.metrics.modelCalls,1);assert.equal(sent,1);assert.equal(job.metrics.repairs,0);
+});
 
 test('deleting a tree requires confirmation, stops pending generation and cannot resurrect after restart',async()=>{
   const {runner,directory}=await setup();let started;const ready=new Promise(resolve=>{started=resolve});

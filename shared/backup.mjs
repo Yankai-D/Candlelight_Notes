@@ -28,6 +28,7 @@ const notebook = z.object({ ...notebookState, id: z.string().max(80), label: z.s
 const schema = z.object({ format: z.literal('reading-tree-v1'), document: z.object({
   title: z.string().min(1).max(400), subtitle: z.string(), filename: z.string(), kind: z.enum(['pdf', 'text']), intent: z.string().max(4000),
   sourceWarnings: z.array(z.string().max(500)).max(12).optional(),
+  sourceState: z.enum(['deferred','ready']).optional(), readingPolicy: z.enum(['manual','automatic']).optional(),
   intentSource: z.enum(['default', 'user']).optional(),
   entryType: z.literal('note').optional(), sourceContext: bundleContextSchema.optional(), composition: compositionSchema.optional(),
   createdAt: z.number(), ...notebookState,

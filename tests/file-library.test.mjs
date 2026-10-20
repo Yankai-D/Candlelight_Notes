@@ -36,6 +36,15 @@ test('file library remembers successful import paths across restarts and keeps i
   await reopened.command({ action: 'directory', directory: join(f.root, 'next') });
   assert.equal((await f.index()).entries[0].notePath, entry.notePath);
 });
+test('import replay after a response or collection failure verifies both note and original without duplicating', async t => {
+  const f=await fixture(t), doc=document(), source={name:'test.txt',data:Buffer.from('original').toString('base64')};
+  const request={action:'import',document:doc,source};await f.command(request);
+  assert.equal((await f.command(request)).verified,true);assert.equal((await f.index()).entries.length,1);
+  await assert.rejects(f.command({...request,source:{...source,data:Buffer.from('different').toString('base64')}}),/已存在/);
+  await assert.rejects(f.command({...request,document:{...doc,title:'different'}}),/已存在/);
+  assert.equal(await readFile((await f.index()).entries[0].sourcePath,'utf8'),'original');
+});
+
 test('migration is verified and idempotent without replacing a later edited note', async t => {
   const f = await fixture(t), doc = document();
   await f.command({ action: 'import', document: doc, migration: true, source: { name: 'test.txt', data: Buffer.from('old').toString('base64') } });

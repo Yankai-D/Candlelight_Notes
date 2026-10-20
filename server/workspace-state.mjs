@@ -1,16 +1,12 @@
-import { readFile, writeFile, rename, unlink } from 'node:fs/promises';
+import { readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { atomicWrite } from './atomic-file.mjs';
 
 export async function readJSON(path, fallback) {
   try { return JSON.parse(await readFile(path, 'utf8')); }
   catch (error) { if (error.code === 'ENOENT' && fallback !== undefined) return structuredClone(fallback); throw error; }
 }
-export async function atomicJSON(path, value) {
-  const temporary = `${path}.${randomUUID()}.tmp`;
-  try { await writeFile(temporary, JSON.stringify(value) + '\n', { flag: 'wx', mode: 0o600 }); await rename(temporary, path); }
-  finally { await unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error; }); }
-}
+export const atomicJSON = (path, value, options) => atomicWrite(path, JSON.stringify(value) + '\n', options);
 // A durable journal makes the two lightweight files one recoverable state change.
 // It never contains credentials or instructions to delete material files.
 export async function recoverWorkspaceState(profile) {

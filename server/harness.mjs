@@ -1,4 +1,5 @@
 import { brand } from '../shared/brand.mjs';
+import { recoverOperation, recoveryScope } from './recovery.mjs';
 import { z } from 'zod';
 import { editableBlocks, textOf } from '../shared/document.mjs';
 import { defaultSettings, learningSettingsSchema, learnerProfileSchema, knowledgeContext } from '../shared/learning.mjs';
@@ -232,6 +233,9 @@ export function validateResult(input, raw) {
 }
 
 export async function runModel(config, messages, signal, fetcher = fetch, options = {}) {
+  return recoveryScope(() => runModelOperation(config, messages, signal, fetcher, options));
+}
+async function runModelOperation(config, messages, signal, fetcher, options) {
   const planInput = bundlePlans.get(messages);
   if (planInput) {
     let conversation = messages;
@@ -248,7 +252,7 @@ export async function runModel(config, messages, signal, fetcher = fetch, option
   }
   const idealRequest = idealOperationFor(messages);
   if (idealRequest) return runIdealOperation(idealRequest, config, (conversation, task) =>
-    runCompletion(config, conversation, task.signal, fetcher, { action: `ideal-${task.stage}`, onCompletion: task.onCompletion }));
+    runCompletion(config, conversation, task.signal, fetcher, { action: `ideal-${task.stage}`, onCompletion: task.onCompletion, onRequest: task.onRequest }));
   const templateRequest = templateOperationFor(messages);
   if (templateRequest) return runTemplateOperation(templateRequest, messages,
     conversation => runCompletion(config, conversation, signal, fetcher, { ...options, action: templateRequest.action }), signal);
@@ -338,6 +342,8 @@ async function runCompletion(config, messages, signal, fetcher = fetch, options 
   const budgets = deepseek ? limits[options.action] || limits.generate : [options.action === 'test' ? 256 : 8192];
   for (const [attempt, maxTokens] of budgets.entries()) {
     signal?.throwIfAborted();
+    const data = await recoverOperation(async () => {
+    options.onRequest?.();
     let response;
     try {
       response = await fetcher(endpoint, {
@@ -356,9 +362,18 @@ async function runCompletion(config, messages, signal, fetcher = fetch, options 
     }
     if (!response.ok) {
       const descriptions = { 401: 'API Key 无效，请检查模型设置。', 402: '模型账户余额不足，请检查 DeepSeek 账户。', 429: '模型服务请求过于频繁，请稍后重试。', 400: '模型不支持当前请求格式，请检查模型名称与 JSON 模式支持。' };
-      throw Object.assign(new Error(descriptions[response.status] || `模型服务暂时不可用（${response.status}），请稍后重试。`), { code:'MODEL_HTTP',status:response.status,retryable:[408,429,500,502,503,504].includes(response.status) });
+      const retryAfter = response.headers?.get('retry-after');
+      const retryAfterMs = retryAfter ? (/^\d+$/.test(retryAfter) ? Number(retryAfter) * 1000 : Date.parse(retryAfter) - Date.now()) : 0;
+      await response.body?.cancel().catch(() => {});
+      throw Object.assign(new Error(descriptions[response.status] || `模型服务暂时不可用（${response.status}），请稍后重试。`), { code:'MODEL_HTTP',status:response.status,retryable:[408,429,500,502,503,504].includes(response.status),retryAfterMs:Number.isFinite(retryAfterMs)?Math.max(0,retryAfterMs):0 });
     }
-    const data = await response.json();
+    let parsed;
+    try { parsed = await response.json(); }
+    catch (error) { signal?.throwIfAborted(); throw Object.assign(new Error('模型连接在读取响应时中断。'), {code:'MODEL_RESPONSE',retryable:true,cause:error}); }
+    const choice=parsed?.choices?.[0];
+    if ((!choice?.finish_reason || choice.finish_reason==='stop') && !choice?.message?.refusal && (typeof choice?.message?.content!=='string'||!choice.message.content.trim())) throw Object.assign(new Error('模型返回了空内容，自动重试后仍未取得有效响应。'),{code:'MODEL_EMPTY',retryable:true});
+    return parsed;
+    }, {layer:'transport',stage:options.action || 'completion',signal,delays:options.action?.startsWith('ideal-')?[]:options.retryDelays || [800]});
     const finishReason = data.choices?.[0]?.finish_reason;
     options.onCompletion?.({ attempt: attempt + 1, maxTokens, finishReason, promptTokens: data.usage?.prompt_tokens, completionTokens: data.usage?.completion_tokens, reasoningTokens: data.usage?.completion_tokens_details?.reasoning_tokens });
     if (finishReason === 'length') {

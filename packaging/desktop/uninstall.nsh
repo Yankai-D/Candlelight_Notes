@@ -1,5 +1,6 @@
 ; Only a real uninstall clears credentials. electron-builder also invokes the
 ; old uninstaller during an upgrade, with --updated; preserve settings then.
+!include "${__FILEDIR__}\install-directory.nsh"
 !ifndef CANDLELIGHT_PROFILE_PATH
   !define CANDLELIGHT_PROFILE_PATH "$APPDATA\PangzhuNotes"
 !endif

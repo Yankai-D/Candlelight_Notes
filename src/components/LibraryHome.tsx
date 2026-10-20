@@ -21,6 +21,7 @@ type Props = {
   onDiscover?: () => void; recoverableRemoval?: boolean;
   onRename: (id: string, title: string) => Promise<void>;
   onCreateNote: (folderId: string, title: string, intent: string) => Promise<void>;
+  sourceProgress?: string;
   filter: LibraryFilter; onFilter: (filter: LibraryFilter) => void;
   sidebarOpen: boolean; onToggleSidebar: () => void; onCloseSidebar: () => void;
   theme: VisualTheme; onTheme: (theme: VisualTheme) => void; organizing: boolean; organizeError: string;
@@ -103,7 +104,7 @@ export function LibraryHome(props: Props) {
         <div className="collection-table-heading"><span>资料与笔记</span><span>文件夹</span><span>学习状态</span><span /></div>
         <div className="collection-list paper-library" role="list" aria-label="已添加的资料">
           {visible.map(document => <div className="collection-row" role="listitem" key={document.id}>
-            <button className="collection-document" aria-label={`打开 ${document.library?.label || document.title}`} onClick={() => onOpen(document.id)}><span className={`collection-file-icon ${document.entryType === 'note' ? 'standalone-note-icon' : ''}`}>{document.entryType === 'note' ? <NotebookPen size={22} strokeWidth={1.4} /> : <FileText size={22} strokeWidth={1.4} />}</span><span><strong>{document.library?.label || document.title}</strong><small>{document.entryType === 'note' ? document.intent : document.library ? document.title : document.filename}</small><span>{document.entryType === 'note' ? `独立笔记 · ${document.sourceContext?.sources.length || 0} 份参考资料` : [document.library?.authors, document.library?.year, document.kind === 'pdf' ? 'PDF' : '文本', `${document.pages.length} 页`].filter(Boolean).join(' · ')}</span></span></button>
+            <button className="collection-document" aria-label={`打开 ${document.library?.label || document.title}`} onClick={() => onOpen(document.id)}><span className={`collection-file-icon ${document.entryType === 'note' ? 'standalone-note-icon' : ''}`}>{document.entryType === 'note' ? <NotebookPen size={22} strokeWidth={1.4} /> : <FileText size={22} strokeWidth={1.4} />}</span><span><strong>{document.library?.label || document.title}</strong><small>{document.entryType === 'note' ? document.intent : document.library ? document.title : document.filename}</small><span>{document.entryType === 'note' ? `独立笔记 · ${document.sourceContext?.sources.length || 0} 份参考资料` : [document.library?.authors, document.library?.year, document.kind === 'pdf' ? 'PDF' : '文本', document.sourceState === 'deferred' ? '原件已保存' : `${document.pages.length} 页`].filter(Boolean).join(' · ')}</span></span></button>
             <span className="collection-folder-label" title={folderPath(collection, collection.items[document.id]?.folderId)}><Folder size={13} />{collection.folders.find(folder => folder.id === collection.items[document.id]?.folderId)?.name || '未分类'}</span>
             <span className={`study-status status-${collection.items[document.id]?.status || 'imported'}`}><i />{studyStatuses[collection.items[document.id]?.status || 'imported']}</span>
             <button className="collection-row-menu" aria-label={`整理 ${document.library?.label || document.title}`} onClick={() => { setManagedId(document.id); setRename(document.library?.label || document.title); setConfirmDelete(false); setError('') }}><MoreHorizontal size={18} /></button>
@@ -142,8 +143,9 @@ export function LibraryHome(props: Props) {
     {noteForm && selectedFolder && <Modal title="新建独立笔记" subtitle={folderPath(collection, selectedFolder.id)} onClose={() => { if (!saving) setNoteForm(null) }}><form className="collection-form new-bundle-note" onSubmit={event => { event.preventDefault(); void perform(() => props.onCreateNote(selectedFolder.id, noteForm.title, noteForm.intent), () => setNoteForm(null)) }}>
       <label>笔记名称<input aria-label="笔记名称" autoFocus maxLength={400} value={noteForm.title} placeholder="例如：数学期末复习讲义" onChange={event => setNoteForm({ ...noteForm, title: event.target.value })} /></label>
       <label>整理要求<textarea aria-label="整理要求" rows={4} maxLength={4000} value={noteForm.intent} onChange={event => setNoteForm({ ...noteForm, intent: event.target.value })} /></label>
-      <details className="bundle-source-inventory"><summary>{sources.length} 份资料 · 包括下属资料包</summary>{sources.map(source => <div key={source.id}><FileText size={14} /><span>{source.library?.label || source.title}<small>{folderPath(collection, collection.items[source.id]?.folderId)} · {source.pages.length} 页</small></span></div>)}</details>
+      <details className="bundle-source-inventory"><summary>{sources.length} 份资料 · 包括下属资料包</summary>{sources.map(source => <div key={source.id}><FileText size={14} /><span>{source.library?.label || source.title}<small>{folderPath(collection, collection.items[source.id]?.folderId)} · {source.sourceState === 'deferred' ? '整理时读取' : `${source.pages.length} 页`}</small></span></div>)}</details>
       <p className="field-help">按要求生成一份独立笔记，之后可以直接编辑、追问或添加小纸条。来源随笔记保存。</p>
+      {saving && <p className="field-help" role="status">{props.sourceProgress || '正在准备笔记…'}</p>}
       {error && <p className="inline-error" role="alert">{error}</p>}<div className="modal-actions"><button type="button" className="secondary" disabled={saving} onClick={() => setNoteForm(null)}>取消</button><button className="primary" disabled={saving || !sources.length || !noteForm.title.trim() || !noteForm.intent.trim()}>创建并打开笔记</button></div>
     </form></Modal>}
   </div>

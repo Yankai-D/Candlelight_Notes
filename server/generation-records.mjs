@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { atomicJSON, readJSON } from './workspace-state.mjs';
 import { requestSchema } from './harness.mjs';
+import { optionalRecord } from './recovery.mjs';
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const documentId = value => { if (!/^[a-zA-Z0-9_-]{1,100}$/.test(value || '')) throw new Error('无效的资料编号。'); return value; };
 const recordId = value => { if (!/^[a-f0-9-]{36}$/.test(value || '')) throw new Error('无效的生成记录编号。'); return value; };
@@ -50,13 +51,13 @@ export async function createGenerationRecord(system, input, model, fetcher = fet
       for (const call of record.calls) { delete call.messages; call.messagesOmitted = true; }
     }
     if (Buffer.byteLength(JSON.stringify(record)) > 32 * 1024 * 1024) throw new Error('生成上下文过大，无法保存追溯记录。');
-    await atomicJSON(file, record);
+    await atomicJSON(file, record, {delays:[80,160]});
   }
-  await save();
+  await optionalRecord(save, 'generation-record-start');
   activeRecords.add(file);
   const wrapped = async (url, options) => {
     const body = JSON.parse(options.body), call = { startedAt: Date.now(), maxTokens: body.max_tokens, messagesDigest: hash(body.messages), messages: body.messages, status: 'requested' };
-    record.calls.push(call); await save();
+    record.calls.push(call); await optionalRecord(save, 'generation-record-call');
     try { const response = await fetcher(url, options); call.status = 'response'; call.httpStatus = response.status; call.elapsedMs = Date.now() - call.startedAt; return response; }
     catch (error) { call.status = 'transport-failed'; call.elapsedMs = Date.now() - call.startedAt; throw error; }
   };
@@ -64,13 +65,15 @@ export async function createGenerationRecord(system, input, model, fetcher = fet
     record.status = status; record.finishedAt = Date.now();
     if (result) { record.resultDigest = hash(result); record.resultSummary = String(result.summary || '').slice(0,4000); }
     if (error) record.errorCode = error.name === 'AbortError' ? 'CANCELLED' : String(error.code || 'GENERATION_FAILED').slice(0,100);
-    await save();
+    await optionalRecord(save, 'generation-record-finish');
     activeRecords.delete(file);
     // Keep recent evidence bounded without storing any credentials or headers.
+    await optionalRecord(async () => {
     const entries = [];
     for (const name of await readdir(path)) if (/^[a-f0-9-]{36}\.json$/.test(name)) { const recordPath = join(path, name); if (await realpath(recordPath) !== recordPath) continue; const info = await lstat(recordPath); entries.push({ path: recordPath, size: info.size, time: info.mtimeMs }); }
     entries.sort((a,b) => b.time - a.time); let total = 0;
     for (const [index, entry] of entries.entries()) { total += entry.size; if ((index >= 20 || total > 64 * 1024 * 1024) && entry.path !== file && !activeRecords.has(entry.path)) await unlink(entry.path); }
+    }, 'generation-record-retention');
   }
   return { id: record.id, fetch: wrapped, event: value => record.events.push(value), finish };
 }

@@ -1,4 +1,7 @@
 import { RegenerateModal } from './components/RegenerateModal'
+import { ImportModal } from './components/ImportModal'
+import { hydrateMaterial, placeImportedMaterial } from '../shared/material-ingestion.mjs'
+import { bundleForDocument } from '../shared/folders.mjs'
 import { HelpModal, type HelpAction } from './components/HelpModal'
 import { Onboarding } from './components/Onboarding'
 import { BrandMark } from './components/BrandMark'
@@ -39,7 +42,7 @@ import { defaultEditInstruction, defaultGenerationInstruction } from '../shared/
 import { defaultLearningIntent, normalizeLearningIntent } from '../shared/learning-intent.mjs'
 import { commitNotebook, ensureNotebooks, selectNotebook, reviseNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
 import { prepareDocument, remainingChapters } from '../shared/preparation.mjs'
-import { applyBundlePlan, bundlePlanRequest, captureBundleContext, contextForMaterial, createBundleNote } from '../shared/bundle-context.mjs'
+import { applyBundlePlan, bundlePlanRequest, bundleMaterials, captureBundleContext, contextForMaterial, createBundleNote } from '../shared/bundle-context.mjs'
 import { repairFormulaDocument } from '../shared/formula-layout.mjs'
 import { upgradeMathDocument } from '../shared/math-references.mjs'
 import { mathText } from '../shared/math-syntax.mjs'
@@ -67,6 +70,7 @@ export default function App() {
   const [view, setView] = useState<'library' | 'tree' | 'reader'>('library')
   const [libraryFilter, setLibraryFilter] = useState<LibraryFilter>({ folder: 'all', status: 'all', query: '' })
   const [importFolderId, setImportFolderId] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
   const [collection, setCollection] = useState<Collection>({ version: 1, folders: [], items: {} })
   const collectionRef = useRef(collection); collectionRef.current = collection
   const collectionWrites = useRef<Promise<void>>(Promise.resolve())
@@ -120,9 +124,11 @@ export default function App() {
   const docsRef = useRef(documents); docsRef.current = documents
   const activeRef = useRef(activeId); activeRef.current = activeId
   const configRef = useRef(config); configRef.current = config
+  const modalRef = useRef(modal); modalRef.current = modal
+  const importStop = useRef<(()=>void)|null>(null)
   const doc = documents.find(d => d.id === activeId)
   const docRef = useRef(doc); docRef.current = doc
-  const desktopBusy = useRef(false); desktopBusy.current = !!busy || preparing || organizing || exporting || !!pending || onboardingBusy
+  const desktopBusy = useRef(false); desktopBusy.current = importing || !!busy || preparing || organizing || exporting || !!pending || onboardingBusy
   const chapter = doc?.chapters.find(c => c.id === doc.currentChapter) || doc?.chapters[0]
   const chapterIndex = doc && chapter ? doc.chapters.findIndex(c => c.id === chapter.id) : 0
 
@@ -174,21 +180,21 @@ export default function App() {
   }, [])
   useEffect(() => { if (activeId) void storage.setPreference('active-document', activeId) }, [activeId])
   useEffect(() => {
-    const handler = () => setModal('import')
+    const handler = () => { if (!importStop.current && modalRef.current !== 'import') setModal('import') }
     window.addEventListener('pangzhu:import', handler)
     return () => window.removeEventListener('pangzhu:import', handler)
   }, [])
   useEffect(() => {
-    const handler = () => setModal('help')
+    const handler = () => { if (modalRef.current !== 'import') setModal('help') }
     const shortcut = (event: KeyboardEvent) => { if (event.key === 'F1') { event.preventDefault(); handler() } }
     window.addEventListener('pangzhu:help', handler); window.addEventListener('keydown', shortcut)
     return () => { window.removeEventListener('pangzhu:help', handler); window.removeEventListener('keydown', shortcut) }
   }, [])
   useEffect(() => window.pangzhuDesktop?.onCloseRequest(async phase => {
     if (phase === 'status') return { busy: desktopBusy.current }
-    abort.current?.abort(); organizationJob.current?.abort()
+    abort.current?.abort(); organizationJob.current?.abort(); importStop.current?.()
     const deadline = Date.now() + 10000
-    while (preparationJob.current || abort.current || organizationJob.current) {
+    while (importStop.current || preparationJob.current || abort.current || organizationJob.current) {
       if (Date.now() > deadline) throw new Error('任务仍在保存，请稍后再退出。')
       await new Promise(resolve => setTimeout(resolve, 25))
     }
@@ -237,7 +243,7 @@ export default function App() {
   useEffect(() => () => { cancelAnimationFrame(scrollFrame.current); organizationJob.current?.abort() }, [])
   useEffect(() => {
     const current = docRef.current
-    if (!onboarding && view === 'reader' && !loading && !modal && config.configured && current && remainingChapters(current).length > 0 && !current.preparation && !preparationJob.current) void generateRemaining(current)
+    if (!onboarding && view === 'reader' && !loading && !modal && config.configured && current && current.sourceState !== 'deferred' && current.readingPolicy !== 'manual' && remainingChapters(current).length > 0 && !current.preparation && !preparationJob.current) void generateRemaining(current)
   }, [onboarding, view, loading, activeId, doc?.activeNotebookId, doc?.preparation, config.configured, modal])
   useEffect(() => {
     const keyboard = (e: KeyboardEvent) => {
@@ -390,8 +396,12 @@ export default function App() {
   }
   async function newBundleNote(folderId: string, title: string, intent: string) {
     if (busy || preparationJob.current) throw new Error('请先暂停当前生成，再新建笔记。')
-    const context = captureBundleContext(docsRef.current, collectionRef.current, folderId)
     const directory = await confirmImportLocation(title)
+    try {
+      const sources = bundleMaterials(docsRef.current, collectionRef.current, folderId) as LearningDocument[]
+      for (const [index, source] of sources.entries()) await ensureSourceMaterial(source, message => setBusy(`读取资料 ${index+1}/${sources.length} · ${source.title} · ${message}`))
+    } finally { setBusy('') }
+    const context = captureBundleContext(docsRef.current, collectionRef.current, folderId)
     const note = ensureNotebooks(createBundleNote(context, title, intent)) as LearningDocument
     const nextDocuments = orderLibraryDocuments([note, ...docsRef.current]) as LearningDocument[]
     let nextCollection = reconcileCollection(collectionRef.current, nextDocuments, knowledge) as Collection
@@ -428,6 +438,18 @@ export default function App() {
     if (configRef.current.startupMode === 'manual') {setReadingChoice({id,chapterId});setModal('choose-reader');return}
     openDocument(id,chapterId,configRef.current.startupMode)
   }
+  async function ensureSourceMaterial(material: LearningDocument, progress: (message: string) => void = setBusy): Promise<LearningDocument> {
+    if (material.sourceState !== 'deferred') return material
+    progress('正在读取原文…')
+    const next = ensureNotebooks(await hydrateMaterial(material, {
+      read: async () => { const file = await storage.readFile(material.id); return file ? new File([file], material.filename) : undefined },
+      parse: async (file: File) => (await import('./pdf')).importMaterial(file, material.intent, progress),
+      save: async (document: LearningDocument) => storage.saveDocument(ensureNotebooks(document) as LearningDocument),
+    })) as LearningDocument
+    docsRef.current = docsRef.current.map(document => document.id === next.id ? next : document); setDocuments(docsRef.current)
+    if (docRef.current?.id === next.id) docRef.current = next
+    return next
+  }
   async function openDocument(id: string, chapterId?: string, mode?: string, readSaved = false) {
     let target = docsRef.current.find(document => document.id === id)
     if (!target) return
@@ -439,7 +461,9 @@ export default function App() {
         if (!readSaved || !canRead) { setMissingDocument({ id, title: target.title, paths, canRead }); setModal(null); return }
         target = { ...target, storageIssue: { missing: paths, notePath: status.notePath!, sourcePath: status.sourcePath } }
       }
+      if (!readSaved && target.sourceState === 'deferred') target = await ensureSourceMaterial(target)
     } catch (error) { notify((error as Error).message); return }
+    finally { setBusy('') }
     // Older running servers have no startupMode field; keep their last edition
     // until upgraded. The current server explicitly defaults to adaptive.
     const selected = !readSaved && mode && target.entryType !== 'note' ? selectNotebook(target,mode) as LearningDocument : target
@@ -573,6 +597,13 @@ export default function App() {
     abort.current = new AbortController(); setError(''); setPending(null); setBusy(`正在生成${notebookLabel(current)}笔记…`)
     const signal = abort.current.signal
     try {
+      if (current.entryType !== 'note' && !current.preparation) {
+        const folder = bundleForDocument(collectionRef.current, current.id)
+        if (folder) for (const source of bundleMaterials(docsRef.current, collectionRef.current, folder.id)) {
+          signal.throwIfAborted(); await ensureSourceMaterial(source as LearningDocument)
+        }
+        signal.throwIfAborted()
+      }
       const persist = async (updated: LearningDocument) => {
         if (!current || !docRef.current || notebookKey(docRef.current) !== notebookKey(current)) throw new Error('当前笔记已切换，生成已停止。')
         updated = commitNotebook(updated) as LearningDocument
@@ -675,7 +706,7 @@ export default function App() {
     <div className={`application-shell view-${view}`}>
     <AppNavigation view={view} canRead={!!doc} onNavigate={next => { if (next === 'reader') { if (view === 'reader') setModal(null); else if (doc) switchDocument(doc.id) } else showLibrary(next) }} onImport={() => { setImportFolderId(null); setModal('import') }} onProfile={() => setModal('knowledge')} onHelp={() => setModal('help')} onSettings={() => setModal('settings')} />
     {view !== 'reader' && <LibraryHome documents={documents} collection={collection} knowledge={knowledge} activeId={activeId} view={view} onView={showLibrary}
-      sidebarOpen={showSidebar} onToggleSidebar={() => setShowSidebar(!showSidebar)} onCloseSidebar={() => setShowSidebar(false)} recoverableRemoval={config.fileStorage}
+      sidebarOpen={showSidebar} onToggleSidebar={() => setShowSidebar(!showSidebar)} onCloseSidebar={() => setShowSidebar(false)} recoverableRemoval={config.fileStorage} sourceProgress={busy}
       filter={libraryFilter} onFilter={setLibraryFilter} onSave={saveCollection} onOpen={switchDocument} onImport={folderId => { setImportFolderId(folderId || null); setModal('import') }} onDiscover={config.fileStorage ? () => void showDiscovery() : undefined} onDelete={removeDocument} onRename={renameDocument} onCreateNote={newBundleNote} onProfile={() => setModal('knowledge')}
       theme={theme} onTheme={next => { setTheme(next); saveVisualTheme(next); void storage.setPreference('visual-theme', next) }} organizing={organizing} organizeError={organizeError} onOrganize={() => void organizeLibrary()} onCancel={() => organizationJob.current?.abort()}
       configured={config.configured} onSettings={() => setModal('settings')} idealApi={body => api('/api/edit', body)} onIdealImport={importIdealSource} />}
@@ -700,7 +731,8 @@ export default function App() {
       <section className="article-scroll" ref={article} onScroll={scheduleReading}
         onWheel={interruptChapterNavigation} onTouchStart={interruptChapterNavigation} onPointerDown={interruptChapterNavigation}
         onKeyDown={event => { if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) interruptChapterNavigation() }}>
-        {(emptyCount > 0 || preparing) && <div className="preparation-banner" role="status"><div className="preparation-heading"><span>{preparing ? <LoaderCircle className="spin" size={18} /> : <Sprout size={20} />} 生成{notebookLabel(doc)}笔记</span><small>{doc.chapters.length - emptyCount} / {doc.chapters.length} 章</small></div><p>{preparing ? busy : doc.preparation ? '这份笔记尚未生成完。继续时只处理未完成章节。' : '首次选择时生成全文，逐章保存。之后切换直接打开已保存的笔记。'}</p><progress aria-label="全文整理进度" max={doc.chapters.length} value={doc.chapters.length - emptyCount} />{!preparing && <button className="secondary" disabled={!!busy} onClick={() => void generateRemaining()}>{config.configured ? doc.preparation ? '继续未完成部分' : '生成这份笔记' : '连接模型，生成笔记'}</button>}{doc.preparation && Object.keys(doc.preparation.errors).length > 0 && <details><summary>{Object.keys(doc.preparation.errors).length} 个问题待处理 · 查看原因</summary>{Object.entries(doc.preparation.errors).map(([id, message]) => <p key={id}><b>{id === '__plan' ? '整理规划' : id === '__template' ? '模板选择' : doc.chapters.find(c => c.id === id)?.title}</b> · {message}</p>)}</details>}</div>}
+        {(emptyCount > 0 || preparing) && <div className="preparation-banner" role="status"><div className="preparation-heading"><span>{preparing ? <LoaderCircle className="spin" size={18} /> : <Sprout size={20} />} 生成{notebookLabel(doc)}笔记</span><small>{doc.chapters.length - emptyCount} / {doc.chapters.length} 章</small></div><p>{preparing ? busy : doc.preparation ? '这份笔记尚未生成完。继续时只处理未完成章节。' : doc.readingPolicy === 'manual' ? '原件已保存。这份资料不会自动生成笔记；可在此开始，也可以只作为联合资料包的来源。' : '首次选择时生成全文，逐章保存。之后切换直接打开已保存的笔记。'}</p><progress aria-label="全文整理进度" max={doc.chapters.length} value={doc.chapters.length - emptyCount} />{!preparing && <button className="secondary" disabled={!!busy} onClick={() => void generateRemaining()}>{config.configured ? doc.preparation ? '继续未完成部分' : '生成这份笔记' : '连接模型，生成笔记'}</button>}{doc.preparation && Object.keys(doc.preparation.errors).length > 0 && <details><summary>{Object.keys(doc.preparation.errors).length} 个问题待处理 · 查看原因</summary>{Object.entries(doc.preparation.errors).map(([id, message]) => <p key={id}><b>{id === '__plan' ? '整理规划' : id === '__template' ? '模板选择' : doc.chapters.find(c => c.id === id)?.title}</b> · {message}</p>)}</details>}</div>}
+        {!!doc.sourceWarnings?.length && <details className="source-import-notice"><summary>资料读取说明</summary>{doc.sourceWarnings.map(message=><p key={message}>{message}</p>)}</details>}
         <ContinuousNotes document={doc} fontSize={fontSize} readOnly={readOnly || preparing || !!doc.storageIssue}
           highlight={context.text && !busy && !pending ? { chapterId: contextChapter.current, from: context.from, to: context.to } : undefined}
           onChange={(id, content) => changeContent(id, content, notebookKey(doc))} onSelection={(id, selection) => { if (docRef.current && notebookKey(docRef.current) === notebookKey(doc)) selectInChapter(id, selection) }}
@@ -732,20 +764,19 @@ export default function App() {
     {modal === 'conflict' && doc && <ConflictModal document={doc} onClose={() => setModal(null)} />}
     {modal === 'course-style' && <CourseStyleModal configured={config.configured} api={api} onClose={() => setModal(null)} onModel={() => setModal('settings')} onStartup={()=>setModal('startup-settings')} onStorage={()=>setModal('storage-settings')} />}
     {modal==='choose-reader'&&readingChoice&&<Modal title="选择这次的阅读方式" subtitle={documents.find(d=>d.id===readingChoice.id)?.title} onClose={()=>{setReadingChoice(null);setModal(null)}}><div className="startup-choice">{(['translation','adaptive'] as const).map(mode=><button key={mode} onClick={()=>openDocument(readingChoice.id,readingChoice.chapterId,mode)}><strong>{mode==='translation'?'纯翻译':'适应性讲解'}</strong><span>{notebookStatus(documents.find(d=>d.id===readingChoice.id)?.notebooks?.[mode])} · {mode==='translation'?'忠实保留原文':'按画像与目标展开讲解'}</span></button>)}<p>已有笔记直接打开；未生成的版本会在选定后整理。两份笔记分别保存。</p></div></Modal>}
-    {modal === 'import' && <ImportModal configured={config.configured} onClose={() => setModal(null)} onImport={async (material, file, directory) => {
+    {modal === 'import' && <ImportModal onBusy={(value, stop) => { importStop.current=stop||null; setImporting(value) }} onClose={() => setModal(null)} onComplete={count => { setModal(null); setView('library'); notify(`已保存 ${count} 份资料，未调用模型生成笔记`) }} onImport={async (material, file, directory, relativePath) => {
       if (busy || preparationJob.current) throw new Error('请先暂停当前整理，再导入其他资料。')
       material = ensureNotebooks(upgradeMathDocument(upgradeNoteFormat(repairFormulaDocument(normalizeLearningIntent(material))))) as LearningDocument
       if (docRef.current) await storage.saveDocument(docRef.current)
-      await storage.importDocument(material, file, directory)
-      const nextDocuments = orderLibraryDocuments([material, ...docsRef.current]) as LearningDocument[]
+      const nextDocuments = orderLibraryDocuments([material, ...docsRef.current.filter(document => document.id !== material.id)]) as LearningDocument[]
       let nextCollection = reconcileCollection(collectionRef.current, nextDocuments, knowledge) as Collection
       const targetFolder = nextCollection.folders.find(folder => folder.id === importFolderId)
-      if (targetFolder) nextCollection = updateCollectionItem(nextCollection, material.id, { folderId: targetFolder.id }) as Collection
+      nextCollection = placeImportedMaterial(nextCollection, material.id, relativePath, targetFolder?.id || null) as Collection
+      await storage.importDocument(material, file, directory)
       await saveCollection(nextCollection)
       setLibraryFilter({ folder: targetFolder?.id || 'all', status: 'all', query: '' })
-      setDocuments(nextDocuments); setActiveId(material.id); setModal(null); setView('library')
+      docsRef.current = nextDocuments; setDocuments(nextDocuments); setActiveId(material.id); setView('library')
       activeRef.current = material.id; docRef.current = material
-      notify(`已导入 ${material.pages.length} 页资料，分为 ${material.chapters.length} 个阅读章节`)
     }} />}
     {modal === 'source' && doc && chapter && <Modal title="回到原文" subtitle={doc.filename} onClose={() => setModal(null)} wide><div className="source-modal-content"><SourceReader documents={documents} document={doc} position={sourceOverride === null ? sourcePosition : { page: sourceOverride, fraction: 0, quote: '', approximate: false }} chapterTitle={chapter.title} expanded /></div></Modal>}
     {modal === 'reference-source' && referenceSource && <Modal title={referenceSource.title} subtitle="保存的参考原文" onClose={() => setModal('references')} wide><div className="source-modal-content"><SourceReader document={referenceSource} position={{ page: 1, fraction: 0, quote: '', approximate: false }} expanded /></div></Modal>}
@@ -760,43 +791,6 @@ export default function App() {
 }
 
 function LightbulbIcon() { return <Sparkles size={13} /> }
-
-function ImportModal({ configured, onClose, onImport }: { configured: boolean; onClose: () => void; onImport: (document: LearningDocument, file: File, directory?: string) => Promise<void> }) {
-  const [file, setFile] = useState<File | null>(null), [intent, setIntent] = useState(defaultLearningIntent)
-  const [prepared, setPrepared] = useState<LearningDocument | null>(null)
-  const [busy, setBusy] = useState(''), [error, setError] = useState(''), [dragging, setDragging] = useState(false)
-  const input = useRef<HTMLInputElement>(null)
-  const [location, setLocation] = useState<storage.StorageSettings | null>(null)
-  useEffect(() => { void storage.storageSettings().then(setLocation).catch(error => setError(error.message)) }, [])
-  const submit = async () => {
-    if (!file || busy) return
-    setBusy('正在读取资料…'); setError('')
-    try {
-      const { importMaterial } = await import('./pdf')
-      const doc = prepared || await importMaterial(file, intent.trim(), setBusy)
-      if (!prepared && doc.sourceWarnings?.length) { setPrepared(doc); return }
-      await onImport(doc, file, location?.enabled ? location.directory : undefined)
-    }
-    catch (e) { setError((e as Error).message) } finally { setBusy('') }
-  }
-  return <Modal title="开始一段新的学习" subtitle="一篇论文，一份讲义，或一章你一直想弄懂的知识。" explicitCancel={!!file || !!busy} onClose={() => { if (!busy) onClose() }}>
-    <div className="import-form">
-      <div className="import-fields">
-      <button className={`drop-zone ${dragging ? 'dragging' : ''}`} disabled={!!busy} onClick={() => input.current?.click()} onDragOver={e => { e.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={e => { e.preventDefault(); setDragging(false); if (!busy && e.dataTransfer.files[0]) { setFile(e.dataTransfer.files[0]); setPrepared(null); setError('') } }}><span className="upload-circle">{file ? <FileText size={26} /> : <Upload size={26} />}</span><strong>{file?.name || '把学习资料拖到这里'}</strong><span>{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB · 点击重新选择` : 'PDF / Word / PowerPoint / HTML / Markdown / TXT'}</span><small>最大 50 MB · 也可恢复 JSON 笔记备份</small></button>
-      <input ref={input} type="file" accept={materialAccept + ',.json'} disabled={!!busy} hidden onChange={e => { if (e.target.files?.[0]) { setFile(e.target.files[0]); setPrepared(null); setError('') } }} />
-      <label>这次，你想学会什么？<textarea rows={3} value={intent} disabled={!!busy} onChange={e => { setIntent(e.target.value); setPrepared(null) }} maxLength={4000} /></label>
-      <p className="field-help">默认只求看懂原文；有特别关注的问题时，可以自行修改。</p>
-      {file && richMaterial(file.name) && <p className="field-help">支持 DOCX、PPTX、HTML/HTM；原文对照显示提取的正文，原文件完整保存。图片、复杂图表和页面版式请对照原件。</p>}
-      {prepared && <div className="settings-confirm" role="status" aria-label="资料读取说明"><strong>已读取 {prepared.chapters.length} 个章节，请确认以下内容</strong>{prepared.sourceWarnings?.map(message => <p key={message}>{message}</p>)}</div>}
-      {file && /\.json$/i.test(file.name) && <p className="field-help">JSON 备份包含笔记和原文文字，不包含原始 PDF。跨设备保留原件请使用“资料备份与恢复”。</p>}
-      {location?.enabled && <StorageLocation value={location.directory || ''} onChange={directory => setLocation(current => current ? { ...current, directory } : null)} disabled={!!busy} />}
-      <p className="import-initialization">{configured ? '进入资料时按设置中的阅读启动方式打开；两种笔记分别保存。' : '导入后请连接模型；阅读启动方式可在设置中调整。'}</p>
-      {error && <p className="inline-error" role="alert">{error}</p>}
-      </div>
-      <div className="modal-actions"><span className="field-help">{location?.enabled ? '确认此位置并导入，文件保存在本机资料目录' : '资料保存在这台设备的浏览器中'}</span><div className="spacer" /><button className="secondary" disabled={!!busy} onClick={onClose}>取消</button><button className="primary" disabled={!file || !!busy || !intent.trim() || !location || (location.enabled && !location.directory?.trim())} onClick={() => void submit()}>{busy ? <LoaderCircle size={15} className="spin" /> : <ArrowRight size={15} />}{busy || (prepared ? '确认添加到资料库' : '添加到资料库')}</button></div>
-    </div>
-  </Modal>
-}
 
 function IntentModal({ intent, onClose, onSave }: { intent: string; onClose: () => void; onSave: (intent: string) => void }) {
   const [value, setValue] = useState(intent)

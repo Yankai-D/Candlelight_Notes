@@ -1,6 +1,6 @@
-import { readFile, writeFile, rename, unlink } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { atomicWrite } from './atomic-file.mjs';
 import { parseEnv } from 'node:util';
 import { z } from 'zod';
 import { defaultModelConnection, defaultStartupMode } from '../shared/app-settings.mjs';
@@ -66,9 +66,4 @@ export async function openSettingsStore({path=settingsPath(),environment=process
   };
   const publicConfig=()=>({baseUrl:current.baseUrl,model:current.model,configured:!!current.apiKey,startupMode:current.startupMode,storage:'env'});
   return {get current(){return {...current};},publicConfig,save,reset:()=>save({...defaultModelConnection})};
-}
-async function atomicWrite(path,text) {
-  const temporary=`${path}.${randomUUID()}.tmp`;
-  try {await writeFile(temporary,text,{encoding:'utf8',mode:0o600,flag:'wx'});await rename(temporary,path);}
-  finally {await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
 }

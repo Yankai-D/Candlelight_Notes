@@ -1,4 +1,6 @@
-import { mkdir, readdir, readFile, writeFile, rename, unlink } from 'node:fs/promises';
+import { mkdir, readdir, readFile, unlink } from 'node:fs/promises';
+import { atomicWrite } from '../atomic-file.mjs';
+import { recoveryDecision, recordRecovery } from '../recovery.mjs';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -9,7 +11,7 @@ const { findNodePapers } = await import(new URL(`./node-papers.mjs${new URL(impo
 const { arxivId } = await import(new URL(`./arxiv.mjs${new URL(import.meta.url).search}`, import.meta.url));
 
 export class IdealStore {
-  constructor(directory) { this.directory = resolve(directory); this.writes = Promise.resolve(); }
+  constructor(directory, write = atomicWrite) { this.directory = resolve(directory); this.writes = Promise.resolve(); this.write = write; }
   path(id) { if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('无效的学习树编号'); return join(this.directory, `${id}.json`); }
   async read(id) {
     // Windows can deny rename while the old file has a reader. Serialize reads
@@ -23,9 +25,9 @@ export class IdealStore {
     return (await Promise.all(files.map(async f => { try { return await this.read(f.slice(0,-5)); } catch { return null; } }))).filter(Boolean).sort((a,b) => b.createdAt - a.createdAt);
   }
   async save(job) {
-    const snapshot = JSON.stringify(job), path = this.path(job.id), temporary = path + '.pending';
+    const snapshot = JSON.stringify(job), path = this.path(job.id);
     const write = this.writes.catch(() => {}).then(async () => {
-      await mkdir(this.directory, { recursive: true }); await writeFile(temporary, snapshot, { mode: 0o600 }); await rename(temporary, path);
+      await mkdir(this.directory, { recursive: true }); await this.write(path, snapshot);
     });
     this.writes = write; return write;
   }
@@ -192,7 +194,7 @@ export class IdealRunner {
     const entry = { controller, promise: null };
     this.active.set(job.id, entry);
     entry.promise = this.run(job, complete, controller.signal).catch(async error => {
-      job.status = controller.signal.aborted || error.code === 'BUDGET' ? 'paused' : 'failed';
+      job.status = controller.signal.aborted || ['BUDGET','STORAGE_BUSY'].includes(error.code) ? 'paused' : 'failed';
       job.error = controller.signal.aborted ? '构建已暂停，已完成内容已保存。' : error.message;
       delete job.activity;
       await this.persist(job, { type:'stopped', stage:job.stage, reason:job.error, status:job.status }).catch(() => {});
@@ -223,15 +225,23 @@ export class IdealRunner {
         job.metrics.modelCalls++; const started = Date.now(); job.stage = label;
         job.activity = { stage, branchId:context.branch?.id, attempt:attempt+1, startedAt:started }; await this.persist(job);
         const bounded = AbortSignal.any([signal, AbortSignal.timeout(300000)]);
-        let raw;
-        try { raw = await complete(messages, { stage, signal: bounded, onCompletion: info => {
+        let raw, value, requests=0;
+        try { raw = await complete(messages, { stage, signal: bounded, onRequest: () => {
+          // The first request is reserved above. Token-expansion retries must
+          // also consume the same workflow budget, not disappear in transport.
+          if (++requests>1) {
+            if(job.metrics.modelCalls>=until)throw Object.assign(new Error('本轮调用预算已用完，已保存进度；可继续构建。'),{code:'BUDGET'});
+            job.metrics.modelCalls++;
+          }
+        }, onCompletion: info => {
           job.metrics.completionTokens += info.completionTokens || 0;
         } }); signal.throwIfAborted();
-          const value = validate(raw); delete job.activity; await this.persist(job, { type: 'model', stage, branchId:context.branch?.id, attempt: attempt + 1, elapsedMs: Date.now() - started, accepted: true }); return value;
+          value = validate(raw);
         } catch (error) {
           signal.throwIfAborted(); delete job.activity;
           await this.persist(job, { type:'model', stage, branchId:context.branch?.id, attempt:attempt+1, elapsedMs:Date.now()-started, accepted:false, issue:error.message.slice(0,1500) });
-          if (!raw && (error.retryable || error.name === 'TimeoutError') && !networkRetries && attempt < 2) {
+          if (!raw && recoveryDecision(error, 'transport', signal) === 'retry' && !networkRetries && attempt < 2) {
+            recordRecovery({layer:'transport',stage:`ideal-${stage}`,attempt:attempt+1,outcome:'retry',error});
             networkRetries++; job.stage = `连接短暂中断，正在重试 · ${label}`;
             await this.persist(job,{type:'retry',stage,reason:'transport'}); await delay(this.retryDelay,undefined,{signal}); continue;
           }
@@ -239,15 +249,20 @@ export class IdealRunner {
             formatRetries++; job.metrics.repairs++; await this.persist(job, { type: 'repair', stage, elapsedMs: Date.now() - started, issue: error.message.slice(0,1500) });
             messages = [...messages, { role: 'assistant', content: raw }, { role: 'user', content: `结果未通过校验：${error.message.slice(0,2000)}。只修复具体问题，返回完整本阶段 JSON。` }]; continue;
           }
-          if (raw && recover) { const value = recover(raw); await this.persist(job,{type:'partial',stage,issue:error.message.slice(0,1500)}); return value; }
+          if (raw && recover) { const value = recover(raw); job.events.push({at:Date.now(),type:'partial',stage,issue:error.message.slice(0,1500)}); return value; }
           throw error;
         }
+        // Saving an accepted response is not model validation. A storage error
+        // must never trigger another paid generation or "format repair".
+        // The caller checkpoints the value and this event together. A separate
+        // event write before returning would lose an accepted value on failure.
+        delete job.activity; job.events.push({ at:Date.now(), type:'model', stage, branchId:context.branch?.id, attempt:attempt+1, elapsedMs:Date.now()-started, accepted:true }); return value;
       }
     };
     const tool = async (name, input) => {
       signal.throwIfAborted(); job.metrics.toolCalls++; const started = Date.now();
       try { const result = await this.tools[name](input, signal); signal.throwIfAborted();
-        await this.persist(job, { type: 'tool', tool: name, elapsedMs: Date.now() - started, accepted: true }); return result;
+        job.events.push({at:Date.now(),type:'tool',tool:name,elapsedMs:Date.now()-started,accepted:true}); return result;
       } catch (error) { signal.throwIfAborted(); await this.persist(job, { type: 'tool', tool: name, elapsedMs: Date.now() - started, accepted: false, issue:error.message.slice(0,500) }); return { sources: [], problems: [error.message] }; }
     };
     const putSources = sources => {

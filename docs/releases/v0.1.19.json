@@ -1,0 +1,442 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.19",
+  "status": "verified-local-candidate",
+  "codeRevision": "966ecc49539096a9c2919908b70e22ddda579df6",
+  "sourceFingerprint": "a73a8cca46ba38c8424e9bed585ca295c11cd8cbb0382b50df972e0ef254e71e",
+  "changes": [
+    "Bounded transport and atomic-save recovery with nonfatal diagnostic recording",
+    "Deferred original-only batch and folder import, reusable extraction and independent multi-source notes",
+    "Safe batch shutdown and form retention",
+    "Public GitHub version checks and reuse of existing NSIS installation directories"
+  ],
+  "validation": {
+    "tests": 384,
+    "browserSuites": 11,
+    "stages": 14,
+    "sourceChangedDuringChecks": false,
+    "actualModelCalls": 0,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.18",
+        "asarSha256": "c7089800f0fea056827b43c18d71096583d903290aa1230ca0d365265c206345"
+      },
+      "to": {
+        "version": "0.1.19",
+        "asarSha256": "07efd0ba08bd80fb3bc4e35e43eb32c041a0e764280a333c3212ecaf0a9dd0a1"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ]
+    },
+    "installationDirectory": {
+      "status": "pass",
+      "hookSha256": "86b61f6a131e6ee4c6c5d6031a65d9fb8447703f4f74a7f5021ad0708018af7f",
+      "checks": [
+        "first-parent",
+        "same-name",
+        "custom-upgrade",
+        "old-brand-upgrade",
+        "registered-no-exe",
+        "name-substring"
+      ],
+      "scope": "Production directory callback compiled and executed with isolated files/registry; not a full installer upgrade",
+      "modelCalls": 0
+    },
+    "uninstallPolicy": {
+      "status": "pass",
+      "hookSha256": "16ee0118ebc6bf0622c990bd4432f1d6b9efc8831ccbd1ca0cc4106ca96cee29",
+      "modelCalls": 0,
+      "scope": "Compiled production cleanup hook, isolated profile; no personal installation or registry changes",
+      "checks": [
+        "upgrade preserves credentials",
+        "uninstall deletes saved and temporary keys",
+        "browser cache and logs removed after verified migration",
+        "user materials, notes, index and profile survive",
+        "repeated uninstall is idempotent"
+      ]
+    },
+    "publicVersionCheck": {
+      "checkedAt": "2026-10-19T22:26:49.850Z",
+      "fromVersion": "0.1.17",
+      "update": {
+        "version": "0.1.18",
+        "url": "https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.18",
+        "prerelease": true
+      },
+      "modelCalls": 0
+    },
+    "payloadReuse": {
+      "fromRevision": "da41e9a1072df6b2bc847d693d73f6ad2bbb757f",
+      "fromFingerprint": "528934665973a39a956871a6c8ac7429ad88f1c21c1e1e0afca4aeba0b8cf65a",
+      "sourceChanges": [
+        "packaging/desktop/install-directory.nsh",
+        "scripts/test-install-directory.mjs"
+      ],
+      "verifiedFiles": 14051,
+      "unchangedAsarSha256": "07efd0ba08bd80fb3bc4e35e43eb32c041a0e764280a333c3212ecaf0a9dd0a1",
+      "verifiedAt": "2026-10-19T22:46:41.681Z"
+    },
+    "installerContents": {
+      "status": "pass",
+      "scope": "Every file extracted from the final Setup.exe matches the tested win-unpacked directory byte-for-byte",
+      "sourceRevision": "966ecc49539096a9c2919908b70e22ddda579df6",
+      "sourceFingerprint": "a73a8cca46ba38c8424e9bed585ca295c11cd8cbb0382b50df972e0ef254e71e",
+      "installerSha256": "af6d46c47dbb734f9e303cb3b78f7170f3493ee1f46c55ff9f238d5797afe262",
+      "verifierSha256": "51ed92edd368b5ce704d665179b5c81042fad6d10306709594d315b57f9487b7",
+      "files": [
+        {
+          "file": "LICENSE.electron.txt",
+          "sha256": "5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d"
+        },
+        {
+          "file": "LICENSES.chromium.html",
+          "sha256": "e6e6b1f9cb0f32235412be113de7716333e88121f9159a0ea0ff3be652021af7"
+        },
+        {
+          "file": "PangzhuNotes.exe",
+          "sha256": "806b9a9aea013b0970732cf4763c5df3a0a209687b33c0816f317ee6ed74f2d7"
+        },
+        {
+          "file": "chrome_100_percent.pak",
+          "sha256": "ab7c4b7b6cb8832a31d44b95ec50ce52294f49422a3bdde4e21968eca2930cbe"
+        },
+        {
+          "file": "chrome_200_percent.pak",
+          "sha256": "30fa4a6e27c9ff2fb0f939f01158477e621a67d86e9ecb84cf11b3947db8eb9d"
+        },
+        {
+          "file": "d3dcompiler_47.dll",
+          "sha256": "a05f99734f7c4822fefc12b367af21fd0976ed6608752fb1e1e80b6ece7ecbbb"
+        },
+        {
+          "file": "dxcompiler.dll",
+          "sha256": "464772bfaa07fdb378e14f8ccf6d6e8b1d053dddcc2b59f57862d6912f39a023"
+        },
+        {
+          "file": "dxil.dll",
+          "sha256": "77e039c905030a641e53658a008b74e90635a5ea9b6b79eabd0f2003bdfca59a"
+        },
+        {
+          "file": "ffmpeg.dll",
+          "sha256": "96094bc6b5082e6372a9aa21970fcecfc069abd68caf4b48673b84dc3e8cf99b"
+        },
+        {
+          "file": "icudtl.dat",
+          "sha256": "da53f0b69843aaa43315f0f210a67e4a874b0be338f3dae08ff57b8afe76ab0d"
+        },
+        {
+          "file": "locales/en-US.pak",
+          "sha256": "23b271e8009bfa14783700cd0712b4ecaa5b8f2ea28a4d81ae1d7e05bc0c96b1"
+        },
+        {
+          "file": "locales/zh-CN.pak",
+          "sha256": "66c3984c1345b5aba722005458b9cc0af54496260ad06f2509c7afa011d4981f"
+        },
+        {
+          "file": "resources.pak",
+          "sha256": "9611f9a65a37eea7d7f631eba0ed2cc49205f47aaa8a2937694ca2de2d821bd8"
+        },
+        {
+          "file": "resources/ACKNOWLEDGEMENTS.md",
+          "sha256": "b5a4b690eabfa119dec3f4d8705b6a13e2eeeaef4ab1b44f8a8f149a215f77b5"
+        },
+        {
+          "file": "resources/PACKAGE-MANIFEST.json",
+          "sha256": "64496ddf0368611f65f6f8e99718c0a4e06cb5f18fe94163f3f13eaebf2f1ea4"
+        },
+        {
+          "file": "resources/THIRD-PARTY-NOTICES.txt",
+          "sha256": "29f75420c2f8e56766074776c83fb4c761829e071dfea8d503cafb5574d6ef59"
+        },
+        {
+          "file": "resources/app.asar",
+          "sha256": "07efd0ba08bd80fb3bc4e35e43eb32c041a0e764280a333c3212ecaf0a9dd0a1"
+        },
+        {
+          "file": "resources/app.asar.unpacked/node_modules/@napi-rs/canvas-win32-x64-msvc/icudtl.dat",
+          "sha256": "9f48c7f9c7c94d516a14870707e910ab94d75ae640ff6842c4af53276cd26ebe"
+        },
+        {
+          "file": "resources/app.asar.unpacked/node_modules/@napi-rs/canvas-win32-x64-msvc/package.json",
+          "sha256": "11440a4d5696cd4e72950793c9cf4f024952b4f6ceb9f27bab3a1cccc5f567ea"
+        },
+        {
+          "file": "resources/app.asar.unpacked/node_modules/@napi-rs/canvas-win32-x64-msvc/sbom.cdx.json",
+          "sha256": "af0b3af01a73d229ffabb515a7d6c0857784e359df39b0da59949e946415bf71"
+        },
+        {
+          "file": "resources/app.asar.unpacked/node_modules/@napi-rs/canvas-win32-x64-msvc/skia.win32-x64-msvc.node",
+          "sha256": "4296ab1f770556c55077b44929f684ef180065ebeffdffca7eb3a29e8ff715a6"
+        },
+        {
+          "file": "resources/default_app.asar",
+          "sha256": "0eb2491b0a9ac94790389d39c09dd5005c6c1f0665842943829bbd0193f6cc4f"
+        },
+        {
+          "file": "resources/elevate.exe",
+          "sha256": "9b1fbf0c11c520ae714af8aa9af12cfd48503eedecd7398d8992ee94d1b4dc37"
+        },
+        {
+          "file": "resources/materials/ATTRIBUTION.txt",
+          "sha256": "f49aa71639345fa1687bb77d482ed2836af8777d82b521387a7cbc13cbce0c40"
+        },
+        {
+          "file": "resources/materials/SOURCES.json",
+          "sha256": "64b86925f37e2ff77ba6c3eeaf31a51c0eb4daf627485b4a2bd222a7a87f90d0"
+        },
+        {
+          "file": "resources/materials/catalog.json",
+          "sha256": "019115e8e3a5910a17ede3432421992ca9ff4e7655348985e4b481a6b2ac4e6b"
+        },
+        {
+          "file": "resources/materials/descriptive-statistics-categorical.pdf",
+          "sha256": "25705d9c2a5446edf971ffce08fcb04423f6c0d0a795e0a5362af3223663b46e"
+        },
+        {
+          "file": "resources/materials/descriptive-statistics-numerical.pdf",
+          "sha256": "cdeccb54efc3f274c9a12fa4b34fba954c5e4122d4c2f4423d23ca1443f11ec0"
+        },
+        {
+          "file": "resources/materials/descriptive-statistics-textbook.pdf",
+          "sha256": "8ea99a4b6eee734e1e35fe0406f6e6f3e056627f7b39166caa4e11253ba8f8f2"
+        },
+        {
+          "file": "resources/使用说明.txt",
+          "sha256": "9e4345487fd8f4d3a4c4dac1d04b9e349874f25714f6f2f11d179a0845de36a8"
+        },
+        {
+          "file": "snapshot_blob.bin",
+          "sha256": "e20e875e78f7eef460fe1a6f7066212be9097bcc84e2dea2d2cc2cada96473a6"
+        },
+        {
+          "file": "v8_context_snapshot.bin",
+          "sha256": "88d93ed0f028d74b78dc610f2cf60f0838035b2ad3b79a9d2f9f930a4dd7e10a"
+        },
+        {
+          "file": "version",
+          "sha256": "9331b8f378c9763a3bdd6870abf39ed41af9e675435294a06ec6f4bd6c82165e"
+        },
+        {
+          "file": "vk_swiftshader.dll",
+          "sha256": "2ae263d1079d9b1e4a231879cf7048dc517b2806748b38f36547b5b8c649cddd"
+        },
+        {
+          "file": "vk_swiftshader_icd.json",
+          "sha256": "32d83ff113fef532a9f97e0d2831f8656628ab1c99e9060f0332b1532839afd9"
+        },
+        {
+          "file": "vulkan-1.dll",
+          "sha256": "03120814ccb06e0fa9141cfa7c2ec906984f32ef56f8caf50e56e97a7a3225fa"
+        }
+      ],
+      "modelCalls": 0
+    },
+    "payloadFilesVerified": 12082,
+    "checkReportSha256": "069d422809cb36092dcfd6ca4d21e3c77d6f56c9729b1dfbb1bd892c2d5cb85c"
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.19-Setup-x64.exe",
+      "bytes": 138100194,
+      "sha256": "af6d46c47dbb734f9e303cb3b78f7170f3493ee1f46c55ff9f238d5797afe262"
+    },
+    "archive": {
+      "file": "Candlelight-Notes-0.1.19-Windows-x64.zip",
+      "bytes": 138147603,
+      "sha256": "98581c96e98e1ad3280bdfd6776cb4e1baa84016cba47000f5ef6f4067192fe2"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false,
+    "publishedToGitHub": false
+  },
+  "limitations": [
+    "Fault injection covers the reported lock class, not every live OneDrive timing",
+    "Persistent essential storage failures pause rather than pretending to save",
+    "Network recovery may repeat provider work after an interrupted response",
+    "NSIS production hooks tested in isolation; no full installation/upgrade/uninstall against a personal or fresh Windows account",
+    "Updates prompt for manual installation, not automatic execution",
+    "No new live model or teaching-quality evaluation; dependency graph unchanged",
+    "An earlier check/build was interrupted for a shutdown fix; a subsequent full run timed out in the editor under build contention. Neither is acceptance evidence. The original 60-second editor threshold is unchanged.",
+    "The installer callback needed an unused-function warning fix; application payload reuse verifies all staged bytes and permits only that hook and its test script to differ."
+  ],
+  "evidence": [
+    {
+      "path": "check/browser.log",
+      "bytes": 1450,
+      "sha256": "ee053410c8d122b427b7143dc9f0179867df2dbd962fad9c30b4b354d6046677"
+    },
+    {
+      "path": "check/build.log",
+      "bytes": 2074,
+      "sha256": "37a2e9d972352dd59daec6bc718d4c1a016d020dba19133d9f6c33d556442d17"
+    },
+    {
+      "path": "check/claim-calculation-demo.log",
+      "bytes": 1532,
+      "sha256": "9fede79c3e141ea36c4248ca52930993f2ac59c2ae6ce559e9d099524ebb59aa"
+    },
+    {
+      "path": "check/claim-comparison-demo.log",
+      "bytes": 784,
+      "sha256": "eb13c614239f9ca8f4d7cb8a646fa008db7c4156a5cc7da29122ac4ddd9c9896"
+    },
+    {
+      "path": "check/claim-eval-demo.log",
+      "bytes": 681,
+      "sha256": "62b12732b6d073870cfbe13cd479ac9f0e1b761943d37ed965c42d66943d7ae3"
+    },
+    {
+      "path": "check/claim-focused-demo.log",
+      "bytes": 664,
+      "sha256": "b28b38b75d2f08c5a2e0a13bd44af374f7d372b0035bf6262d5bb13ff54bc312"
+    },
+    {
+      "path": "check/claim-meaning-demo.log",
+      "bytes": 686,
+      "sha256": "d66f8902671789b3616f97e63e8d54c59a38ad3aaec304e5186272af657b3d5a"
+    },
+    {
+      "path": "check/field-review-demo.log",
+      "bytes": 412,
+      "sha256": "a6b28bcfe3864d063450fdbfa69744a6ed5beea9fc392245fcf54092edca7705"
+    },
+    {
+      "path": "check/harness-demo.log",
+      "bytes": 233,
+      "sha256": "b4196c76dcf212d188a9aa703c1c58b473c42cd316631dd48051927901495014"
+    },
+    {
+      "path": "check/note-calibration.log",
+      "bytes": 280,
+      "sha256": "871c4793db6037ded923bbbd06add8bf148dc36aea11ed2cd9ec92d99c9781ed"
+    },
+    {
+      "path": "check/note-eval-demo.log",
+      "bytes": 779,
+      "sha256": "808d493b3cad00936ef54cf582f9c62f35e02cc54b2ba6174905f1c2bcd3e78d"
+    },
+    {
+      "path": "check/product-evidence.log",
+      "bytes": 76,
+      "sha256": "2e6d3b28c78114f0e1d2ee0be93ddb6112537650d603950804522f0663a4db06"
+    },
+    {
+      "path": "check/report.json",
+      "bytes": 3914,
+      "sha256": "069d422809cb36092dcfd6ca4d21e3c77d6f56c9729b1dfbb1bd892c2d5cb85c"
+    },
+    {
+      "path": "check/tests.log",
+      "bytes": 44648,
+      "sha256": "8ebd52df385146f95ae824ec977f1c0c3ded8859d11e7382bb97d6ba67721a5e"
+    },
+    {
+      "path": "check/types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit.json",
+      "bytes": 143480,
+      "sha256": "9ba6373397eeb6187bf90c6f935d106d673133264972d5f2019be3c2258bdbd2"
+    },
+    {
+      "path": "desktop.json",
+      "bytes": 1410,
+      "sha256": "9a4d45b4ed9c91cd375e4ecd92083623efcf553cc64234ae35792bc2b2762e92"
+    },
+    {
+      "path": "upgrade.json",
+      "bytes": 1884,
+      "sha256": "f173121e2e63e3804ca0124f05c6eb62a1d59fd26f9c4c272b3d6b500641644f"
+    },
+    {
+      "path": "install-directory.json",
+      "bytes": 399,
+      "sha256": "bb6ab5356495b969dc00f64c226765762275bd0b6503211c5f970b495a7f284d"
+    },
+    {
+      "path": "uninstall-policy.json",
+      "bytes": 500,
+      "sha256": "b4b0dd0b00b770e6d87c1880ddbc2446ad8fb915c0e40a5d7ba1cb5df079404a"
+    },
+    {
+      "path": "public-update.json",
+      "bytes": 239,
+      "sha256": "f2be621366ff7754cdf356ebc315a6fb7b983dfa12e0023fb32cc189a076414b"
+    },
+    {
+      "path": "archive.json",
+      "bytes": 2061,
+      "sha256": "e3048278c6cb3e63c64f4e0e53d721926f95fd17539006516e4a854030792785"
+    },
+    {
+      "path": "batch-import.json",
+      "bytes": 524,
+      "sha256": "dc9eb6b6c5f392b6e7f3090ea196b6f7bc8e4486255c4e04f8f6a959b97c6377"
+    },
+    {
+      "path": "batch/batch-preview.png",
+      "bytes": 133733,
+      "sha256": "e0f2786b02276b7e1d24eb13639344786635d7d5f1bf544e4f1b5da1965db847"
+    },
+    {
+      "path": "batch/batch-mobile.png",
+      "bytes": 55808,
+      "sha256": "f3e0d65b0be728f14ae5adf10806c68a4c48f8254d518f0da36f1b7add172638"
+    },
+    {
+      "path": "batch/two-independent-notes.png",
+      "bytes": 100039,
+      "sha256": "2c0e6f7beb0195bee5ea6b00063ce04b8968d4aa8d6cc651abdecc2dca54e3db"
+    },
+    {
+      "path": "installer-payload-reuse.json",
+      "bytes": 776,
+      "sha256": "5981f477db937e07b239f699e514e25a0b363de849a5dc5b0c8cdd917ea58ce0"
+    },
+    {
+      "path": "installer-contents.json",
+      "bytes": 5719,
+      "sha256": "c0fa44b7ff18d8727f811603f62da2a162475c9ef909a8b25760425a7c517bbf"
+    },
+    {
+      "path": "verify-installer-payload.mjs",
+      "bytes": 2573,
+      "sha256": "51ed92edd368b5ce704d665179b5c81042fad6d10306709594d315b57f9487b7"
+    },
+    {
+      "path": "installer-build.log",
+      "bytes": 2186,
+      "sha256": "1a8c83db5803391b9219eebe4daf0c5fc36be01d2c128dfb568c5a80ae6c72d9"
+    }
+  ]
+}

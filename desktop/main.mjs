@@ -1,5 +1,5 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu, protocol, session, shell } from 'electron';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { app, BrowserWindow, dialog, ipcMain, Menu, protocol, session, shell, net } from 'electron';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +7,9 @@ import { randomUUID } from 'node:crypto';
 import { appOrigin, isAppURL, externalURL, rendererOptions, contentSecurityPolicy } from './policy.mjs';
 import { renderDesktopPDF } from './pdf.mjs';
 import { brand } from '../shared/brand.mjs';
+import { checkForUpdate, releasesURL } from './updates.mjs';
+import { atomicWrite } from '../server/atomic-file.mjs';
+import { optionalRecord, recordRecovery } from '../server/recovery.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 app.setName(brand.englishName);
@@ -65,6 +68,26 @@ async function quitSafely() {
   } finally { exitInProgress = false; }
 }
 function openExternal(value) { const url = externalURL(value); if (url) void shell.openExternal(url); }
+let checkingUpdate=false;
+async function offerUpdate(manual=false){
+  if(checkingUpdate||exitInProgress||allowQuit)return;
+  checkingUpdate=true;
+  try{
+    const latest=await checkForUpdate(app.getVersion(),{fetcher:(...args)=>net.fetch(...args)});
+    if(!window||window.isDestroyed()||allowQuit)return;
+    const statePath=join(data,'update-state.json');
+    const state=await optionalRecord(async()=>JSON.parse(await readFile(statePath,'utf8').catch(error=>{if(error.code==='ENOENT')return '{}';throw error})),'update-state-read') || {};
+    if(latest&&(manual||state.skippedVersion!==latest.version)){
+      const result=await dialog.showMessageBox(window,{type:'info',title:'发现新版本',message:`烛光笔记 ${latest.version}${latest.prerelease?' · 预发布':''}`,
+        detail:`当前版本 ${app.getVersion()}。可打开项目发布页下载安装包。关闭当前应用后安装，新安装器会沿用已有程序目录；资料与笔记保留。`,buttons:['查看并下载','稍后','跳过此版本'],defaultId:1,cancelId:1,noLink:true});
+      if(result.response===0)openExternal(latest.url);
+      if(result.response===2)await optionalRecord(()=>atomicWrite(statePath,JSON.stringify({skippedVersion:latest.version})+'\n'),'update-state-save');
+    }else if(manual)await dialog.showMessageBox(window,{type:'info',title:'检查更新',message:'当前已是可用的最新版本。',buttons:['关闭']});
+  }catch(error){
+    recordRecovery({layer:'update',stage:'release-check',outcome:'deferred',error});
+    if(manual&&window&&!window.isDestroyed()){const answer=await dialog.showMessageBox(window,{type:'info',title:'检查更新',message:'暂时无法检查更新，不影响继续使用。',buttons:['稍后','打开发布页'],defaultId:0,cancelId:0});if(answer.response===1)openExternal(releasesURL);}
+  }finally{checkingUpdate=false;}
+}
 function menu() {
   return Menu.buildFromTemplate([
     { label: '文件', submenu: [
@@ -76,6 +99,7 @@ function menu() {
     { label: '视图', submenu: [{ role: 'resetZoom', label: '实际大小' }, { role: 'zoomIn', label: '放大' }, { role: 'zoomOut', label: '缩小' }, { role: 'togglefullscreen', label: '全屏' }] },
     { label: '帮助', submenu: [
       { label: '使用说明', accelerator: 'F1', click: () => window.webContents.send('pangzhu:help') },
+      { label: '检查更新…', click: () => void offerUpdate(true) },
       { label: '打开本机数据目录', click: () => void shell.openPath(data) },
       { label: '作者与项目', click: () => openExternal(brand.projectUrl) },
       { type: 'separator' }, { label: `关于${brand.name}`, click: () => void dialog.showMessageBox(window, { title: brand.windowTitle, message: `${brand.windowTitle} ${app.getVersion()}`,
@@ -127,6 +151,7 @@ async function start() {
   window.on('close', event => { if (!allowQuit) { event.preventDefault(); void quitSafely(); } });
   await window.loadURL(appOrigin + '/');
   if (!app.commandLine.hasSwitch('hidden')) window.show();
+  if(app.isPackaged&&!app.commandLine.hasSwitch('hidden'))setTimeout(()=>void offerUpdate(),3000).unref();
 }
 if (!app.requestSingleInstanceLock()) app.quit();
 else {

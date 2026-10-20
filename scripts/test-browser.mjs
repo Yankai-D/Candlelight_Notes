@@ -11,5 +11,6 @@ try {
   });
 } finally { await server.stop(); }
 await runNode(['tests/browser/file-storage.mjs'], { env: { ...process.env, PANGZHU_TEST_OUTPUT: join(root, 'artifacts/browser/file-storage') } });
+await runNode(['tests/browser/batch-import.mjs'], { env: { ...process.env, PANGZHU_TEST_OUTPUT: join(root, 'artifacts/browser/batch-import') } });
 await runNode(['tests/browser/ideal-tree-local.mjs'], { env: { ...process.env, PANGZHU_TEST_OUTPUT: join(root, 'artifacts/browser/ideal-tree-local') } });
 await runNode(['tests/browser/workspace-maintenance.mjs'], { env: { ...process.env, PANGZHU_TEST_OUTPUT: join(root, 'artifacts/browser/workspace-maintenance') } });

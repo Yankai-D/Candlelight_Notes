@@ -30,6 +30,7 @@ export type Version = { id: string; time: number; label: string; chapters: Chapt
 export type LearningDocument = {
   storageIssue?: { missing: string[]; notePath: string; sourcePath?: string | null; error?: string };
   id: string; title: string; subtitle: string; filename: string; kind: 'pdf' | 'text'; sourceWarnings?: string[];
+  sourceState?: 'deferred' | 'ready'; readingPolicy?: 'manual' | 'automatic';
   entryType?: 'note'; sourceContext?: BundleContext; composition?: { version: 1; planned: boolean };
   intent: string; createdAt: number; updatedAt: number; revision: number;
   intentSource?: 'default' | 'user';

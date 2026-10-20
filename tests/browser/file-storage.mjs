@@ -131,16 +131,18 @@ try {
       await click('添加到资料库');await page.waitForSelector('.import-form .inline-error');await page.mouse.click(2,2);await page.keyboard.press('Escape');assert.ok(await page.$('.import-form'));
       await (await page.$('.import-form input[type="file"]')).uploadFile(file);
     }
-    const count=(await index()).entries.length;await click('添加到资料库');await page.waitForSelector('[aria-label="资料读取说明"]');
-    assert.equal((await index()).entries.length,count,'Warnings must be confirmed before any file is imported');
-    await page.mouse.click(2,2);await page.keyboard.press('Escape');await page.keyboard.press('Escape');await page.waitForSelector('dialog[open] [aria-label="资料读取说明"]',{visible:true});
+    const count=(await index()).entries.length;
     if(ext==='docx') {
       await page.screenshot({path:join(output,'word-import-preview.png'),fullPage:true});
       await page.setViewport({width:390,height:844});assert.ok(await page.$eval('dialog',el=>el.scrollWidth<=el.clientWidth+1));await page.screenshot({path:join(output,'word-import-mobile.png'),fullPage:true});await page.setViewport({width:1440,height:960});
     }
-    await click('确认添加到资料库');await page.waitForSelector(`[aria-label="打开 ${name}"]`);
+    await click('添加到资料库');await page.waitForSelector(`[aria-label="打开 ${name}"]`);
     const imported=(await index()).entries.find(e=>e.filename===`${name}.${ext}`);assert.deepEqual(await readFile(imported.sourcePath),bytes);
+    assert.equal((await index()).entries.length,count+1);assert.equal(JSON.parse(await readFile(imported.notePath,'utf8')).sourceState,'deferred','Import saves the original without extracting it');
+    await page.click(`[aria-label="打开 ${name}"]`);await page.waitForSelector('.preparation-banner');
+    await page.waitForFunction(()=>document.querySelector('.preparation-banner')?.textContent.includes('生成'));
     const note=JSON.parse(await readFile(imported.notePath,'utf8'));assert.equal(note.chapters.length,2);assert.ok(note.sourceWarnings.length);assert.ok(note.pages.some(p=>p.text.includes(ext==='html'?'期望':'样本均值')));
+    await page.click('[aria-label="资料库"]');await page.waitForSelector(`[aria-label="打开 ${name}"]`);
   }
   await page.reload();await page.waitForSelector('[aria-label="打开 格式验收-docx"]');assert.equal((await index()).entries.length,6);
   assert.equal(modelCalls.length, 0); assert.deepEqual(errors, []);

@@ -1,4 +1,5 @@
 import { brand } from '../shared/brand.mjs';
+import { optionalRecord } from './recovery.mjs';
 import http from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
@@ -165,7 +166,7 @@ const server = http.createServer(async (req, res) => {
           const messages = buildMessages(input);
           let record;
           if (process.env.READING_TREE_FILE_STORAGE !== '0' && input.documentId && ['generate', 'explain', 'rewrite', 'style'].includes(input.action)) {
-            await fileCommand({ action: 'status' }); record = await createGenerationRecord(files.index.systemDirectory, input, activeConfig.model);
+            await fileCommand({ action: 'status' }); record = await optionalRecord(() => createGenerationRecord(files.index.systemDirectory, input, activeConfig.model), 'generation-record-create');
           }
           try {
             const raw = await runModel(activeConfig, messages, controller.signal, record?.fetch || fetch, { action: input.action, onCompletion: info => { generation.push(info); record?.event(info); } });

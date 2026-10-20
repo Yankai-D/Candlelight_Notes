@@ -251,6 +251,13 @@ export class FileLibrary {
     const existing = this.index.entries.find(entry => entry.id === id);
     if (existing) {
       if (input.migration && existing.migrationDigest === hash) return { id, verified: true };
+      // The original/index may have committed while the following collection
+      // save or HTTP response failed. Only acknowledge an exact replay.
+      const status = await this.inspect(existing);
+      if (!status.missing.length && digest(JSON.stringify(await json(existing.notePath))) === hash) {
+        const source = input.source && !/\.json$/i.test(input.source.name || '') ? Buffer.from(z.string().max(72 * 1024 * 1024).parse(input.source.data), 'base64') : null;
+        if ((!source && !existing.sourcePath) || (source && existing.sourcePath && digest(await readFile(existing.sourcePath)) === digest(source))) return { id, verified: true };
+      }
       throw new Error('资料编号已存在，原笔记已保留。请重新导入文件。');
     }
     const backup = /\.json$/i.test(input.source?.name || '');
