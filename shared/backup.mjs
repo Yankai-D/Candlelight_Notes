@@ -58,6 +58,8 @@ export function restoreBackup(raw) {
     if (!validChapters(state.chapters) || state.versions.some(v => !validChapters(v.chapters) || result.entryType !== 'note' && (v.chapters.length !== ids.length || v.chapters.some(c => !ids.includes(c.id))))) throw new Error('备份中的章节或原文页码不完整。');
     if (state.preparation) {
       const completed = state.preparation.completedIds;
+      if (state.preparation.interruption && !ids.includes(state.preparation.interruption.chapterId)) throw new Error('备份中的中断记录与章节不一致。');
+      if (state.preparation.workflow?.history.some(report => !ids.includes(report.chapterId))) throw new Error('备份中的任务审查记录与章节不一致。');
       if (new Set(completed).size !== completed.length || completed.some(id => !ids.includes(id)) || Object.keys(state.preparation.errors).some(id => !ids.includes(id) && !(id === '__plan' && result.entryType === 'note' && !result.composition.planned) && !(id === '__template' && state.preparation.templateRouting === 'pending')) || (state.preparation.status === 'complete' && completed.length !== ids.length)) throw new Error('备份中的初始化进度与章节不一致。');
     }
     return { ...state, chapters: state.chapters.map(c => ({ ...c, content: withIds(c.content) })),

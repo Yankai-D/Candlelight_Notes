@@ -12,7 +12,7 @@ const config={baseUrl:'https://api.deepseek.com',model:'fixture-only',apiKey:'te
 const response=value=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:typeof value==='string'?value:JSON.stringify(value)}}],usage:{prompt_tokens:10,completion_tokens:20}}),{status:200});
 const suffix='\n'+adaptiveEvidencePolicy.instruction;
 
-test('current comparison preserves the archived baseline except explicit brand/profile/goal migrations, and changes only one experimental suffix',()=>{
+test('current comparison preserves the archived baseline except explicit brand/profile/goal/reference migrations, and changes only one experimental suffix',()=>{
   const previous=JSON.parse(readFileSync(new URL('../evals/notes/runs/2026-10-18-product/run.json',import.meta.url),'utf8'));
   const plan=planExperiment({suite:'evidence-boundary'});
   assert.equal(plan.candidateCount,6);

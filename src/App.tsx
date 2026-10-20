@@ -42,12 +42,13 @@ import { defaultEditInstruction, defaultGenerationInstruction } from '../shared/
 import { defaultLearningIntent, normalizeLearningIntent } from '../shared/learning-intent.mjs'
 import { commitNotebook, ensureNotebooks, selectNotebook, reviseNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
 import { prepareDocument, remainingChapters } from '../shared/preparation.mjs'
+import { noteFailureMetadata } from '../shared/note-recovery.mjs'
 import { applyBundlePlan, bundlePlanRequest, bundleMaterials, captureBundleContext, contextForMaterial, createBundleNote } from '../shared/bundle-context.mjs'
 import { repairFormulaDocument } from '../shared/formula-layout.mjs'
 import { upgradeMathDocument } from '../shared/math-references.mjs'
 import { mathText } from '../shared/math-syntax.mjs'
 import { resultRendering, upgradeNoteFormat } from '../shared/note-format.mjs'
-import type { Collection, EditRequest, Knowledge, LearnerProfile, LearningSettings, LearningDocument, ModelConfig, SelectionContext, SourcePosition } from './types'
+import type { Collection, EditRequest, Knowledge, LearnerProfile, LearningSettings, LearningDocument, ModelConfig, SelectionContext, SourcePosition, WorkflowReview } from './types'
 
 type ModalName = 'import' | 'discover' | 'maintenance' | 'records' | 'conflict' | 'settings' | 'startup-settings' | 'storage-settings' | 'choose-reader' | 'course-style' | 'history' | 'source' | 'references' | 'reference-source' | 'intent' | 'help' | 'knowledge' | 'regenerate' | null
 const NotePreview = lazy(() => import('./components/NotePreview').then(module => ({ default: module.NotePreview })))
@@ -307,7 +308,7 @@ export default function App() {
   async function api(path: string, body: unknown, signal?: AbortSignal) {
     const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Reading-Tree-Token': configRef.current.token }, body: JSON.stringify(path === '/api/edit' ? { ...(body as object), workspaceToken: configRef.current.workspaceToken } : body), signal })
     const data = await response.json()
-    if (!response.ok) throw new Error(data.error || '请求失败，请重试。')
+    if (!response.ok) throw Object.assign(new Error(data.error || '请求失败，请重试。'), noteFailureMetadata(data))
     return data
   }
   async function saveCollection(value: Collection) {
@@ -631,7 +632,7 @@ export default function App() {
           throw failure
         }
       }
-      const result = await prepareDocument({ document: current, settings: notebookSettings(current), knowledge,
+      const result = await prepareDocument({ document: current, settings: notebookSettings(current), knowledge, reviewPolicy: 'on-anomaly',
         sourceContext: current.entryType === 'note' ? undefined : current.preparation ? current.preparation.sourceContext : contextForMaterial(current, docsRef.current, collectionRef.current),
         selectTemplate: async (source: LearningDocument, requestSignal: AbortSignal) => {
           setBusy('正在根据资料内容与学习目标选择模板…')
@@ -641,14 +642,14 @@ export default function App() {
         },
         getLatest: () => docRef.current || current,
         save: persist, signal,
-        onProgress: ({ chapter, done, total }: { chapter: { title: string }; done: number; total: number }) => setBusy(`${notebookLabel(current)} · 已完成 ${done}/${total} · ${chapter.title}`),
-        request: async (latest: LearningDocument, chapterId: string, settings: LearningSettings, background: LearnerProfile, requestSignal: AbortSignal) => {
-          const request = makeRequest(latest, 'generate', 'chapter', defaultGenerationInstruction(settings, latest.entryType === 'note'), chapterId, settings, background)
-          return (await api('/api/edit', request, requestSignal)).result
+        onProgress: ({ chapter, done, total }: { chapter: { title: string }; done: number; total: number }) => setBusy(`${notebookLabel(current)} · 已完成 ${done}/${total} · 正在生成与审查 ${chapter.title}`),
+        request: async (latest: LearningDocument, chapterId: string, settings: LearningSettings, background: LearnerProfile, requestSignal: AbortSignal, workflow: WorkflowReview) => {
+          const request = { ...makeRequest(latest, 'generate', 'chapter', defaultGenerationInstruction(settings, latest.entryType === 'note'), chapterId, settings, background), workflow }
+          return api('/api/edit', request, requestSignal)
         },
       })
       if (result.preparation.status === 'complete') notify('全文笔记已就绪。之后的追问与修改会留在这份笔记里。')
-      else if (!signal.aborted) notify('已保存完成章节，未完成部分可继续初始化。')
+      else if (!signal.aborted) notify(result.preparation.interruption?.message || (result.preparation.completedIds.length ? '已保存完成章节，未完成部分可继续生成。' : '尚未生成完成章节，请查看本次停止原因。'))
     } catch (e) { if ((e as Error).name !== 'AbortError') setError(`${(e as Error).message} 已完成章节已保留。`) }
     finally { setBusy(''); setPreparing(false); preparationJob.current = false; abort.current = null }
   }
@@ -731,7 +732,13 @@ export default function App() {
       <section className="article-scroll" ref={article} onScroll={scheduleReading}
         onWheel={interruptChapterNavigation} onTouchStart={interruptChapterNavigation} onPointerDown={interruptChapterNavigation}
         onKeyDown={event => { if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) interruptChapterNavigation() }}>
-        {(emptyCount > 0 || preparing) && <div className="preparation-banner" role="status"><div className="preparation-heading"><span>{preparing ? <LoaderCircle className="spin" size={18} /> : <Sprout size={20} />} 生成{notebookLabel(doc)}笔记</span><small>{doc.chapters.length - emptyCount} / {doc.chapters.length} 章</small></div><p>{preparing ? busy : doc.preparation ? '这份笔记尚未生成完。继续时只处理未完成章节。' : doc.readingPolicy === 'manual' ? '原件已保存。这份资料不会自动生成笔记；可在此开始，也可以只作为联合资料包的来源。' : '首次选择时生成全文，逐章保存。之后切换直接打开已保存的笔记。'}</p><progress aria-label="全文整理进度" max={doc.chapters.length} value={doc.chapters.length - emptyCount} />{!preparing && <button className="secondary" disabled={!!busy} onClick={() => void generateRemaining()}>{config.configured ? doc.preparation ? '继续未完成部分' : '生成这份笔记' : '连接模型，生成笔记'}</button>}{doc.preparation && Object.keys(doc.preparation.errors).length > 0 && <details><summary>{Object.keys(doc.preparation.errors).length} 个问题待处理 · 查看原因</summary>{Object.entries(doc.preparation.errors).map(([id, message]) => <p key={id}><b>{id === '__plan' ? '整理规划' : id === '__template' ? '模板选择' : doc.chapters.find(c => c.id === id)?.title}</b> · {message}</p>)}</details>}</div>}
+        {(emptyCount > 0 || preparing) && <div className="preparation-banner" role="status">
+          <div className="preparation-heading"><span>{preparing ? <LoaderCircle className="spin" size={18} /> : <Sprout size={20} />} 生成{notebookLabel(doc)}笔记</span><small>{doc.chapters.length - emptyCount} / {doc.chapters.length} 章</small></div>
+          <p>{preparing ? busy : doc.preparation?.interruption?.message || (doc.preparation ? '这份笔记尚未生成完。继续时只处理未完成章节。' : doc.readingPolicy === 'manual' ? '原件已保存。这份资料不会自动生成笔记；可在此开始，也可以只作为联合资料包的来源。' : '首次选择时生成全文，逐章保存。之后切换直接打开已保存的笔记。')}</p>
+          <progress aria-label="全文整理进度" max={doc.chapters.length} value={doc.chapters.length - emptyCount} />
+          {!preparing && <button className="secondary" disabled={!!busy} onClick={() => void generateRemaining()}>{config.configured ? doc.preparation ? '继续未完成部分' : '生成这份笔记' : '连接模型，生成笔记'}</button>}
+          {!preparing && doc.preparation && Object.keys(doc.preparation.errors).length > 0 && <details><summary>{Object.keys(doc.preparation.errors).length} 个问题待处理 · 查看原因</summary>{Object.entries(doc.preparation.errors).map(([id, message]) => <p key={id}><b>{id === '__plan' ? '整理规划' : id === '__template' ? '模板选择' : doc.chapters.find(c => c.id === id)?.title}</b> · {message}</p>)}</details>}
+        </div>}
         {!!doc.sourceWarnings?.length && <details className="source-import-notice"><summary>资料读取说明</summary>{doc.sourceWarnings.map(message=><p key={message}>{message}</p>)}</details>}
         <ContinuousNotes document={doc} fontSize={fontSize} readOnly={readOnly || preparing || !!doc.storageIssue}
           highlight={context.text && !busy && !pending ? { chapterId: contextChapter.current, from: context.from, to: context.to } : undefined}

@@ -13,7 +13,8 @@ export type LearnerProfile = { background: string; foundations: string[] }
 export type Knowledge = LearnerProfile & { materials: ReadMaterial[] }
 export type CourseSample = { baseVersion: string; paragraphs: { id: string; text: string }[]; rules: string[]; updatedAt: number; editCount: number; lastRequest: string }
 export type CourseStylePreferences = { version: 1; revision: number; selected: 'default' | 'personal'; personal: CourseSample; undo?: { selected: 'default' | 'personal'; personal: CourseSample } }
-export type Preparation = { startedAt: number; completedAt?: number; status: 'running' | 'paused' | 'partial' | 'complete'; completedIds: string[]; errors: Record<string, string>; settings: LearningSettings; knowledge?: LearnerProfile; templateRouting?: 'pending' | 'selected'; sourceContext?: BundleContext }
+export type WorkflowReview = { version: 1; id: string; attempt: number; chapterId: string; totalChapters: number; completedChapters: number; reviewPolicy: 'always' | 'on-anomaly'; repairAllowance: number; priorDiagnoses: string[] }
+export type Preparation = { startedAt: number; completedAt?: number; status: 'running' | 'paused' | 'partial' | 'complete'; completedIds: string[]; errors: Record<string, string>; settings: LearningSettings; knowledge?: LearnerProfile; templateRouting?: 'pending' | 'selected'; sourceContext?: BundleContext; interruption?: { code: string; chapterId: string; message: string }; workflow?: import('zod').infer<typeof import('../shared/workflow-review.mjs').workflowStateSchema> }
 export type StudyStatus = 'imported' | 'studying' | 'completed'
 export type TreeConcept = { label: string; description: string; chapterIds: string[] }
 export type StudyTreeData = { version: 'study-tree-v1'; generatedAt: number; fingerprint: string; model: string;
@@ -61,6 +62,6 @@ export type EditRequest = {
   instruction: string; revision: number; chapterId: string; anchorId?: string; selection?: string;
   learning?: LearningSettings; knowledge?: LearnerProfile; documentId?: string;
   notebookId?: string;
-  bundleContext?: BundleContext; composition?: boolean;
+  bundleContext?: BundleContext; composition?: boolean; workflow?: WorkflowReview;
   document: Pick<LearningDocument, 'title' | 'intent' | 'chapters' | 'pages'>;
 }

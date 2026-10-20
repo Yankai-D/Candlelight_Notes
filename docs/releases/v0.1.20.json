@@ -1,0 +1,83 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.20",
+  "status": "verified-local-candidate",
+  "codeRevision": "cac01f34e7f2e7c320acf6a12357c53dc6094969",
+  "sourceFingerprint": "26c63b9f58a38bbeae44205b1716262bb4cb1e9a5b70f058a8a4a5d11c6e0382",
+  "changes": [
+    "Cross-file source IDs are distinct from original page numbers; quotation-based or metadata-only citation repair",
+    "Task-scoped progress, diagnostic memory, shared correction budgets and validated completion receipts",
+    "Anomaly-triggered model review, evidence-bound targeted patches and post-revision recheck",
+    "Exhausted recovery stops later chapters; accepted work remains visible and resumes without duplication",
+    "Paragraph-paired Chinese and English README for both development and public source"
+  ],
+  "validation": {
+    "tests": 408,
+    "browserSuites": 11,
+    "stages": 14,
+    "actualModelCalls": 0,
+    "sourceChangedDuringChecks": false,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.19",
+        "asarSha256": "07efd0ba08bd80fb3bc4e35e43eb32c041a0e764280a333c3212ecaf0a9dd0a1"
+      },
+      "to": {
+        "version": "0.1.20",
+        "asarSha256": "3b7fc4289ca95bb5beac1b0c0ff4eab8105d991a1ed155c31a9cec8bf813d7c8"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "installerContents": {
+      "status": "pass",
+      "files": 36,
+      "sourceRevision": "cac01f34e7f2e7c320acf6a12357c53dc6094969",
+      "installerSha256": "7d3b9a159abf646482f56e31dc87789180e6b0e78622b0ff76cf2451dae922ff",
+      "scope": "Every file extracted from the final Setup.exe matches the tested win-unpacked directory byte-for-byte"
+    },
+    "payloadFilesVerified": 12086,
+    "checkReportSha256": "ad9ed3dfe653128724885a8c3975ce13ffab9f0cbf5c9ba00363e020903f1dc4"
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.20-Setup-x64.exe",
+      "bytes": 138107446,
+      "sha256": "7d3b9a159abf646482f56e31dc87789180e6b0e78622b0ff76cf2451dae922ff"
+    },
+    "archive": {
+      "file": "Candlelight-Notes-0.1.20-Windows-x64.zip",
+      "bytes": 138155676,
+      "sha256": "777055ac58d8a47a8e5235eb5e4068d149f48e864cdebdbe5da497eda5bae044"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false,
+    "publishedToGitHub": false
+  },
+  "limitations": [
+    "No live DeepSeek or independent teaching-quality evaluation in this review",
+    "Anomaly-triggered review does not guarantee detection of every semantic error",
+    "New semantic review gates note generation; tree and template flows retain their existing stage-specific checks",
+    "No full NSIS install/upgrade/uninstall lifecycle test on a clean Windows account or VM",
+    "Editor integration cold SSR initialization exceeded the former 60-second total deadline; the total budget is now 120 seconds, with interaction deadlines and assertions unchanged",
+    "Earlier interrupted or failed checks are not acceptance evidence; the final clean revision passed all 14 stages",
+    "Remote publication and CI outcomes are recorded on GitHub, separately from this local verification snapshot"
+  ]
+}

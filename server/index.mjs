@@ -1,5 +1,6 @@
 import { brand } from '../shared/brand.mjs';
 import { optionalRecord } from './recovery.mjs';
+import { noteFailureMetadata } from '../shared/note-recovery.mjs';
 import http from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
@@ -164,22 +165,22 @@ const server = http.createServer(async (req, res) => {
           }
           const generation = [];
           const messages = buildMessages(input);
-          let record;
+          let record, workflow;
           if (process.env.READING_TREE_FILE_STORAGE !== '0' && input.documentId && ['generate', 'explain', 'rewrite', 'style'].includes(input.action)) {
             await fileCommand({ action: 'status' }); record = await optionalRecord(() => createGenerationRecord(files.index.systemDirectory, input, activeConfig.model), 'generation-record-create');
           }
           try {
-            const raw = await runModel(activeConfig, messages, controller.signal, record?.fetch || fetch, { action: input.action, onCompletion: info => { generation.push(info); record?.event(info); } });
+            const raw = await runModel(activeConfig, messages, controller.signal, record?.fetch || fetch, { action: input.action, onCompletion: info => { generation.push(info); record?.event(info); }, onWorkflowReport: value => { workflow = value; if (value) record?.event({ phase: 'workflow-summary', workflow: value }); } });
             const result = validateResult(input, raw);
             await record?.finish('accepted', result);
-            return send(res, 200, { result, model: activeConfig.model, generation, recordId: record?.id });
+            return send(res, 200, { result, model: activeConfig.model, generation, recordId: record?.id, workflow });
           } catch (error) { await record?.finish(controller.signal.aborted ? 'cancelled' : 'failed', undefined, error); throw error; }
         } finally { clearTimeout(timer); controllers.delete(controller); }
       }
       return send(res, 404, { error: '接口不存在。' });
     } catch (error) {
       const message = error.name === 'AbortError' ? '请求已取消或超时，笔记未被修改。' : error instanceof z.ZodError ? '输入格式不正确，请检查模型设置或重新选择内容。' : error.message === 'fetch failed' ? '无法连接模型服务，请检查网络与 API 地址。' : error.message;
-      if (!res.destroyed) send(res, 400, { error: message });
+      if (!res.destroyed) send(res, 400, { error: message, ...noteFailureMetadata(error) });
     }
     return;
   }

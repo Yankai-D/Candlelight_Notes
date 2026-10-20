@@ -1,5 +1,7 @@
 import { applyResult } from './document.mjs';
 import { defaultSettings, defaultKnowledge, learnerProfile, learningSettingsSchema } from './learning.mjs';
+import { preparationInterruption } from './note-recovery.mjs';
+import { startWorkflow, workflowRequest, acceptWorkflowReport } from './workflow-review.mjs';
 
 export function remainingChapters(document) {
   const completed = new Set(document.preparation?.completedIds || []);
@@ -8,7 +10,7 @@ export function remainingChapters(document) {
 
 // Each chapter is committed independently. A later failure never rolls back
 // completed work, and a resumed run never regenerates a completed chapter.
-export async function prepareDocument({ document, settings = defaultSettings, knowledge, sourceContext, getLatest, save, request, selectTemplate, signal, onProgress = progress => {} }) {
+export async function prepareDocument({ document, settings = defaultSettings, knowledge, sourceContext, getLatest, save, request, selectTemplate, signal, reviewPolicy, onProgress = progress => {} }) {
   if (document.preparation?.status === 'complete') return document;
   let selected = learningSettingsSchema.parse(document.preparation?.settings || settings);
   let current = document;
@@ -18,6 +20,8 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
     sourceContext: current.preparation?.sourceContext || (!current.preparation ? sourceContext : undefined),
     knowledge: selected.mode === 'adaptive' ? learnerProfile(current.preparation?.knowledge || knowledge || defaultKnowledge) : undefined,
     completedIds: [...completed], errors: { ...current.preparation?.errors }, status: 'running' };
+  delete preparation.interruption;
+  if (reviewPolicy || preparation.workflow) preparation.workflow = startWorkflow(preparation.workflow, current.chapters.length, reviewPolicy);
   const shouldSelect = selected.mode === 'adaptive' && !selected.writingTemplate && typeof selectTemplate === 'function'
     && (current.preparation?.templateRouting === 'pending' || (!current.preparation && completed.size === 0));
   if (shouldSelect) preparation.templateRouting = 'pending';
@@ -46,13 +50,16 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
     }
   }
   const queue = remainingChapters(current);
+  let consecutiveFailures = 0;
   for (const chapter of queue) {
     if (signal?.aborted) break;
     onProgress({ chapter, done: completed.size, total: current.chapters.length });
     const before = getLatest?.() || current;
     if (!sameNotebook(before)) return current;
+    const audit = preparation.workflow ? workflowRequest(preparation.workflow, chapter.id, current.chapters.length, completed.size) : undefined;
     try {
-      const result = await request(before, chapter.id, selected, preparation.knowledge, signal);
+      const reply = await request(before, chapter.id, selected, preparation.knowledge, signal, audit);
+      const result = audit ? reply.result : reply;
       if (signal?.aborted) break;
       const latest = getLatest?.() || current;
       if (!sameNotebook(latest)) return current;
@@ -61,19 +68,27 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
         preparation.errors[chapter.id] = '生成期间笔记发生编辑，已暂停以保留你的修改。';
         break;
       }
+      if (audit) preparation.workflow = acceptWorkflowReport(preparation.workflow, audit, reply.workflow, 'accepted');
       current = applyResult(latest, { action: 'generate', chapterId: chapter.id, revision: before.revision }, result);
       completed.add(chapter.id);
+      consecutiveFailures = 0;
       delete preparation.errors[chapter.id];
     } catch (error) {
       if (signal?.aborted || error.name === 'AbortError') break;
-      preparation.errors[chapter.id] = error.message.slice(0, 2000);
+      if (audit && error.workflow) {
+        try { preparation.workflow = acceptWorkflowReport(preparation.workflow, audit, error.workflow, 'blocked'); }
+        catch (invalidReport) { error = invalidReport; }
+      }
+      preparation.errors[chapter.id] = String(error.message || '生成失败').slice(0, 2000);
       // Keep user edits made while an unsuccessful request was in flight.
       const latest = getLatest?.();
       if (latest && !sameNotebook(latest)) return current;
       if (latest) current = latest;
+      preparation.interruption = preparationInterruption(error, ++consecutiveFailures, chapter.id);
     }
     current = { ...current, preparation: { ...preparation, completedIds: [...completed], errors: { ...preparation.errors } } };
     await save(current);
+    if (preparation.interruption) break;
   }
   const latest = getLatest?.();
   if (latest && !sameNotebook(latest)) return current;

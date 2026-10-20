@@ -7,6 +7,7 @@ import { paragraph, withIds } from '../../shared/document.mjs';
 import { ensureNotebooks, selectNotebook, commitNotebook } from '../../shared/notebooks.mjs';
 import { defaultModelConnection } from '../../shared/app-settings.mjs';
 import { validateResult } from '../../server/harness.mjs';
+import { mockWorkflowReceipt } from '../support/workflow-receipt.mjs';
 
 const base=process.env.PANGZHU_TEST_URL,output=process.env.PANGZHU_TEST_OUTPUT;
 if(!base||!output)throw new Error('Run npm run test:e2e with an isolated test server.');
@@ -51,7 +52,7 @@ try {
     if(url.pathname==='/api/test')return json({ok:true});
     if(url.pathname==='/api/edit') {
       if(body.action==='select-template')return json({result:{templateId:'narrative',reason:'用于测试启动方式的原创示例。'}});
-      if(body.action==='generate')return json({result:validateResult(body,{summary:'离线测试生成',blocks:[{type:'paragraph',text:`新生成的${body.learning.mode}笔记。`,sourcePages:[1]}]})});
+      if(body.action==='generate')return json({result:validateResult(body,{summary:'离线测试生成',blocks:[{type:'paragraph',text:`新生成的${body.learning.mode}笔记。`,sourcePages:[1]}]}),workflow:mockWorkflowReceipt(body)});
     }
     forbidden.push(request.url());return request.abort();
   });

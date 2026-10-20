@@ -5,8 +5,12 @@ import 'fake-indexeddb/auto';
 import { createDemo } from '../src/demo.ts';
 import { paragraph } from '../shared/document.mjs';
 import { compileResult } from '../shared/note-format.mjs';
+import { mockWorkflowReceipt } from './support/workflow-receipt.mjs';
 
-test('rich editor and independent notebooks preserve edits, selection, history and persistence', { timeout: 60000 }, async () => {
+// Cold Vite SSR loading of the full editor can exceed a minute on Windows.
+// Keep the per-interaction waitUntil deadline unchanged; this budget includes
+// module initialization plus all notebook/edit/history integration assertions.
+test('rich editor and independent notebooks preserve edits, selection, history and persistence', { timeout: 120000 }, async () => {
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: 'http://localhost:5173', pretendToBeVisual: true });
   for (const name of ['window', 'document', 'navigator', 'Node', 'Element', 'HTMLElement', 'HTMLInputElement', 'DocumentFragment', 'MutationObserver', 'DOMParser', 'getComputedStyle']) Object.defineProperty(globalThis, name, { value: dom.window[name], configurable: true, writable: true });
   globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
@@ -316,7 +320,7 @@ test('rich editor and independent notebooks preserve edits, selection, history a
           const adaptive = input.learning.mode === 'adaptive';
           const blocks = [{ type: 'paragraph', text: `${input.learning.mode} 初始化内容 ${input.chapterId}` }];
           if (adaptive) blocks.push({ type: 'paragraph', text: `顺着前文继续解释 ${input.chapterId}` });
-          return Promise.resolve(new Response(JSON.stringify({ model: 'test-model', result: { blocks, summary: '' } })));
+          return Promise.resolve(new Response(JSON.stringify({ model: 'test-model', result: { blocks, summary: '' }, workflow: mockWorkflowReceipt(input) })));
         }
         return regularFetch(url, options);
       };

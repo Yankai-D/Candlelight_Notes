@@ -1,13 +1,13 @@
 {
   "schema": "candlelight-public-source-v1",
-  "version": "0.1.19",
-  "sourceRevision": "0585c8c62f11bb1c643320febab9ecad368e1503",
-  "applicationRevision": "966ecc49539096a9c2919908b70e22ddda579df6",
-  "applicationFilesVerified": 136,
+  "version": "0.1.20",
+  "sourceRevision": "363f2ae2d5514385a8cbf06d2a040f6d304ce953",
+  "applicationRevision": "cac01f34e7f2e7c320acf6a12357c53dc6094969",
+  "applicationFilesVerified": 140,
   "installer": {
-    "file": "Candlelight-Notes-0.1.19-Setup-x64.exe",
-    "bytes": 138100194,
-    "sha256": "af6d46c47dbb734f9e303cb3b78f7170f3493ee1f46c55ff9f238d5797afe262"
+    "file": "Candlelight-Notes-0.1.20-Setup-x64.exe",
+    "bytes": 138107446,
+    "sha256": "7d3b9a159abf646482f56e31dc87789180e6b0e78622b0ff76cf2451dae922ff"
   },
   "gitHistoryIncluded": false,
   "personalDataIncluded": false,
@@ -32,7 +32,7 @@
     {
       "path": "README.md",
       "operation": "public-distribution-documentation",
-      "originalSha256": "50c1b8fcedc5428d4716293134a9c04846274acc0a6bcd290f9fb2461469912d"
+      "originalSha256": "955fe19b3cb2f37b73d82588d6bfbbd09b2db74cbd49eabc956e45526672ae55"
     },
     {
       "path": "PUBLICATION.md",
@@ -92,8 +92,8 @@
     },
     {
       "path": "desktop/README.md",
-      "bytes": 14199,
-      "sha256": "a48df74aeef49556424cf2eef4fe2bb69a630a563f3f539edb729d9f07497b71"
+      "bytes": 14670,
+      "sha256": "ce721f5c51c6418f5586644339bcfc2a0527c9bece0cac55b99e3d312494dbb2"
     },
     {
       "path": "desktop/updates.mjs",
@@ -127,8 +127,8 @@
     },
     {
       "path": "docs/operational-harness.md",
-      "bytes": 5647,
-      "sha256": "2a90b99101c527cbe936cbe4b51bc433212b33d14800874b55289bbd89e1c1ed"
+      "bytes": 11482,
+      "sha256": "f2dce705a8e44f558601052ebc86c5f70455c65465c76cd6d22f4b3adc21bb20"
     },
     {
       "path": "docs/product-quality.md",
@@ -214,6 +214,11 @@
       "path": "docs/releases/v0.1.2-desktop.json",
       "bytes": 2536,
       "sha256": "1596c5dde41a0dddb8c246edbefd968bff3cd2d20f6f7885906e2d2323fbfb66"
+    },
+    {
+      "path": "docs/releases/v0.1.20.json",
+      "bytes": 4387,
+      "sha256": "cbe50fe5e6253c026ea3b4e47e64ea6fdc74b8b9f4aac6342b9c365dc56464a1"
     },
     {
       "path": "docs/releases/v0.1.3-desktop.json",
@@ -783,12 +788,12 @@
     {
       "path": "package-lock.json",
       "bytes": 230191,
-      "sha256": "4c55b11c98066c9ed80f125e9d82d6fef0f1327ceb3c328790323fa368a32a1e"
+      "sha256": "2c7db6dc93461b4874ab5153c8d07bea7da4d4f6d992d6bfc814a5ed36da64bb"
     },
     {
       "path": "package.json",
       "bytes": 2439,
-      "sha256": "315152ee7c2614f2dcf0185d97fc431fe7215add4942c29887cef0c5009c951c"
+      "sha256": "7ce747535accb1cece0d38210974d118093068fe7d090d35ed7c5d93fb9f34e7"
     },
     {
       "path": "packaging/desktop/使用说明.txt",
@@ -817,13 +822,13 @@
     },
     {
       "path": "packaging/source/PUBLICATION.public.md",
-      "bytes": 4131,
-      "sha256": "b9f37e37c605d2b8d67d1c2ad7cea64cd697b6a32661f16063102944cde51b2c"
+      "bytes": 6755,
+      "sha256": "eb5c308b1ad2b3a8fea91ba151b31dcecafe0e283367d25e923db75a5467498f"
     },
     {
       "path": "packaging/source/README.public.md",
-      "bytes": 7244,
-      "sha256": "2d67e3a935cb1bfbdcb452708c2073ecccbbeb123b8afa396f6e065ddcf3f6b4"
+      "bytes": 15700,
+      "sha256": "c5ca9377e1d3a70b18a9d1ff5073555f79520797b23e7d52409305b6c6324121"
     },
     {
       "path": "packaging/windows/使用说明.txt",
@@ -882,13 +887,13 @@
     },
     {
       "path": "PUBLICATION.md",
-      "bytes": 4131,
-      "sha256": "b9f37e37c605d2b8d67d1c2ad7cea64cd697b6a32661f16063102944cde51b2c"
+      "bytes": 6755,
+      "sha256": "eb5c308b1ad2b3a8fea91ba151b31dcecafe0e283367d25e923db75a5467498f"
     },
     {
       "path": "README.md",
-      "bytes": 7244,
-      "sha256": "2d67e3a935cb1bfbdcb452708c2073ecccbbeb123b8afa396f6e065ddcf3f6b4"
+      "bytes": 15700,
+      "sha256": "c5ca9377e1d3a70b18a9d1ff5073555f79520797b23e7d52409305b6c6324121"
     },
     {
       "path": "scripts/audit-desktop.mjs",
@@ -1127,8 +1132,8 @@
     },
     {
       "path": "server/harness.mjs",
-      "bytes": 37007,
-      "sha256": "a72a59b4270d36cea664169d853fe9686c59b55932f736abeb845235b3158efd"
+      "bytes": 43422,
+      "sha256": "8370dd81997285b944d6d4daa5fb85c5387dab9243a0151bc4ee52e15c6e81b7"
     },
     {
       "path": "server/ideal-tree/adapter.mjs",
@@ -1167,8 +1172,8 @@
     },
     {
       "path": "server/index.mjs",
-      "bytes": 16540,
-      "sha256": "a32aeedaecce8f1173a375a165a072446909867923c0b36460079f647a2d6601"
+      "bytes": 16782,
+      "sha256": "0e6e14a2edf9118a0623b994308694f817cf19b0c49072a11434c13d48c7f6b4"
     },
     {
       "path": "server/library.mjs",
@@ -1189,6 +1194,11 @@
       "path": "server/model-budget.mjs",
       "bytes": 1773,
       "sha256": "74571b7a2c416f053e51e484f9103683b51d40ea125671a622766642f7f8d6f4"
+    },
+    {
+      "path": "server/note-review.mjs",
+      "bytes": 12996,
+      "sha256": "4a1888dd2f406601dd2e62dca7e540f4acc758abe7f666813182bfb496e98df3"
     },
     {
       "path": "server/organization-harness.mjs",
@@ -1224,6 +1234,11 @@
       "path": "server/settings-store.mjs",
       "bytes": 4501,
       "sha256": "62abce12053ecba8fe4dceefe8b9a5494d0f8b4227ca3158e19faaa5d0010284"
+    },
+    {
+      "path": "server/source-references.mjs",
+      "bytes": 5435,
+      "sha256": "ba0818adf2d59c152b67e6f0e92c3250698a4c593ae3fe3b04721875cc3094ee"
     },
     {
       "path": "server/template-harness.mjs",
@@ -1262,8 +1277,8 @@
     },
     {
       "path": "shared/backup.mjs",
-      "bytes": 6880,
-      "sha256": "7c04e498a927b644ef8d6816b53ddd436033244f13e44c50eb931bf919323896"
+      "bytes": 7214,
+      "sha256": "486ec1c7b3e6adc1b522c43470e6fe3395d4cbd0aa37809b9018a99fb4b09602"
     },
     {
       "path": "shared/brand-mark.mjs",
@@ -1357,8 +1372,8 @@
     },
     {
       "path": "shared/learning.mjs",
-      "bytes": 3519,
-      "sha256": "7531d526c50f61dbdd0a63b9b402eac71366a9bcf9e7d1a7d2a6b11e7b3a2ceb"
+      "bytes": 3754,
+      "sha256": "278f87a7463b6ce0db4baba7914d55c700abd7fdf42d58815b744508107dc815"
     },
     {
       "path": "shared/library.mjs",
@@ -1401,14 +1416,19 @@
       "sha256": "18f22a5746a3ba8c5e0e5a78fd7615f126cf01e7b73b6d74907ed79c3117e9ef"
     },
     {
+      "path": "shared/note-recovery.mjs",
+      "bytes": 1384,
+      "sha256": "ab15858ed0013e59a3ec5d5a492b189fd5f268aac7c31b6aae97e30f122eafac"
+    },
+    {
       "path": "shared/notebooks.mjs",
       "bytes": 7170,
       "sha256": "9603093f4576de8857b8c95c256e13c6775cf70985f9c143380b3be00c292b83"
     },
     {
       "path": "shared/preparation.mjs",
-      "bytes": 5308,
-      "sha256": "9162829098492ec74139e77634fda43f2be4232324280a87db89129d7a7bdd97"
+      "bytes": 6426,
+      "sha256": "751e2b9f37d66548b0cb82e95003f18238986bad57e801d7c9ea0ba290b55449"
     },
     {
       "path": "shared/print-layout.mjs",
@@ -1446,14 +1466,19 @@
       "sha256": "d6f968302917eef35d080681e94739eae04b23af1a134b852f3ea785bb915d43"
     },
     {
+      "path": "shared/workflow-review.mjs",
+      "bytes": 4179,
+      "sha256": "de6cad02e3044e42946cfe3648efe6ea35be5062f723b6fe271a8a38669f61eb"
+    },
+    {
       "path": "shared/writing-templates.mjs",
       "bytes": 15388,
       "sha256": "d510fe01b1cf415bc614e866009f1da9e241386dbf87cca510bf05642f1e58e3"
     },
     {
       "path": "src/App.tsx",
-      "bytes": 76934,
-      "sha256": "44c86918852954f2c23118f8e0178491affe245c863b2cb36168394d2731fcb4"
+      "bytes": 77404,
+      "sha256": "31b0c5e30ea7af97db6f5b01e7dca617226b365767f9235ec61d578f2300ef9f"
     },
     {
       "path": "src/collection.css",
@@ -1497,8 +1522,8 @@
     },
     {
       "path": "src/components/GenerationRecordsModal.tsx",
-      "bytes": 3574,
-      "sha256": "930308d3abdeff1f0b8b62174689a3800ddecc19211c6c6144b89c28bfe66136"
+      "bytes": 3745,
+      "sha256": "2221133f765ac40e077c4c0c44db3ff0e401cd491f61552c0051822f7a3038c4"
     },
     {
       "path": "src/components/HelpModal.tsx",
@@ -1712,8 +1737,8 @@
     },
     {
       "path": "src/types.ts",
-      "bytes": 6402,
-      "sha256": "d6093598a9a93a3a4d19be75ea77447c460b905e2b1cc03e4a58f965bc4c2068"
+      "bytes": 6830,
+      "sha256": "d6aaa25c14072b01f26be34452b271af81ef47e8d0d4ae3442e4611dae3ee124"
     },
     {
       "path": "src/vite-env.d.ts",
@@ -1727,8 +1752,8 @@
     },
     {
       "path": "tests/adaptive-evidence.test.mjs",
-      "bytes": 4528,
-      "sha256": "d90e666246c19b223ac834de83a6857af11224646ce3f6549d66e7cfaed23b16"
+      "bytes": 4538,
+      "sha256": "348f6d71710e147e7341d171782824e3779a5dc142c00efc43f3a32e89f00857"
     },
     {
       "path": "tests/api.test.mjs",
@@ -1767,13 +1792,13 @@
     },
     {
       "path": "tests/browser/ideal-tree.mjs",
-      "bytes": 22281,
-      "sha256": "fe2d9ce856161e807d272715c10fb38d00f2828bd6d25af2704084cfe8fb1ec0"
+      "bytes": 22388,
+      "sha256": "172cdc0f2a0f374e8556b143b3ecd1f185f08efd2cb24aafa50b93a7090be383"
     },
     {
       "path": "tests/browser/nested-bundles.mjs",
-      "bytes": 10741,
-      "sha256": "7f1283612ca1729f066c20df4a2fe7a4d13e521c25c17a18704b5e5e307bbcf3"
+      "bytes": 12272,
+      "sha256": "7596eda807499cf1d4c3a6a6a6960a9c88f9cd3501b2e7d7d74fe1c334851661"
     },
     {
       "path": "tests/browser/onboarding.mjs",
@@ -1782,8 +1807,8 @@
     },
     {
       "path": "tests/browser/settings.mjs",
-      "bytes": 14528,
-      "sha256": "71b2dd00348cb3e83495ed76c1a3a9ec11e5578b66d8efc6eed191797d52fd59"
+      "bytes": 14634,
+      "sha256": "db8c35d35d16977dff08e0df72a9f5e6a8dec6ee77aa78e254b92e7e79c5e7e6"
     },
     {
       "path": "tests/browser/workspace-maintenance.mjs",
@@ -1847,8 +1872,8 @@
     },
     {
       "path": "tests/editor.test.mjs",
-      "bytes": 40149,
-      "sha256": "0eb8fb5f7e581679b2a7a6be7694aae407402006140c61bb862c2aa582485e22"
+      "bytes": 40493,
+      "sha256": "9eb0c9489baabd37c3f23d3079356238fa85756f311887d1884bd3f04b176bea"
     },
     {
       "path": "tests/editorial.test.mjs",
@@ -1862,8 +1887,8 @@
     },
     {
       "path": "tests/field-review.test.mjs",
-      "bytes": 13036,
-      "sha256": "79f2f8d80cc2a0a84493dbe78409eb3ea5d69c3d5a51b4a17a430afb1abfcae7"
+      "bytes": 13046,
+      "sha256": "191ce86b81db1d933326273dc18de18578ed819f417dcf1569c8ef43ff83669d"
     },
     {
       "path": "tests/file-library.test.mjs",
@@ -1917,8 +1942,8 @@
     },
     {
       "path": "tests/learning.test.mjs",
-      "bytes": 11848,
-      "sha256": "3226e67f416d67a904e2f84963fb41b1e61d135b6c0699f4d74c5d10f13cb9c8"
+      "bytes": 11905,
+      "sha256": "ada9fa43b7e3428b3ce2ffc16502189f8aada4475ad065cfcd56fba87d84d327"
     },
     {
       "path": "tests/library.test.mjs",
@@ -1969,6 +1994,16 @@
       "path": "tests/note-format.test.mjs",
       "bytes": 9566,
       "sha256": "5fab43683a26faf6e8e315accfecac34d1f866555850387a1cb3c3ac42c0cb71"
+    },
+    {
+      "path": "tests/note-reference-recovery.test.mjs",
+      "bytes": 11708,
+      "sha256": "53c1c1f43d8d3f65ab386493153fa0a40fdaa184eecf0293e7311bf28ba224d2"
+    },
+    {
+      "path": "tests/note-workflow-review.test.mjs",
+      "bytes": 17447,
+      "sha256": "cef9e56a08e136cbf9736a50c6502676767c41517d9f070de8cee13d12f0f101"
     },
     {
       "path": "tests/notebooks.test.mjs",
@@ -2057,13 +2092,18 @@
     },
     {
       "path": "tests/support/prompt-history.mjs",
-      "bytes": 3324,
-      "sha256": "fd117923cf1dc9e7937b13f49b01b5c0f2815942a148d57450beb0dd540837e8"
+      "bytes": 4743,
+      "sha256": "b4229486819f781d026aad8ed5b1fcbf4d97d6c41cc88ea0e0fb8dda45f43b54"
     },
     {
       "path": "tests/support/server.mjs",
       "bytes": 3034,
       "sha256": "f731a30280af50e631bcfecf93b88a9bdbe2b7f34bcf11250bf113752505a76f"
+    },
+    {
+      "path": "tests/support/workflow-receipt.mjs",
+      "bytes": 507,
+      "sha256": "531dbc5be55853277905c6553d4328b46bc3d8a09114c95273c8bc62d3d930fc"
     },
     {
       "path": "tests/tree-layout.test.mjs",

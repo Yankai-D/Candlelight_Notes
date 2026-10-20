@@ -1,5 +1,6 @@
 import { testBrowser } from '../support/browser.mjs';
 import { completeOnboarding } from '../support/onboarding.mjs';
+import { mockWorkflowReceipt } from '../support/workflow-receipt.mjs';
 import { mkdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { createDemo } from '../../src/demo.ts';
@@ -33,7 +34,7 @@ page.on('request',req=>{const url=req.url(),json=(v,status=200)=>void req.respon
  if(url.endsWith('/api/library'))return json({documents:[fixture]});
  if(url.endsWith('/api/edit')){const input=JSON.parse(req.postData());requests.push(input);
    if(input.action==='select-template')return json({result:{templateId:'lecture',reason:'测试讲义'}});
-   if(input.action==='generate')return json({result:{blocks:[{type:'paragraph',text:'测试资料正文。',sourcePages:[],sourceQuote:''}],summary:''}});
+   if(input.action==='generate')return json({result:{blocks:[{type:'paragraph',text:'测试资料正文。',sourcePages:[],sourceQuote:''}],summary:''},workflow:mockWorkflowReceipt(input)});
    if(input.action!=='ideal-tree'){unexpected.push(input.action);return void req.abort();}
    if(errorMode)return json({error:'模拟连接中断，后台记录保留。'},400);
    if(input.command==='list')return json({result:{trees:rebuilt?[rebuilt,rebuildSource].map(j=>({id:j.id,title:j.contract.title,edition:j.edition||1,status:j.status,nodes:24,createdAt:j.createdAt})):exists?Array.from({length:savedCopies},(_,i)=>({id:i?`saved-${i}`:job.id,title:i?`${job.contract.title} · ${i+1}`:job.contract.title,status:job.status,nodes:24,createdAt:job.createdAt})):[]}});

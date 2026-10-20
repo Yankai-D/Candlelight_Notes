@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { defaultNotebookId, templateSettings } from './learning-templates.mjs';
 import { writingTemplateSnapshotSchema } from './writing-templates.mjs';
 import { bundleContextSchema } from './bundle-context.mjs';
+import { workflowStateSchema } from './workflow-review.mjs';
 
 export const learningSettingsSchema = z.object({
   mode: z.enum(['translation', 'adaptive']).default(defaultNotebookId),
@@ -34,6 +35,8 @@ export const preparationSchema = z.object({
   settings: learningSettingsSchema, knowledge: learnerProfileSchema.optional(),
   templateRouting: z.enum(['pending', 'selected']).optional(),
   sourceContext: bundleContextSchema.optional(),
+  interruption: z.object({ code: z.string().max(80), chapterId: z.string().max(100), message: z.string().max(2000) }).optional(),
+  workflow: workflowStateSchema.optional(),
 });
 
 export function knowledgeContext(knowledge) { return learnerProfile(knowledge); }

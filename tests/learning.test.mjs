@@ -117,7 +117,7 @@ test('invalid model structure receives one bounded repair and unsafe page refere
   assert.equal(attempts, 2);
   let unsafeCalls = 0;
   await assert.rejects(runModel(modelConfig, buildMessages(request), undefined, async () => { unsafeCalls++; return response({ blocks: [{ type: 'paragraph', text: 'x', sourcePages: [999] }] }); }, { action: 'generate' }), /本章以外/);
-  assert.equal(unsafeCalls, 1);
+  assert.equal(unsafeCalls, 2, 'One metadata-only repair is attempted before stopping');
 });
 
 test('long sources split without lost or duplicated characters, and every segment must validate before any chapter result is returned', async () => {
