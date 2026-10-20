@@ -1,7 +1,7 @@
 {
   "schema": "candlelight-public-source-v1",
   "version": "0.1.19",
-  "sourceRevision": "9fa3abb7e95575377aa980a1701ef916b47e9cca",
+  "sourceRevision": "0585c8c62f11bb1c643320febab9ecad368e1503",
   "applicationRevision": "966ecc49539096a9c2919908b70e22ddda579df6",
   "applicationFilesVerified": 136,
   "installer": {
@@ -317,8 +317,8 @@
     },
     {
       "path": "docs/reviews/2026-10-20-recovery-batch-update-0.1.19.md",
-      "bytes": 5902,
-      "sha256": "bcbb888b7ff7ef281383383ddb4458cb2c82dec07bea5ecb42845bd1728fb39d"
+      "bytes": 6376,
+      "sha256": "c17d2f0341a52f6343d92666001efac6ed251daf56b742b3521b5492ab780bf1"
     },
     {
       "path": "docs/workspace-recovery.md",
@@ -1772,8 +1772,8 @@
     },
     {
       "path": "tests/browser/nested-bundles.mjs",
-      "bytes": 10400,
-      "sha256": "e6528c12e129072b4080c43bc0c148db11c457848e22d133e6ba6ab6eb2f8bca"
+      "bytes": 10741,
+      "sha256": "7f1283612ca1729f066c20df4a2fe7a4d13e521c25c17a18704b5e5e307bbcf3"
     },
     {
       "path": "tests/browser/onboarding.mjs",

@@ -79,6 +79,9 @@ try {
   const plan = requests.find(r => r.action === 'bundle-plan');
   assert.deepEqual(plan.units.map(unit => unit.sourceId), ['source-0', 'source-1']);
   assert.equal(await page.$('[aria-label="阅读方式"]'), null);
+  // An error can render before the pending checkpoint finishes. Resume is
+  // available only after generation has settled and released its busy state.
+  await page.waitForFunction(() => [...document.querySelectorAll('.preparation-banner button')].some(button => button.textContent.trim() === '继续未完成部分' && !button.disabled));
   await click('继续未完成部分');
   await page.waitForFunction(() => !document.querySelector('.preparation-banner'));
   assert.equal(requests.filter(r => r.chapterId === 'note-section-1').length, 1);
