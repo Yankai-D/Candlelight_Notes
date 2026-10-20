@@ -15,3 +15,14 @@ export function preparationInterruption(error, consecutive, chapterId) {
   if (consecutive >= 2) return { code: 'REPEATED_CHAPTER_FAILURE', chapterId,
     message: '连续两节生成失败，已暂停后续调用；已完成内容保留，请检查模型连接与来源后继续。' };
 }
+
+// Old saves lack explicit attempt membership. Use their verified receipts and
+// stopping point; never present all inherited errors as new failures.
+export function preparationErrors(preparation) {
+  const currentIds = new Set(preparation?.currentErrorIds ?? [
+    ...(preparation?.workflow?.history || []).filter(report => report.attempt === preparation.workflow.attempt && report.outcome === 'blocked').map(report => report.chapterId),
+    preparation?.interruption?.chapterId, '__plan', '__template',
+  ]);
+  const entries = Object.entries(preparation?.errors || {});
+  return { current: entries.filter(([id]) => currentIds.has(id)), previous: entries.filter(([id]) => !currentIds.has(id)) };
+}

@@ -1,8 +1,9 @@
 import { brand } from '../shared/brand.mjs';
 import { randomUUID } from 'node:crypto';
 import { organizationRequestSchema } from '../shared/study-tree.mjs';
-import { classificationInput, classificationVersion, decodeClassification, classificationFailure } from './organization-protocol.mjs';
+import { classificationInput, classificationVersion, decodeClassification } from './organization-protocol.mjs';
 import { runModel } from './harness.mjs';
+import { executionScope, runStage } from './execution.mjs';
 
 export function organizationMessages(input) {
   const context = classificationInput(input);
@@ -18,26 +19,23 @@ export function organizationMessages(input) {
 
 export async function organizeTree(config, input, signal, fetcher = fetch, options = {}) {
   const request = organizationRequestSchema.parse(input);
-  let messages = organizationMessages(request);
+  const messages = organizationMessages(request);
   const diagnostic = { id: randomUUID().slice(0, 8), protocol: classificationVersion, model: config.model,
     documents: request.documents.length, folders: request.folders.length, inputCharacters: messages[1].content.length, startedAt: Date.now(), attempts: [], status: 'running' };
   try {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      signal?.throwIfAborted();
-      const record = { attempt: attempt + 1, completions: [] }; diagnostic.attempts.push(record);
-      const raw = await runModel(config, messages, signal, fetcher, { action: 'organize', onCompletion: info => record.completions.push(info) });
-      signal?.throwIfAborted(); record.responseCharacters = raw.length;
-      try { const result = decodeClassification(request, raw); diagnostic.status = 'success'; return result; }
-      catch (error) {
-        if (error.code !== 'INVALID_CLASSIFICATION') throw error;
-        record.issues = error.issues;
-        if (attempt === 1) throw Object.assign(new Error(`${classificationFailure(error.issues)}，自动修复后仍未通过。原学习树已保留。（诊断 ${diagnostic.id}）`), { code: error.code });
-        messages = [...messages, { role: 'assistant', content: raw }, { role: 'user', content: JSON.stringify({
-          task: '修复分类校验失败。只修正以下具体问题，保留正确主题。返回完整 groups JSON，包含全部资料；同组不能跨文件夹。不要输出章节定位或其他字段。',
-          issues: error.issues, requiredDocuments: classificationInput(request).documents.map(({ ref, folder }) => ({ ref, folder })),
-        }) }];
-      }
-    }
+    const result = await executionScope({ binding: { model: config.model, endpoint: config.baseUrl, messages } }, () => runStage({
+      stage: 'organize', messages, signal,
+      complete: async (conversation, action) => {
+        const record = { attempt: diagnostic.attempts.length + 1, action, completions: [] }; diagnostic.attempts.push(record);
+        const raw = await runModel(config, conversation, signal, fetcher, { action, onCompletion: info => record.completions.push(info) });
+        record.responseCharacters = raw.length; return raw;
+      },
+      validate: raw => {
+        try { return decodeClassification(request, raw); }
+        catch (error) { diagnostic.attempts.at(-1).issues = error.issues; throw error; }
+      },
+    }));
+    diagnostic.status = 'success'; return result.value;
   } catch (error) {
     diagnostic.status = signal?.aborted ? 'cancelled' : 'failed'; diagnostic.errorCode = error.code || error.name;
     if (error.code === 'OUTPUT_TRUNCATED') throw new Error(`模型的分类输出过长，原学习树已保留。（诊断 ${diagnostic.id}）`);

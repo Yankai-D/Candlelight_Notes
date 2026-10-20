@@ -7,8 +7,14 @@ export function mathText(node) {
 export function parseMath(text, marks, { strict = false, source = false } = {}) {
   const output = [];
   const plain = text => { if (text) output.push({ type: 'text', text, ...(marks?.length ? { marks } : {}) }); };
-  const fail = () => { throw new Error('公式定界符不完整；请使用配对的 \\(…\\) 或 \\[…\\]，并检查 JSON 反斜杠转义。'); };
   let end = 0, i = 0;
+  const fail = (expected = 'paired math delimiters') => {
+    throw Object.assign(new Error('公式定界符不完整；请使用配对的 \\(…\\) 或 \\[…\\]，并检查 JSON 反斜杠转义。'), {
+      issues: [{ code: 'math_delimiter', path: [], offset: i, expected,
+        message: `Unmatched math syntax at character ${i}; expected ${expected}.`,
+        context: text.slice(Math.max(0, i - 40), i + 100) }],
+    });
+  };
   while (i < text.length) {
     const rest = text.slice(i);
     // Code stays literal. Only an explicitly math/latex/tex-labelled fence is
@@ -19,7 +25,7 @@ export function parseMath(text, marks, { strict = false, source = false } = {}) 
         const closing = new RegExp(`^ {0,3}${fence[1][0]}{${fence[1].length},}[ \\t]*(?:\\n|$)`, 'm').exec(rest.slice(fence[0].length));
         const finish = closing ? i + fence[0].length + closing.index + closing[0].length : text.length;
         if (/^(math|latex|tex)$/i.test(fence[2].trim())) {
-          if (!closing) { if (strict) fail(); i = finish; continue; }
+          if (!closing) { if (strict) fail(fence[1]); i = finish; continue; }
           let latex = rest.slice(fence[0].length, fence[0].length + closing.index).trim();
           const wrapped = /^(?:\$\$([\s\S]*)\$\$|\\\[([\s\S]*)\\\]|\\\(([\s\S]*)\\\))$/.exec(latex);
           if (wrapped) latex = wrapped[1] ?? wrapped[2] ?? wrapped[3];
@@ -57,6 +63,11 @@ export function parseMath(text, marks, { strict = false, source = false } = {}) 
     }
     // Accept one extra escape level on paired delimiters only. The body,
     // especially aligned/matrix \\ row separators, remains byte-for-byte intact.
+    // An embedded dollar in an identifier/member-access expression is literal,
+    // e.g. frame$column, result()$value, or frame[1]$value. It cannot open math
+    // and must not pair with a later dollar across prose or explicit formulas.
+    if (text[i] === '$' && /[A-Za-z0-9_.\])]/.test(text[i - 1] || '')
+      && /[A-Za-z_.]/.test(text[i + 1] || '')) { i++; continue; }
     const delimiter = /^(\\{1,2})([([])/.exec(rest);
     const dollars = !delimiter && rest.startsWith('$$') ? '$$' : !delimiter && rest[0] === '$' ? '$' : null;
     if (delimiter || dollars) {
@@ -71,7 +82,7 @@ export function parseMath(text, marks, { strict = false, source = false } = {}) 
         if (!value || /\n|^\s|\s$/.test(value) || /\d/.test(text[close + 1] || '') || (/\p{Script=Han}/u.test(value) && !/\\(?:text|mathrm)\{/.test(value))) { i++; continue; }
       }
       if (close < 0) {
-        if (strict && (!single || /^\$[a-zA-Z](?=$|[\s_^=+*/-])|^\$\\|^\$[a-zA-Z\\][^\n]*(?:[_^=]|\\[a-zA-Z])/.test(rest))) fail();
+        if (strict && (!single || /^\$[a-zA-Z](?=$|[\s_^=+*/-])|^\$\\|^\$[a-zA-Z\\][^\n]*(?:[_^=]|\\[a-zA-Z])/.test(rest))) fail(closing);
         i += opening.length; continue;
       }
       plain(text.slice(end, i));

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { buildMessages, runModel, validateResult } from '../server/harness.mjs';
-import { applyReferenceRepair, repairQuotedReferences } from '../server/source-references.mjs';
+import { applyReferenceRepair, repairQuotedReferences, referenceRepairMessages } from '../server/source-references.mjs';
 import { noteFailureMetadata } from '../shared/note-recovery.mjs';
 import { prepareDocument } from '../shared/preparation.mjs';
 import { restoreBackup } from '../shared/backup.mjs';
@@ -86,25 +86,46 @@ test('patches cannot erase citations, invent evidence, modify valid blocks or re
   }
 });
 
-test('failed citation repair terminates after one patch; cancellation never issues a repair', async () => {
+test('multi-source citation recovery verifies each source independently without requiring a shared quote', () => {
+  const input = fixture(), candidate = { blocks: [block([1, 25]), block([25], quoteB)] };
+  const context = JSON.parse(referenceRepairMessages(input, candidate)[1].content);
+  const ids = context.source.map(page => page.excerpts[0].id);
+  const edits = [{ index: 0, sourceEvidenceIds: ids }];
+  const result = applyReferenceRepair(input, candidate, JSON.stringify({ edits }));
+  assert.deepEqual(result.blocks[0].sourcePages, [8, 25]);
+  assert.equal(result.blocks[0].sourceQuote, quoteA);
+  assert.equal(result.blocks[0].text, candidate.blocks[0].text);
+  assert.deepEqual(result.blocks[1], candidate.blocks[1]);
+  assert.deepEqual(candidate.blocks[0].sourcePages, [1, 25]);
+  for (const edit of [
+    { ...edits[0], sourceEvidenceIds: [ids[0], ids[0]] },
+    { ...edits[0], sourceEvidenceIds: ['e999-0-fabricated'] },
+    { ...edits[0], sourcePages: [8] }, { ...edits[0], index: 1 },
+  ]) assert.throws(() => applyReferenceRepair(input, candidate, JSON.stringify({ edits: [edit] })));
+  const changed = structuredClone(input); changed.document.pages[7].text += ' Changed source.';
+  assert.throws(() => applyReferenceRepair(changed, candidate, JSON.stringify({ edits })));
+});
+
+test('persistent citation failure changes strategy and remains bounded; cancellation never issues a repair', async () => {
   const input = fixture(); let calls = 0;
-  await assert.rejects(runModel(config, buildMessages(input), undefined, async () => { calls++; return reply({ blocks: [block()] }); }, { action: 'generate' }), { code: 'REFERENCE_REPAIR_FAILED' });
-  assert.equal(calls, 2);
+  await assert.rejects(runModel(config, buildMessages(input), undefined, async () => { calls++; return reply({ blocks: [block()] }); }, { action: 'generate' }), { code: 'WORKFLOW_REVIEW_FAILED' });
+  assert.equal(calls, 6);
   const controller = new AbortController(); calls = 0;
   await assert.rejects(runModel(config, buildMessages(input), controller.signal, async () => { calls++; controller.abort(); return reply({ blocks: [block()] }); }, { action: 'generate' }), { name: 'AbortError' });
   assert.equal(calls, 1);
 });
 
-test('repair budget is shared across all segments instead of expanding with chapter size', async () => {
+test('valid citation resolution across segments does not consume the content revision budget', async () => {
   const input = fixture(); input.document.pages[7].text = (quoteA + '\n').repeat(1100);
   input.document.chapters[0].sourcePages = [8];
   let generates = 0, patches = 0;
-  await assert.rejects(runModel(config, buildMessages(input), undefined, async (_, options) => {
+  const result = await runModel(config, buildMessages(input), undefined, async (_, options) => {
     const messages = JSON.parse(options.body).messages;
     if (messages[0].content.includes('source-reference-repair-v1')) { patches++; return reply({ edits: [{ index: 0, sourcePages: [8], sourceQuote: quoteA }] }); }
     generates++; return reply({ blocks: [block([1])] });
-  }, { action: 'generate' }), { code: 'REFERENCE_REPAIR_FAILED' });
-  assert.equal(generates, 3); assert.equal(patches, 2);
+  }, { action: 'generate' });
+  assert.equal(generates, 4); assert.equal(patches, 2, 'Identical immutable reference stages are reused');
+  assert.equal(JSON.parse(result).blocks.length, generates);
 });
 
 test('thirty-chapter generation stops on an exhausted semantic recovery, commits earlier work and resumes only unfinished chapters', async () => {
@@ -155,9 +176,9 @@ test('HTTP carries only allowlisted stop classification, enabling the client to 
     const response = await fetch(server.base + '/api/edit', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Reading-Tree-Token': connection.token }, body: JSON.stringify(fixture()) });
     assert.equal(response.status, 400);
     const body = await response.json();
-    assert.equal(body.code, 'REFERENCE_REPAIR_FAILED'); assert.equal(body.recovery.stopRun, true);
+    assert.equal(body.code, 'WORKFLOW_REVIEW_FAILED'); assert.equal(body.recovery.stopRun, true);
     assert.deepEqual(Object.keys(body).sort(), ['code', 'error', 'recovery']);
-    assert.equal(calls, 2);
+    assert.equal(calls, 6);
     assert.deepEqual(noteFailureMetadata({ code: 'UNKNOWN', recovery: { stopRun: true }, secret: 'hidden' }), {});
   } finally { if (server) await server.stop(); upstream.closeAllConnections(); await new Promise(resolve => upstream.close(resolve)); }
 });

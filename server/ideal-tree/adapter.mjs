@@ -18,6 +18,7 @@ export function buildIdealOperation(input) {
 }
 export const idealOperationFor = messages => operations.get(messages);
 export async function runIdealOperation(request, config, complete) {
+  complete.identity = { model: config.model, endpoint: config.baseUrl };
   return JSON.stringify(await currentRunner().command(request, complete, config.model));
 }
 export const validateIdealOperation = (_request, raw) => JSON.parse(raw);

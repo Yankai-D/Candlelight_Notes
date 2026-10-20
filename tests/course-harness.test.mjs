@@ -167,8 +167,8 @@ test('late failure has no committable result, abort is honored, and transport er
   const { request, plan, output } = twoSections(), before = clone(request), stages = [];
   await assert.rejects(runCourseLecture(request, { complete: async (_, { stage }) => {
     stages.push(stage); return stage === 'plan' ? plan : stage === 'center' ? output.center : '{}';
-  } }), { code: 'COURSE_SECTION' });
-  assert.deepEqual(stages, ['plan', 'center', 'spread', 'spread']);
+  } }), { code: 'EXECUTION_BLOCKED' });
+  assert.deepEqual(stages, ['plan', 'center', 'spread', 'spread', 'recovery-plan', 'spread', 'recovery-plan']);
   assert.deepEqual(request, before);
   const controller = new AbortController(); let count = 0;
   await assert.rejects(runCourseLecture(request, { signal: controller.signal, complete: async (_, { signal }) => {

@@ -15,6 +15,8 @@ const requests = [], errors = [];
 let failedOnce = false;
 let failPendingChapter;
 const secondChapterPending = new Promise(resolve => { failPendingChapter = resolve; });
+let failFirstChapter = false, rejectFirstChapter;
+const firstChapterPending = new Promise(resolve => { rejectFirstChapter = resolve; });
 try {
   page.on('pageerror', e => errors.push(e.message));
   await page.setViewport({ width: 1440, height: 950 });
@@ -31,6 +33,12 @@ try {
       if (input.action === 'bundle-plan') return void json({ result: { sections: input.units.map((unit, i) => ({ title: ['从极限到变化率', '导数的局部含义', '运用微分'][i], purpose: '理解局部变化如何由极限建立。', unitIds: [unit.id] })) } });
       if (input.action === 'select-template') return void json({ result: { templateId: 'lecture', reason: '复习讲义使用结构化模板。' } });
       if (input.action === 'generate') {
+        if (failFirstChapter) {
+          failFirstChapter = false;
+          rejectFirstChapter(() => json({ error: '第一章审查未通过。', code: 'WORKFLOW_REVIEW_FAILED', recovery: { stopRun: true },
+            workflow: mockWorkflowReceipt(input, { outcome: 'blocked', reviewedSegments: 0, reviewCalls: 0, repairsUsed: 1, diagnoses: ['REVIEW_UNRESOLVED'] }) }, 400));
+          return;
+        }
         if (input.chapterId === 'note-section-2' && !failedOnce) { failedOnce = true; failPendingChapter(() => json({ error: '引用自动校正仍缺少可靠来源，已暂停后续章节。', code: 'REFERENCE_REPAIR_FAILED', recovery: { stopRun: true }, workflow: mockWorkflowReceipt(input, { outcome: 'blocked', reviewedSegments: 0, reviewCalls: 0, repairsUsed: 1, diagnoses: ['ORIGINAL_PAGE_AS_ID'] }) }, 400)); return; }
         const chapter = input.document.chapters.find(c => c.id === input.chapterId);
         const raw = { blocks: [{ type: 'paragraph', text: '导数从一个局部问题开始：当输入发生很小的变化，输出如何响应？', sourcePages: chapter.sourcePages, sourceQuote: '' }, { type: 'paragraph', text: String.raw`利用极限把平均变化率收敛为瞬时变化率，写成 \(f\prime(x)=\lim_{h\to0}\frac{f(x+h)-f(x)}{h}\)。`, sourcePages: chapter.sourcePages, sourceQuote: '' }] };
@@ -122,7 +130,73 @@ try {
   await page.click('[aria-label="打开 微积分复习"]'); await page.waitForSelector('.learning-article');
   assert.equal(requests.length, before);
   assert.equal((await state()).documents.find(d => d.id === note.id).sourceContext.sources[0].title, '极限');
+
+  // A first-chapter failure leaves no ready prose, but must still expose the
+  // same goal + feedback + replan flow as a successfully generated notebook.
+  await page.click('[aria-label="资料库"]'); await folder('数学');
+  await click('新建笔记'); await page.type('[aria-label="笔记名称"]', '首章失败的复习讲义');
+  failFirstChapter = true;
+  await click('创建并打开笔记');
+  const rejectFirst = await firstChapterPending;
+  assert.equal(await page.$eval('.document-meta>.intent-pill', el => el.disabled), true, 'Cannot regenerate during an active call');
+  await rejectFirst();
+  await page.waitForFunction(() => [...document.querySelectorAll('.preparation-banner button')].some(button => button.textContent.trim() === '继续未完成部分' && !button.disabled));
+  const failed = (await state()).documents.find(d => d.title === '首章失败的复习讲义');
+  assert.equal(failed.preparation.status, 'partial');
+  assert.equal(failed.preparation.completedIds.length, 0);
+  assert.ok(failed.chapters.every(chapter => chapter.status === 'empty'));
+  // Reopen an older save containing errors from chapters never retried in this
+  // attempt. Only the actual stopping chapter belongs to the current failure.
+  await page.evaluate(async failed => {
+    const next = structuredClone(failed);
+    delete next.preparation.currentErrorIds;
+    for (const chapter of next.chapters.slice(1)) next.preparation.errors[chapter.id] = '生成笔记引用了本章以外的原文页码。';
+    if (next.notebooks?.[next.activeNotebookId]) next.notebooks[next.activeNotebookId].preparation = next.preparation;
+    const db = await new Promise(resolve => { const req = indexedDB.open('reading-tree'); req.onsuccess = () => resolve(req.result); });
+    await new Promise(resolve => { const tx = db.transaction('documents', 'readwrite'); tx.objectStore('documents').put(next); tx.oncomplete = resolve; });
+    db.close();
+  }, failed);
+  await page.reload({ waitUntil: 'networkidle0' });
+  await folder('数学');
+  await page.click('[aria-label="打开 首章失败的复习讲义"]');
+  await page.waitForSelector('.previous-generation-errors');
+  assert.match(await page.$eval('.current-generation-errors summary', el => el.textContent), /本轮 1 个问题/);
+  assert.match(await page.$eval('.previous-generation-errors summary', el => el.textContent), /此前错误记录 · 2 条/);
+  assert.equal(await page.$eval('.previous-generation-errors', el => el.open), false);
+  assert.doesNotMatch(await page.$eval('.current-generation-errors', el => el.textContent), /本章以外/);
+  await page.screenshot({ path: `${output}/current-and-previous-errors.png` });
+  const failedCalls = requests.length;
+  await click('调整并重新生成');
+  await page.waitForSelector('[aria-label="重新生成的调整要求"]');
+  await page.screenshot({ path: `${output}/regenerate-after-first-failure.png` });
+  const replace = async (selector, text) => page.$eval(selector, (el, text) => {
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(el, text);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, text);
+  await replace('[aria-label="我的学习目标"]', '整理成可独立复习的知识讲义');
+  await replace('[aria-label="重新生成的调整要求"]', '先说明概念，再解释计算思路');
+  await click('取消');
+  assert.equal(requests.length, failedCalls, 'Opening/cancelling never generates');
+  assert.equal((await state()).documents.find(d => d.id === failed.id).intent, failed.intent);
+  await click('调整并重新生成');
+  await replace('[aria-label="我的学习目标"]', '整理成可独立复习的知识讲义');
+  await replace('[aria-label="重新生成的调整要求"]', '先说明概念，再解释计算思路');
+  await click('保存目标并重新生成');
+  await page.waitForSelector('dialog', { hidden: true });
+  await page.waitForFunction(() => !document.querySelector('.preparation-banner'));
+  const regenerated = (await state()).documents.find(d => d.id === failed.id);
+  const regenerationCalls = requests.slice(failedCalls);
+  assert.deepEqual(regenerationCalls.map(request => request.action), ['bundle-plan', 'select-template', 'generate', 'generate', 'generate']);
+  assert.equal(regenerationCalls[0].intent, '整理成可独立复习的知识讲义');
+  assert.equal(regenerationCalls[0].feedback, '先说明概念，再解释计算思路');
+  assert.equal(regenerationCalls[2].document.intent, regenerationCalls[0].intent);
+  assert.equal(regenerationCalls[2].learning.regenerationFeedback, regenerationCalls[0].feedback);
+  assert.equal(regenerated.preparation.status, 'complete');
+  assert.deepEqual(regenerated.preparation.errors, {});
+  assert.deepEqual(regenerated.sourceContext, failed.sourceContext);
+  assert.deepEqual(regenerated.versions[0].chapters, failed.chapters);
+  assert.deepEqual((await state()).documents.find(d => d.id === note.id).chapters, note.chapters, 'Other notes are untouched');
   assert.deepEqual(errors, []);
-  await writeFile(`${output}/report.json`, JSON.stringify({ passed: true, calls: requests.map(r => ({ action: r.action, chapterId: r.chapterId })), checks: ['nested navigation', 'create child bundle', 'source scope excludes siblings', 'standalone note creation', 'completed prose visible while generating next chapter', 'exhausted semantic recovery stops subsequent chapters', 'resume without duplicate chapters', 'shared math renderer', 'source switch', 'rename notes and materials', 'reload without calls', 'source snapshot retained'] }, null, 2));
+  await writeFile(`${output}/report.json`, JSON.stringify({ passed: true, calls: requests.map(r => ({ action: r.action, chapterId: r.chapterId })), checks: ['nested navigation', 'create child bundle', 'source scope excludes siblings', 'standalone note creation', 'completed prose visible while generating next chapter', 'exhausted semantic recovery stops subsequent chapters', 'resume without duplicate chapters', 'shared math renderer', 'source switch', 'rename notes and materials', 'reload without calls', 'source snapshot retained', 'regenerate after first-chapter failure', 'regeneration locked while active', 'cancel preserves goal without calls', 'new goal and feedback reach replan and generation', 'regeneration retains sources, history and other notes'] }, null, 2));
 } catch (error) { await page.screenshot({ path: `${output}/failure.png` }).catch(() => {}); throw error; }
 finally { await browser.close(); }

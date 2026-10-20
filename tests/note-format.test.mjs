@@ -62,6 +62,66 @@ test('source quotations render balanced MediaWiki TeX through the same math rend
   assert.throws(()=>noteBlocks(quote,{}, {strict:true}),/定界符/,'source compatibility does not loosen the model contract');
 });
 
+test('member-access dollars stay literal beside formulas in notes, inline explanations and print output', async () => {
+  const source = String.raw`比较 sample(data$value) 与 data$group，summary(model)$statistic[1] 对应 \(F\)。对象表[1] 不变；frame[1]$estimate 对应 $x^2$，区间为 \[a < b\]。`;
+  const expected = ['F', 'x^2', 'a < b'];
+  const inline = noteInline(source, [], { strict: true });
+  assert.deepEqual(math(inline).map(n => n.attrs.latex), expected);
+  for (const action of ['generate', 'explain', 'rewrite', 'style']) {
+    const input = request(action);
+    const payload = action === 'generate' ? { blocks: [{ type: 'paragraph', text: source }] }
+      : action === 'explain' ? { title: '代码与公式', paragraphs: [source], sourcePages: [1] }
+        : action === 'rewrite' ? { text: source } : { edits: [{ id: input.anchorId, text: source }] };
+    const result = validateResult(input, { ...payload, summary: '保留代码和公式。' });
+    const nodes = result.rendering.blocks || result.rendering.inline || result.rendering.edits.flatMap(e => e.content);
+    assert.deepEqual(math(nodes).map(n => n.attrs.latex), expected);
+    const html = renderNoteHTML({ type: 'doc', content: [{ type: 'paragraph', content: inline }] });
+    assert.match(html, /data\$value/);
+    assert.match(html, /summary\(model\)\$statistic/);
+    if (action === 'generate') {
+      const printed = new JSDOM(await printHTML(applyResult(input.document, input, result)));
+      assert.match(printed.window.document.body.textContent, /data\$value/);
+      assert.equal(printed.window.document.querySelectorAll('.math-invalid').length, 0);
+      printed.window.close();
+    }
+  }
+  // Code recognition does not hide malformed explicit formulas or math dollars.
+  for (const invalid of [String.raw`data$value 与 \(x`, 'data$value 与 $x_1', String.raw`summary(model)$value 与 \[x\)`]) {
+    assert.throws(() => noteInline(invalid, [], { strict: true }), /定界符/);
+  }
+  assert.equal(math(noteInline('结果$x^2$。', [], { strict: true })).length, 1);
+});
+
+test('format recovery receives the exact field and syntax location without regenerating valid output', async () => {
+  const input = request('generate'), source = String.raw`保留 data$value。坏公式 \(x`;
+  const rejected = { blocks: [{ type: 'paragraph', text: '已有说明。' }, { type: 'paragraph', text: source }] };
+  assert.throws(() => validateResult(input, rejected), error => {
+    assert.deepEqual(error.issues[0].path, ['blocks', 1, 'text']);
+    assert.equal(error.issues[0].offset, source.indexOf('\\('));
+    assert.equal(error.issues[0].expected, '\\)');
+    assert.match(error.issues[0].context, /data\$value/);
+    return true;
+  });
+  const messages = buildMessages(input); let calls = 0;
+  const fixed = { blocks: [rejected.blocks[0], { type: 'paragraph', text: source + String.raw`\)` }] };
+  const raw = await runModel({ apiKey: 'offline', baseUrl: 'https://model.invalid', model: 'fixture' }, messages, undefined,
+    async (_url, options) => {
+      const body = JSON.parse(options.body); calls++;
+      if (calls === 2) {
+        const context = JSON.parse(body.messages.at(-1).content);
+        assert.deepEqual(context.failure.issues[0].path, ['blocks', 1, 'text']);
+        assert.equal(context.failure.issues[0].offset, source.indexOf('\\('));
+        assert.match(context.failure.issues[0].context, /data\$value/);
+      }
+      return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(calls === 1 ? rejected : fixed) }, finish_reason: 'stop' }] }),
+        { status: 200, headers: { 'content-type': 'application/json' } });
+    });
+  const result = validateResult(input, raw);
+  assert.equal(calls, 2);
+  assert.deepEqual(result.blocks[0], validateResult(input, fixed).blocks[0]);
+  assert.deepEqual(math(result.rendering.blocks).map(n => n.attrs.latex), ['x']);
+});
+
 test('all harness actions return the same trusted node format and applying paper notes keeps its rendering unchanged', async () => {
   const source = `**重点**：\\\\(${formula}\\\\)，保持解释连贯。`;
   const outputs = {};

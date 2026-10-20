@@ -61,13 +61,13 @@ test('routing repairs a wrong builtin once, keeps the task, and fails closed on 
   const config={baseUrl:'https://example.invalid/v1',model:'fixture',apiKey:'fixture'};
   const raw=await runModel(config,messages,undefined,async(_,options)=>{
     calls++; const body=JSON.parse(options.body);
-    if(calls===2){assert.match(body.messages.at(-1).content,/templateId/);assert.doesNotMatch(body.messages.at(-1).content,/完整 rules 和 edits/);}
+    if(calls===2){assert.match(JSON.parse(body.messages.at(-1).content).failure.message,/模板任务不匹配/);assert.doesNotMatch(body.messages.at(-1).content,/完整 rules 和 edits/);}
     return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(decision({templateId:calls===1?'lecture':'exercise'}))}}]}));
   });
   assert.equal(calls,2);assert.equal(validateResult(input,raw).templateId,'exercise');
   calls=0;
-  await assert.rejects(runModel(config,messages,undefined,async()=>{calls++;return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(decision({templateId:'narrative'}))}}]}));}),/任务不匹配/);
-  assert.equal(calls,2);
+  await assert.rejects(runModel(config,messages,undefined,async()=>{calls++;return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(decision({templateId:'narrative'}))}}]}));}),{code:'EXECUTION_BLOCKED'});
+  assert.equal(calls,5);
 });
 
 test('exercise sample renders original subquestions; prompts avoid lecture rules and keep hint/local scope', () => {

@@ -1,52 +1,78 @@
-# 有界恢复、延后解析与桌面更新
+# 有状态执行与自动恢复 / Stateful execution and recovery
 
-本轮把运行时恢复纳入 harness：程序先按错误所属阶段决定重试、保留结果或停止。模型不负责猜测文件权限，也不因为日志失败重新生成内容。
+`server/execution.mjs` 是生成链路共用的执行层。它把一次用户操作拆为有输入绑定、候选结果、校验器和检查点的阶段；出错时恢复当前阶段，已经通过的阶段继续复用。接入范围包括笔记生成、来源定位、内容审查、建议复核、局部修订、模板选择与编辑、资料分类、联合笔记规划、理想学习树创建与重建，以及独立讲义生成器。
 
-## 错误处理契约
+`server/execution.mjs` is the shared execution layer. Each stage has bound inputs, a candidate, a validator and a checkpoint. Recovery resumes the failing stage and reuses accepted work. Integrations cover note generation, citations, review, advice auditing, targeted revision, template routing/editing, classification, bundle planning, ideal-tree creation/rebuilding, and the standalone lecture generator.
 
-| 阶段 | 可恢复情况 | 上限与提交规则 |
-| --- | --- | --- |
-| 原子保存 | Windows / OneDrive / 杀毒程序造成的 EPERM、EACCES、EBUSY | 临时文件名带 UUID；完成写入后重试替换同一份快照，最多 7 次，等待合计约 9 秒。绝不先删除旧文件，不改成直接覆盖。 |
-| 模型连接 | 连接中断、响应读取中断、空响应、HTTP 408/429/500/502/503/504 | 每次发送最多一次传输重试；普通逻辑请求共享 2 次额外传输预算，Retry-After 最长等待 10 秒，取消立即终止等待。 |
-| 笔记输出 | JSON、模板格式或来源定位不符合协议 | 每片段每类修复最多一次；同一章节所有片段共享 2 次额外语义修复预算。引用修复只返回定位元数据，不重写全文；该调用最多输出 8192 token，不因截断扩展重试。 |
-| 其他模型输出 | 截断、学习树结构等任务协议失败 | 沿用各任务的 token 扩展和格式修复预算。理想学习树的实际模型请求（含 token 扩展）计入同一构建预算，不嵌套一套传输重试。 |
-| 追溯记录 | 日志目录不可写、记录保存或保留策略失败 | 尽力写入，失败不否决有效模型结果。记录文件仅短暂重试；恢复日志异步写入。 |
-| 无法安全继续 | 磁盘已满、无效请求、认证失败、证书错误、持续无法保存关键数据 | 不盲目重试。保留已提交数据，给出具体提示；学习树保存持续失败时暂停，不能假装数据已安全保存。 |
+## 执行状态与恢复策略 / State and strategies
 
-`server/recovery.mjs` 集中定义恢复决策、退避、取消及日志；`atomic-file.mjs` 处理原子替换。学习树将已通过校验的结果与阶段事件一起提交，保存错误不会进入模型格式修复。日志只记阶段、错误码、次数、结果，不记 Key、原文或路径；每份约 512 KB，保留当前与上一次轮转。桌面版位于本机数据目录的 `logs`，通过帮助菜单查看数据目录。原有详细生成追溯记录仍是本机用户数据，不进入公开包。
+正常路径是 `pending → produced → accepted`。模型响应先进入本机检查点，再校验和提交；失败进入 `recovering`，保留失败结果、具体字段约束、已尝试方法和累计调用次数。一次性修复失败不直接返回前端，而是在同一操作中继续诊断。
 
-网络中断时供应商可能已处理请求，自动重试不等于供应商保证不重复计费。永久权限问题和真实磁盘故障不能由 harness 消除。恢复预算用于吸收短暂故障，不是无限掩盖失败。
+The normal path is `pending → produced → accepted`. A response is checkpointed before validation. Failures enter `recovering`, retaining the candidate, concrete constraint failures, previous strategies and call totals. A failed first repair continues within the same operation.
 
-## 联合笔记的来源诊断与恢复
+首次失败把校验结果和原任务交给模型定向修复。后续由 `execution-recovery-plan-v1` 读取原始约束、实际失败输出、校验路径与尝试历史，选择以下程序允许的动作。策略不依赖某篇论文、具体页码或预先枚举的报错文字。
 
-联合资料包中，每个文件都可能有“第 1 页”。原文件的 `sourcePage` 用于显示，扁平来源表的 `number` 才是唯一引用 ID。生成请求携带当前片段的 `sourceReferences.allowedIds` 与显示页码映射，输出示例也使用该片段的真实 ID。来源缺失或 ID 重复在付费调用前拒绝；校验不能放宽到片段外的其他章节页。
+The first failure receives targeted feedback. Subsequent diagnosis uses the original contract, actual rejected output, validator paths and attempt history to choose from application-defined capabilities. Strategy selection does not depend on a paper, particular page number or catalogue of known error messages.
 
-检测到越界引用后，`server/source-references.mjs` 先区分原文件页码混用与其他越界编号，然后依次处理：
+| 动作 / Action | 执行范围 / Scope |
+| --- | --- |
+| `repair` | 基于现有候选修复当前步骤。 / Repair the current candidate. |
+| `reframe` | 从原始任务重新推导当前步骤，用失败候选作对照；不重跑前序正文。 / Re-derive this stage from its original contract, retaining the rejected candidate as context. |
+| `partition` | 仅能调用程序提供的拆分器；多条审查意见可逐条复核，多目标修改对同一正文快照分别处理后统一校验。 / Use an application-supplied partitioner; audit findings separately or merge independent edits against one immutable snapshot. |
+| `stop` | 缺少外部输入、无可靠处理方法时保留状态。 / Preserve state when required inputs or a defensible recovery path are unavailable. |
 
-1. 单页引用的连续原文引文足够长、且只在当前证据的唯一一页出现时，本地修正引用 ID，不增加模型调用。
-2. 无法确定时，将诊断、实际来源映射与受影响段落交给模型做一次元数据补丁。补丁不能改正文、修改无关段落、遗漏问题、清空来源或添加不可验证的引文。不得猜测页码偏移，也不能直接过滤掉非法编号来掩盖失败。
-3. 修正后重新经过来源、模板、数学与统一渲染校验，整章通过才提交。分片修复预算由整章共享，避免长文放大自动调用次数。
-4. 修复耗尽或来源前置检查失败，通过白名单错误码通知章节调度器停止后续章节。未知错误连续出现两章也停止；不再把所有章节遍历一遍。完成章节逐章保存并显示，手动继续只处理未完成章节。
+恢复计划本身有严格 schema 与失败摘要绑定。非法计划最多触发一次确定性的换策略，不递归调用“修复恢复计划”。同一候选、同一失败不能无限重复同一方法；无进展时选择尚未尝试的方法，耗尽后明确停止。模型不能提供任意命令、文件路径、工具名或新的校验规则。
 
-修复过程的分类与结果进入本地恢复日志。前端只显示最终停止说明，详细原因折叠展示；没有任何完成章节时不会提示“已保存完成章节”。`preparation.interruption` 可随备份保存，继续时清除本轮中断状态。已有笔记不会自动重新生成。
+Recovery plans have a strict schema and failure digest. Invalid plans trigger a bounded fallback rather than a recursive controller-repair loop. Identical failures cannot repeatedly use the same strategy. The model cannot supply commands, paths, arbitrary tools or replacement validators.
 
-来源定位校验只能证明引用属于所提供证据、引文能匹配原文，不能证明每段教学解释在语义上完全正确。来源诊断是下面任务级审查流程中的一个阶段。
+## 结果与预算的边界 / Acceptance and budgets
 
-## 笔记任务级自我审查
+所有恢复结果必须通过原校验器。正文范围、来源身份、精确引文、数学格式、模板约束和修订定位不因恢复而放宽。已经通过校验的审查意见必须在建议复核中逐项得到决定，补丁不能遗漏或增加问题。未通过校验的审查草稿保留作恢复与复核的参考，不把其中矛盾、撤销或不完整的批评固定为编辑要求。
 
-生产入口将整份笔记作为一个有状态任务，而不是互不相关的章节请求。`preparation.workflow` 保存任务 ID、尝试轮次、审查策略、共享修正预算及逐章回执。每次请求携带已完成章数、剩余预算和前序问题分类；来源映射异常、目标未落实等诊断会影响下一章的生成约束。旧笔记不补造审查记录、不自动重新生成。
+Every recovered result passes the original validator. Recovery never relaxes source identity, exact quotations, math formatting, template constraints or edit scope. Validated findings require individual audit decisions; patches cannot omit or invent findings. Rejected review drafts remain diagnostic context without turning their contradictory, withdrawn or incomplete criticism into editing requirements.
 
-默认策略为 **仅异常或可疑结果触发模型审查**。结构、编辑范围、来源和公式检查始终执行。以下情况进入模型审查：发生过格式或来源修复；较长来源只得到极短正文或仅有标题；明确要求解题但看不到解法／结果迹象；较长来源没有任何来源锚点；模型短引文无法与原文核对。可疑信号只决定是否审查，不直接证明正文错误。正常结果不额外调用审查模型。
+普通逻辑请求默认最多 32 次真实 HTTP 尝试、8 个恢复动作、单阶段最多 3 个恢复动作；诊断、子阶段、传输重试和 token 扩展都占用同一实际调用预算。章节的内容修订另计：每章最多 3 次，整份任务每轮共享 `min(12, max(3, 章节数))` 次；协议故障不会耗光正文纠错额度。理想学习树保留整次构建 160 次请求上限，恢复动作最多 32 次。取消立即传播，预算不会在自动恢复中重置。
 
-审查阶段读取确切的目标、模板、当前来源和候选正文，分别检查目标交付、覆盖、来源边界、解释连贯性。它只返回问题与定向指令。应用验证候选摘要、实际正文引文、来源引用、目标范围及检查完整性；审查本身违反协议时也只有一次有预算的纠正机会。问题缺少依据、审查矛盾或没有可靠修正路径时停止，不能伪造通过。
+An ordinary logical request allows at most 32 actual HTTP attempts, eight recovery actions and three actions per stage. Diagnosis, child stages, transport retries and token expansion share the call ceiling. Content correction has a separate limit of three revisions per chapter and `min(12, max(3, chapter count))` per notebook attempt. Ideal trees retain their 160-request construction limit and allow at most 32 recovery actions. Cancellation propagates immediately; automatic recovery never resets a budget.
 
-需要修订时，模型提交与审查 finding ID 和候选摘要绑定的块级补丁；未被指出的正文原样保留。修订后先过确定性检查，再执行模型复查。复查仍未通过就停止，不开启下一轮全章重写。正式正文仅在该节所有片段验收后提交；UI 和保存流程必须收到身份匹配的审查回执，缺少回执不能把生成结果标为完成。
+笔记按章提交并即时保存。当前章内部保留生成、定位、审查和修改检查点，只有整章通过才交付正式笔记。服务重启或外部问题解决后，同一任务的显式继续复用检查点；改变目标、资料、版本、模板、模型或端点会失效。新建重新生成任务不会沿用旧任务结果。复用的审查单独计入 `reusedReviewStages`，不冒充新的真实模型调用。
 
-预算分两层：同一章节所有片段共享最多 2 次额外修正，整份任务每轮共享 `min(12, max(3, ceil(章节数 / 5)))` 次修正。来源补丁、格式修复、审查协议修复和正文定向修订均消耗该预算，本地确定性映射不消耗模型预算。初次模型审查与修订后的复查计入实际调用记录，不计作新的修订轮次；传输重试仍使用上表独立的短暂故障预算。手动继续开启新尝试轮次，保留历史诊断与完成章节；应用不会因预算用完自行开启新轮次。
+Accepted chapters are committed and saved individually. Within a chapter, generation, citation, review and revision checkpoints survive interruptions, but only an accepted chapter enters the notebook. Explicit continuation of the same task reuses checkpoints; changed goals, sources, revisions, templates, models or endpoints invalidate them. A new regeneration task starts fresh. Cached review proofs are reported separately as `reusedReviewStages`, not as new model calls.
 
-当前按异常触发的审查不保证发现所有语义问题，也不是独立的人类教学评测。理想学习树继续使用既有的规划、覆盖、来源及分阶段审查协议；模板编辑继续使用其样稿、数学不变性和编辑范围校验。本轮新增的语义审查提交门应用于笔记生成，不能据此宣称所有功能已有同等深度的内容审查。
+详细检查点位于本机 `.candlelight/generation-records` 或理想学习树文件中，包含私人任务上下文和模型结果，不包含认证头或 Key，不进入公开包。生成记录沿用 20 份 / 64 MB 的保留策略，单份上限 32 MB；超过上限或写入失败时不能声称已持久化。普通恢复日志仅记录阶段、错误码和次数，约 512 KB 轮转，不保存原文。理想学习树的公开接口不暴露执行检查点。
 
-“生成记录”的折叠详情保留任务上下文、审查结论、修订与复查事件；普通恢复日志只保留分类。记录是本机用户数据，不进入公开发行包。
+Detailed checkpoints live in local generation records or ideal-tree files. They contain private task context and model results, never authorization headers or keys, and are excluded from public packages. Generation records retain at most 20 records / 64 MB with a 32 MB per-record ceiling; a failed checkpoint write is not durable. The rotating diagnostic log contains only stage names, codes and counts. Public tree responses exclude execution checkpoints.
+
+## 审查与来源 / Review and grounding
+
+默认仍为“仅异常或可疑结果触发内容审查”。结构、引用和数学检查始终执行。审查读取目标、模板、章节分工、完整当前来源和确切正文，检查目标交付、覆盖、来源边界与连贯性；提出问题后先复核批评和建议是否成立，再定向修改并复查。未改段落保留，补丁对同一快照操作并产生明确的位置映射。无法消除的分歧不会被程序猜成通过。
+
+Content review remains anomaly-triggered by default; structural, citation and math checks always run. Review receives the goal, template, chapter responsibility, complete current evidence and exact candidate. Proposed criticisms are audited before targeted editing and rechecking. Untouched blocks remain intact, and patches operate against one snapshot with explicit index mappings. Unresolved disagreement is never inferred to be acceptance.
+
+联合资料的原文件页码只用于显示，扁平来源 ID 用于定位。程序优先做有唯一逐字证据的本地映射；否则运行独立定位阶段，模型选择按内容绑定的 `sourceEvidenceIds`，程序回填原句并严格核验。定位故障不会重新生成整段正文。多来源段落可分别选择各来源证据，无需不同文件包含同一句话。
+
+Original page numbers are display metadata; flattened source IDs identify evidence. Unambiguous exact-quote mappings are repaired locally. Other cases enter a citation stage where the model selects content-bound excerpt IDs and the application resolves and verifies exact text. Citation recovery preserves prose, and multi-source paragraphs can select distinct evidence from each source.
+
+联合资料适应性整合在 48,000 来源字符内整章生成，其他阅读以 18,000 字符分段；来源不会被静默截去。后续片段收到已验收的完整前文块用于衔接，不把前文当成新来源。审查只检查本章/片段承担的任务，不要求每章覆盖整套课程。
+
+Adaptive bundle synthesis keeps chapters together up to 48,000 source characters; other reading uses 18,000-character segments without silently dropping source text. Later segments receive accepted writing context for continuity, not as new source evidence. Review respects chapter and segment responsibilities.
+
+## 运行环境错误 / Runtime failures
+
+确定性的运行环境问题仍由专用层处理：原子文件写入对短暂 Windows/OneDrive 锁重试同一份快照，绝不先删旧文件；暂时连接故障按退避与共享传输额度重试。认证失败、磁盘已满或用户取消不能靠模型编造解决。日志保存失败不会使有效正文重新调用模型；关键数据持续无法保存时仍需明确暂停。
+
+Deterministic runtime failures remain in dedicated layers: transient Windows/OneDrive locks retry the same atomic snapshot without deleting the old file, and temporary connection failures use bounded backoff. A model cannot invent a fix for invalid credentials, full disks or cancellation. Diagnostic failures do not regenerate valid prose; persistent failure to save essential data still requires a pause.
+
+## 验证与限制 / Evidence and limits
+
+`tests/execution.test.mjs` 使用全新约束验证通用诊断、换策略、拆分、取消、调用预算、检查点失效和日志失败。`tests/execution-integration.test.mjs` 验证持续不确定的审查能在一次操作中恢复、多目标补丁统一提交，以及真实本机记录的续接不会重跑已完成正文或泄露凭据。其余笔记、模板、分类、理想学习树与文件系统测试保留原有内容边界检查。
+
+The execution tests use novel constraints to check diagnosis, strategy changes, partitioning, cancellation, budgets, cache invalidation and failed diagnostics. Integration tests cover resolving uncertain reviews within one operation, atomic multi-target edits, and continuation from real local records without regenerating accepted prose or persisting credentials. Existing adapter and filesystem suites retain their correctness checks.
+
+这些是离线、合成故障和保存响应的回放证据，不是新一轮真实模型成功率。此轮没有追加真实 API 调用。独立论文搜索和研究评测工具仍有各自的有界执行器，不能据此宣称项目内每个模型工具已经迁移。审查者与恢复调度使用同一用户配置模型，仍可能共享认知错误；该机制不等于数学证明或教师评测。
+
+These are offline fault-injection and saved-response replay checks, not a new live-model success rate. No additional live API calls were made in this round. Independent paper search and research-evaluation utilities retain their own bounded runners; not every model utility has migrated. Review and recovery use the configured model and can share its reasoning errors; they are not mathematical proof or independent teacher evaluation.
+
 
 ## 批量资料与独立笔记
 
@@ -68,14 +94,9 @@
 
 安装目录页替换 electron-builder 内置的简单名称包含判断：选中已有程序目录或已登记的安装位置时原样复用；首次选择父目录仅追加一层产品目录。显式 `/D` 与安装器既有的更新、卸载策略保留。不能声称已自动搬回此前被用户装到嵌套目录的旧安装。
 
-## 回归证据
 
-- `tests/recovery.test.mjs`、`tests/ideal-tree.test.mjs`：共享锁、持续锁、取消、永久错误、诊断失败、树创建与重建、保存失败不引发付费格式修复。
-- `tests/note-reference-recovery.test.mjs`、`tests/browser/nested-bundles.mjs`：跨文件页码混用、片段边界、引用补丁的证据与编辑范围、整章修复预算、30 章停止保护、HTTP 错误码、生成中的正文即时显示及无重复续写。模型响应为合成夹具，不代表真实供应商成功率。
-- `tests/note-workflow-review.test.mjs`：正常内容零额外审查、疑似未作答触发审查、局部修订与复查、无依据的审查不获准修改、任务记忆和预算跨 HTTP/章节传递、取消、停止、缺失或重复回执拒绝提交。测试使用模拟供应商，不消耗真实 Key。
-- `tests/material-ingestion.test.mjs`、`tests/file-library.test.mjs`：30 份来源、嵌套范围、缓存、原件/元数据精确重放。
-- `tests/browser/batch-import.mjs`、`file-storage.mjs`：真实浏览器导入、PDF 延后读取、部分失败重试、两份独立笔记、移动端与多格式原件。
-- `tests/updates.test.mjs`：版本排序、发布过滤、固定仓库、无凭据请求和响应限制。
-- `scripts/test-install-directory.mjs`：编译并执行生产 NSIS 回调，使用隔离文件和随机测试注册表项；不是对用户现有安装执行升级。
+## 格式误报与定位 / Format false positives and diagnostics
 
-这些测试证明指定工程行为，不证明真实 OneDrive 的所有竞争时序，也不替代模型教学内容评测。
+统一解析器将 `data$column`、`summary(model)$statistic` 等成员访问表达式中的美元符号视为代码文字，避免错误进入公式恢复；显式数学定界符仍须配对。生成、讲解、改写和风格编辑的格式诊断包含结果字段路径、字符位置和局部上下文，恢复层将这些证据交给模型，不再只返回笼统的公式报错。该修改通过合成回归及旧响应离线回放验证，没有新增真实模型调用。
+
+The shared parser treats dollars embedded in member-access expressions such as `data$column` and `summary(model)$statistic` as literal text, avoiding false math recovery. Explicit math delimiters must still match. Format diagnostics for generation, explanation, rewriting, and style editing include the result-field path, character offset, and local context. The recovery layer forwards this evidence rather than only a generic math error. Synthetic regression and saved-response replay verified this change without new live model calls.

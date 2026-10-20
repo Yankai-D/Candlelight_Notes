@@ -19,7 +19,7 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
   const preparation = { startedAt: Date.now(), ...current.preparation, settings: selected,
     sourceContext: current.preparation?.sourceContext || (!current.preparation ? sourceContext : undefined),
     knowledge: selected.mode === 'adaptive' ? learnerProfile(current.preparation?.knowledge || knowledge || defaultKnowledge) : undefined,
-    completedIds: [...completed], errors: { ...current.preparation?.errors }, status: 'running' };
+    completedIds: [...completed], errors: { ...current.preparation?.errors }, currentErrorIds: [], status: 'running' };
   delete preparation.interruption;
   if (reviewPolicy || preparation.workflow) preparation.workflow = startWorkflow(preparation.workflow, current.chapters.length, reviewPolicy);
   const shouldSelect = selected.mode === 'adaptive' && !selected.writingTemplate && typeof selectTemplate === 'function'
@@ -44,7 +44,10 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
     } catch (error) {
       const latest = getLatest?.() || current;
       if (!sameNotebook(latest)) return current;
-      if (!signal?.aborted && error.name !== 'AbortError') preparation.errors.__template = `模板选择：${error.message}`.slice(0, 2000);
+      if (!signal?.aborted && error.name !== 'AbortError') {
+        preparation.errors.__template = `模板选择：${error.message}`.slice(0, 2000);
+        preparation.currentErrorIds.push('__template');
+      }
       current = { ...latest, preparation: { ...preparation, status: signal?.aborted || error.name === 'AbortError' ? 'paused' : 'partial', errors: { ...preparation.errors } } };
       await save(current); return current;
     }
@@ -66,6 +69,7 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
       if (latest.id !== before.id || latest.revision !== before.revision) {
         current = latest.id === current.id ? latest : current;
         preparation.errors[chapter.id] = '生成期间笔记发生编辑，已暂停以保留你的修改。';
+        preparation.currentErrorIds.push(chapter.id);
         break;
       }
       if (audit) preparation.workflow = acceptWorkflowReport(preparation.workflow, audit, reply.workflow, 'accepted');
@@ -80,6 +84,7 @@ export async function prepareDocument({ document, settings = defaultSettings, kn
         catch (invalidReport) { error = invalidReport; }
       }
       preparation.errors[chapter.id] = String(error.message || '生成失败').slice(0, 2000);
+      preparation.currentErrorIds.push(chapter.id);
       // Keep user edits made while an unsuccessful request was in flight.
       const latest = getLatest?.();
       if (latest && !sameNotebook(latest)) return current;

@@ -4,6 +4,7 @@ import { coursePolicy, courseEditorialPrompt } from '../shared/course-policy.mjs
 import { NOTE_FORMAT, noteBlocks } from '../shared/note-format.mjs';
 import { renderMath } from '../shared/math.mjs';
 import { runModel } from './harness.mjs';
+import { executionScope, runStage } from './execution.mjs';
 import { courseStyleContextSchema, resolveCourseStyle } from '../shared/course-style.mjs';
 import { writingTemplateSnapshotSchema, templateSnapshot, freshTemplateLibrary } from '../shared/writing-templates.mjs';
 
@@ -191,21 +192,15 @@ export function buildCourseMessages(input, { plan: rawPlan, sectionId, previous 
 
 // Pure orchestration: no persistence and no mutation of existing notes. The UI
 // will need a separate revision-checked commit when the bundle editor is added.
-export async function runCourseLecture(input, { complete, signal, onProgress } = {}) {
+export async function runCourseLecture(input, { complete, signal, onProgress, checkpoint, saveCheckpoint } = {}) {
   if (typeof complete !== 'function') throw new TypeError('A completion adapter is required.');
   const request = courseRequest(input);
+  return executionScope({ binding: { kind: 'course-lecture', provider: complete.identity, request }, state: checkpoint, save: saveCheckpoint }, async () => {
   async function step(messages, validate, label) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      signal?.throwIfAborted(); onProgress?.({ stage: label, attempt: attempt + 1 });
-      const raw = await complete(messages, { signal, stage: label });
-      signal?.throwIfAborted();
-      try { return validate(raw); }
-      catch (error) {
-        if (attempt || !['COURSE_PLAN', 'COURSE_SECTION'].includes(error.code)) throw error;
-        // No invalid long response is fed back or spliced into a saved document.
-        messages = [...messages, { role: 'user', content: `上一结果未通过校验：${error.message}\n按原始输入重新输出当前步骤完整 JSON，只修复上述问题，不改变任务范围。` }];
-      }
-    }
+    let attempt = 0;
+    return (await runStage({ stage: label, messages, validate, signal,
+      complete: (conversation, stage) => { onProgress?.({ stage, attempt: ++attempt }); return complete(conversation, { signal, stage }); },
+    })).value;
   }
   const plan = await step(buildCourseMessages(request), raw => validateCoursePlan(request, raw), 'plan');
   const sections = [];
@@ -216,10 +211,13 @@ export async function runCourseLecture(input, { complete, signal, onProgress } =
   signal?.throwIfAborted();
   return { template: coursePolicy.id, voice: coursePolicy.voice, learningIntent: request.learningIntent,
     writingStyle: selectedWritingTemplate(request) ? undefined : resolveCourseStyle(request.writingStyle), writingTemplate: selectedWritingTemplate(request), plan, sections, status: 'structurally-validated', semanticReview: 'required' };
+  });
 }
 
 // Reuse the existing provider adapter, timeout/abort propagation and token
 // budgets. Calling this is explicit; importing a fixture never calls a model.
 export function courseCompletion(config, fetcher = fetch) {
-  return (messages, { signal }) => runModel(config, messages, signal, fetcher, { action: 'generate' });
+  const complete = (messages, { signal, stage }) => runModel(config, messages, signal, fetcher, { action: stage === 'recovery-plan' ? stage : 'generate' });
+  complete.identity = { model: config.model, endpoint: config.baseUrl };
+  return complete;
 }

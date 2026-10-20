@@ -53,7 +53,7 @@ test('split generation and bounded format repair retain the full goal contract i
   }, { action: 'generate' });
   assert.equal(calls.length, segments.length + 1);
   assert.equal(JSON.parse(raw).blocks.length, segments.length);
-  assert.match(calls[1].messages.at(-1).content, /修复 JSON/);
+  assert.equal(JSON.parse(calls[1].messages.at(-1).content).execution, 'stage-recovery-v1');
 });
 
 test('HTML exercise task reaches routing and generation; new derivations render with question anchors without requiring an original answer',async()=>{

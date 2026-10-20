@@ -94,9 +94,13 @@ test('explicit regeneration snapshots only the current notebook and restored com
   assert.equal(doc.preparation, undefined);
   assert.deepEqual(doc.versions[0].chapters, previous);
   assert.deepEqual(doc.notebooks.translation, translation);
+  doc.preparation = { startedAt: 1, status: 'partial', completedIds: [], errors: { [doc.chapters[0].id]: 'old failure' },
+    currentErrorIds: [doc.chapters[0].id], settings: notebookSettings(doc) };
   doc = restoreNotebookVersion(doc, doc.versions[0].chapters);
   assert.deepEqual(doc.chapters, previous);
   assert.equal(doc.preparation.status, 'complete');
+  assert.deepEqual(doc.preparation.currentErrorIds, []);
+  assert.deepEqual(restoreBackup(JSON.stringify({ format: 'reading-tree-v1', document: doc })).preparation.errors, {});
   assert.deepEqual(doc.notebooks.translation, translation);
 });
 
@@ -192,7 +196,7 @@ test('invalid JSON math escapes receive the precise parser error and a correctly
     const messages = JSON.parse(options.body).messages;
     if (++calls === 2) {
       assert.match(messages.at(-1).content, /Bad escaped character/);
-      assert.ok(messages.at(-1).content.includes(JSON.stringify({ text: String.raw`\(m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t\)` })));
+      assert.ok(JSON.parse(messages.at(-1).content).failure.details.includes(JSON.stringify({ text: String.raw`\(m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t\)` })));
     }
     return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: calls === 1 ? malformed : JSON.stringify(valid) } }] }));
   }, { action: 'generate' });

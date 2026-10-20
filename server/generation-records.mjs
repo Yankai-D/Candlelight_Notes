@@ -2,8 +2,9 @@ import { mkdir, readdir, unlink, lstat, realpath } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { atomicJSON, readJSON } from './workspace-state.mjs';
-import { requestSchema } from './harness.mjs';
+import { requestSchema, buildMessages } from './harness.mjs';
 import { optionalRecord } from './recovery.mjs';
+import { executionBinding } from './execution.mjs';
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const documentId = value => { if (!/^[a-zA-Z0-9_-]{1,100}$/.test(value || '')) throw new Error('无效的资料编号。'); return value; };
 const recordId = value => { if (!/^[a-f0-9-]{36}$/.test(value || '')) throw new Error('无效的生成记录编号。'); return value; };
@@ -43,7 +44,32 @@ export async function generationRecordFiles(system, id) {
 }
 export async function createGenerationRecord(system, input, model, fetcher = fetch) {
   const request = requestSchema.parse(input), path = await directory(system, request.documentId, true);
-  const record = { format: 'candlelight-generation-v1', id: randomUUID(), documentId: request.documentId, model, startedAt: Date.now(), status: 'running', request, requestDigest: hash(request), calls: [], events: [] };
+  // Resume only the same task/input. A new regeneration workflow, changed goal,
+  // source, revision or model starts fresh. Credentials never enter this key.
+  const resumeDigest = hash({ messages: executionBinding(buildMessages(request)), revision: request.revision,
+    documentId: request.documentId, notebookId: request.notebookId, workflowId: request.workflow?.id, reviewPolicy: request.workflow?.reviewPolicy, model });
+  let execution, resumedFrom;
+  await optionalRecord(async () => {
+    const entries = (await readdir(path)).filter(name => /^[a-f0-9-]{36}\.json$/.test(name));
+    const recent = [];
+    for (const name of entries) {
+      const candidate = join(path, name), info = await lstat(candidate);
+      if (!info.isFile() || info.isSymbolicLink() || activeRecords.has(candidate) || await realpath(candidate) !== candidate) continue;
+      recent.push({ file: candidate, time: info.mtimeMs, size: info.size });
+    }
+    for (const entry of recent.sort((a,b) => b.time-a.time).slice(0, 20)) {
+      if (entry.size > 32 * 1024 * 1024) continue;
+      const previous = await readJSON(entry.file);
+      if (previous.resumeDigest === resumeDigest) {
+        if (previous.execution && !['accepted', 'success'].includes(previous.status)) {
+          execution = previous.execution; resumedFrom = previous.id;
+        }
+        break;
+      }
+    }
+  }, 'execution-checkpoint-read');
+  const record = { format: 'candlelight-generation-v1', id: randomUUID(), documentId: request.documentId, model, startedAt: Date.now(), status: 'running', request, requestDigest: hash(request), resumeDigest,
+    ...(execution ? { execution, resumedFrom } : {}), calls: [], events: [] };
   const file = join(path, record.id + '.json');
   async function save() {
     if (Buffer.byteLength(JSON.stringify(record)) > 32 * 1024 * 1024) {
@@ -75,5 +101,6 @@ export async function createGenerationRecord(system, input, model, fetcher = fet
     for (const [index, entry] of entries.entries()) { total += entry.size; if ((index >= 20 || total > 64 * 1024 * 1024) && entry.path !== file && !activeRecords.has(entry.path)) await unlink(entry.path); }
     }, 'generation-record-retention');
   }
-  return { id: record.id, fetch: wrapped, event: value => record.events.push(value), finish };
+  return { id: record.id, fetch: wrapped, event: value => record.events.push(value), finish,
+    checkpoint: execution, saveCheckpoint: async state => { record.execution = state; await save(); } };
 }

@@ -1,3 +1,4 @@
+import { confirmedAudit } from './support/review-audit.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -33,6 +34,7 @@ test('workflow performs generation and independent review before accepting a cha
   const input = fixture(), calls = []; let report;
   const raw = await runModel(config, buildMessages(input), undefined, async (_, options) => {
     const messages = JSON.parse(options.body).messages; calls.push(messages);
+    const audit = confirmedAudit(messages); if (audit) return response(audit);
     return response(messages[0].content.includes('note-self-review-v1') ? review(JSON.parse(messages[1].content)) : original);
   }, { action: 'generate', onWorkflowReport: value => { report = value; } });
   assert.equal(calls.length, 2); assert.equal(report.outcome, 'accepted'); assert.equal(report.reviewedSegments, 1); assert.equal(report.reviewCalls, 1);
@@ -57,13 +59,14 @@ test('goal diagnosis repairs only the targeted block, then independently recheck
   const input = fixture(), phases = [], events = []; let report, reviews = 0;
   const raw = await runModel(config, buildMessages(input), undefined, async (_, options) => {
     const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content);
+    const audit = confirmedAudit(messages); if (audit) return response(audit);
     if (messages[0].content.includes('note-self-review-v1')) { phases.push('review'); return response(review(context, reviews++ === 0)); }
     if (messages[0].content.includes('note-review-patch-v1')) { phases.push('patch'); return response({ candidateDigest: context.binding, changes: [{ findingId: 'f1', blocks: [solved] }] }); }
     phases.push('generate'); return response(original);
   }, { action: 'generate', onCompletion: value => events.push(value), onWorkflowReport: value => { report = value; } });
   assert.deepEqual(phases, ['generate', 'review', 'patch', 'review']);
   const result = JSON.parse(raw); assert.equal(result.blocks[0].text, solved.text); assert.equal(result.blocks[1].text, original.blocks[1].text);
-  assert.equal(report.reviewCalls, 2); assert.equal(report.repairsUsed, 1); assert.ok(report.diagnoses.includes('GOAL_MISMATCH'));
+  assert.equal(report.reviewCalls, 3); assert.equal(report.repairsUsed, 1); assert.ok(report.diagnoses.includes('GOAL_MISMATCH'));
   assert.deepEqual(events.filter(e => e.review).map(e => [e.phase, e.review.verdict]), [['review', 'revise'], ['recheck', 'accept']]);
 });
 
@@ -81,6 +84,7 @@ test('targeted review repairs retain the protocol of unfinished legacy notebooks
   const input = fixture(); input.learning.template = 'guided-v1'; let reviews = 0;
   const raw = await runModel(config, buildMessages(input), undefined, async (_, options) => {
     const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content);
+    const audit = confirmedAudit(messages); if (audit) return response(audit);
     if (messages[0].content.includes('note-self-review-v1')) return response(review(context, reviews++ === 0));
     if (messages[0].content.includes('note-review-patch-v1')) {
       assert.match(messages[0].content, /须保留 section 字段/);
@@ -92,38 +96,42 @@ test('targeted review repairs retain the protocol of unfinished legacy notebooks
   assert.equal(JSON.parse(raw).blocks[1].text, original.blocks[1].text);
 });
 
-test('invalid reviewer output gets one diagnostic repair; repeated invalid reviews cannot approve a note', async () => {
+test('invalid reviewer output changes strategy within a finite budget and cannot approve a note', async () => {
   let calls = 0;
   await assert.rejects(runModel(config, buildMessages(fixture()), undefined, async () => { calls++; return response(calls === 1 ? original : { verdict: 'accept' }); }, { action: 'generate' }), error => {
-    assert.equal(error.code, 'WORKFLOW_REVIEW_FAILED'); assert.equal(error.workflow.outcome, 'blocked'); assert.equal(error.workflow.repairsUsed, 1); return true;
+    assert.equal(error.code, 'WORKFLOW_REVIEW_FAILED'); assert.equal(error.workflow.outcome, 'blocked'); assert.equal(error.workflow.repairsUsed, 0);
+    assert.equal(error.workflow.execution.recoveryActions, 2); return true;
   });
-  assert.equal(calls, 3);
+  assert.equal(calls, 6);
 });
 
 test('unresolved recheck stops without returning a chapter or starting another repair loop', async () => {
   let calls = 0;
   await assert.rejects(runModel(config, buildMessages(fixture()), undefined, async (_, options) => {
     calls++; const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content);
+    const audit = confirmedAudit(messages); if (audit) return response(audit);
     if (messages[0].content.includes('note-self-review-v1')) return response(review(context, true));
     if (messages[0].content.includes('note-review-patch-v1')) return response({ candidateDigest: context.binding, changes: [{ findingId: 'f1', blocks: [solved] }] });
     return response(original);
   }, { action: 'generate' }), { code: 'WORKFLOW_REVIEW_FAILED' });
-  assert.equal(calls, 4);
+  assert.equal(calls, 9);
 });
 
 test('shared remaining budget can prohibit repairs but still allow normal reviewed generation', async () => {
   const input = fixture(); input.workflow.repairAllowance = 0; let calls = 0;
   await assert.rejects(runModel(config, buildMessages(input), undefined, async (_, options) => {
     calls++; const messages = JSON.parse(options.body).messages;
+    const audit = confirmedAudit(messages); if (audit) return response(audit);
     return response(calls === 1 ? original : review(JSON.parse(messages[1].content), true));
   }, { action: 'generate' }), error => error.code === 'WORKFLOW_REVIEW_FAILED' && error.workflow.repairsUsed === 0);
-  assert.equal(calls, 2, 'No patch is sent after the task budget is exhausted');
+  assert.equal(calls, 3, 'Advice can be audited, but no patch is sent after the task budget is exhausted');
 });
 
 test('local citation recovery is followed by review, and prior diagnosis is carried into subsequent chapter prompts', async () => {
   const input = fixture(); let calls = 0, report;
   await runModel(config, buildMessages(input), undefined, async (_, options) => {
     calls++; const messages = JSON.parse(options.body).messages;
+    const audit = confirmedAudit(messages); if (audit) return response(audit);
     return response(calls === 1 ? { blocks: original.blocks.map(block => ({ ...block, sourcePages: [1] })) } : review(JSON.parse(messages[1].content)));
   }, { action: 'generate', onWorkflowReport: value => { report = value; } });
   assert.equal(calls, 2); assert.equal(report.repairsUsed, 0); assert.ok(report.diagnoses.includes('ORIGINAL_PAGE_AS_ID'));
@@ -172,7 +180,8 @@ test('HTTP and preparation preserve task memory and budget across a reviewed cor
     let raw = ''; for await (const chunk of req) raw += chunk;
     const { messages } = JSON.parse(raw), context = JSON.parse(messages[1].content); upstreamCalls++;
     let result;
-    if (messages[0].content.includes('note-self-review-v1')) { result = review(context, initialReview); initialReview = false; }
+    if (messages[0].content.startsWith('note-review-audit-v1')) result = confirmedAudit(messages);
+    else if (messages[0].content.includes('note-self-review-v1')) { result = review(context, initialReview); initialReview = false; }
     else if (messages[0].content.includes('note-review-patch-v1')) result = { candidateDigest: context.binding, changes: [{ findingId: 'f1', blocks: [solved] }] };
     else { inputs.push(context.workflow); result = inputs.length === 1 ? original : { blocks: [solved] }; }
     res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(result) } }] }));
@@ -187,7 +196,7 @@ test('HTTP and preparation preserve task memory and budget across a reviewed cor
         const response = await fetch(server.base + '/api/edit', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Reading-Tree-Token': connection.token }, body: JSON.stringify({ ...base, revision: document.revision, document, chapterId, learning, workflow }) });
         const body = await response.json(); if (!response.ok) throw Object.assign(new Error(body.error), noteFailureMetadata(body)); return body;
       } });
-    assert.equal(latest.preparation.status, 'complete'); assert.equal(upstreamCalls, 5);
+    assert.equal(latest.preparation.status, 'complete'); assert.equal(upstreamCalls, 6);
     assert.equal(latest.preparation.workflow.history.length, 2); assert.equal(latest.preparation.workflow.repairsUsed, 1);
     assert.equal(inputs[1].completedChapters, 1); assert.equal(inputs[1].repairAllowance, inputs[0].repairAllowance - 1);
     assert.ok(inputs[1].priorDiagnoses.includes('GOAL_MISMATCH'));

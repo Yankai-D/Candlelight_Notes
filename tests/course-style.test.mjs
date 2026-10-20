@@ -116,12 +116,12 @@ test('style adapter repairs a malformed response once using the same personal sa
   assert.deepEqual(input, original);
 });
 
-test('cancelled or twice invalid style requests never return a candidate for saving', async () => {
+test('cancelled or persistently invalid style requests never return a candidate for saving', async () => {
   const input = request(), config = { baseUrl: 'https://example.test', model: 'mock', apiKey: 'test' };
   let calls = 0;
   const invalid = async () => { calls++; return { ok: true, json: async () => ({ choices: [{ message: { content: '{}' } }] }) }; };
-  await assert.rejects(runModel(config, buildMessages(input), undefined, invalid), { code: 'COURSE_STYLE_FORMAT' });
-  assert.equal(calls, 2);
+  await assert.rejects(runModel(config, buildMessages(input), undefined, invalid), { code: 'EXECUTION_BLOCKED' });
+  assert.equal(calls, 5);
   const controller = new AbortController();
   await assert.rejects(runModel(config, buildMessages(input), controller.signal, async () => {
     controller.abort(); return { ok: true, json: async () => ({ choices: [{ message: { content: JSON.stringify(reply(input)) } }] }) };

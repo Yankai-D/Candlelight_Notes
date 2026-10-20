@@ -7,6 +7,7 @@ import { learningGoalPrompt } from '../../shared/learning-goal.mjs';
 // 8a060db: product rename; 3a290ba: unknown/blank profile remains unknown.
 // 762737a: goal-v2 separates requested outcomes from the fixed writing voice.
 // b71cb99: source-reference-v2 distinguishes original pages from citation IDs.
+// 3846ece: generation keeps mathematical conditions and readable source quotes.
 export function currentMessagesFromV010(messages) {
   const oldName = '你是旁烛笔记的学习笔记编辑器。';
   const profile = '用户画像约束 stable-profile-v1：learner 仅包含用户明确维护的稳定背景与基础知识。资料库状态、已读记录、学习树的分类和概念均不代表用户画像，不据此推断掌握程度或省略必要解释。';
@@ -28,6 +29,8 @@ export function currentMessagesFromV010(messages) {
   const nextOrganization = '任务优先于默认编排：learningIntent 要求什么成果，正文就完成什么成果。解答练习时按题号/小问组织过程与结果，允许题号标题与步骤段落；不要为了长文连贯或讲义知识层级，把独立题目改编成概念讲解。保持模板的语气与数学严谨性，不把组织偏好当作禁止作答的规则。样稿里的介绍、算例或总结只示范表达，不替代当前任务。\n知识画像只决定陌生前提的铺垫深度，学习目标决定交付任务，文风保持一致。';
   if (context.writingTemplate) assert.ok(messages[0].content.includes(oldOrganization));
   const referenceRule = '\n来源定位 source-reference-v2：sourceReferences.allowedIds 是本次可用的全部引用定位号，sourcePages 只能从中选择。mapping 显式区分 id 与原文件 originalPage；禁止用文件内页码、章节号或从 1 开始的顺序号代替 id。示例中的 id 仅示意格式，实际依据对应 source 正文选择。';
+  const contentRules = action !== 'generate' ? '' : '\n正文一致性 note-content-v1：公式与相邻解释一起保留适用条件，区分精确等式、上界和近似，不把特殊情形的数值例子当成一般保证；概念定义的方向、符号、分母为零等边界应前后一致。标题准确描述后续段落，不复制已讲过的整段内容。教学补充应自然说明它的依据和假设，不冒充原文陈述；不输出自检报告。'
+    + '\nsourceQuote 仅用于精确定位：优先复制一段可读的连续原文文字，不选择损坏的 PDF 公式、控制字符或字形碎片，也不重排散落的符号。没有可精确复制的文本时填写空字符串，sourcePages 仍保留真实依据的定位号；不能为凑引文而改写原句。';
   assert.equal(context.sourceReferences, undefined, 'Historical traces must remain unchanged');
   const sourceReferences = { version: 'source-reference-v2', allowedIds: [...new Set(context.source.map(page => page.number))],
     mapping: context.source.map(page => ({ id: page.number, title: page.sourceTitle, originalPage: page.sourcePage })),
@@ -35,6 +38,6 @@ export function currentMessagesFromV010(messages) {
   const nextContext = Object.fromEntries(Object.entries(context).flatMap(entry => entry[0] === 'source' ? [entry, ['sourceReferences', sourceReferences]] : [entry]));
   return messages.map((message, index) => index === 1 ? { ...message, content: JSON.stringify(nextContext) } : index ? structuredClone(message) : {
     ...message, content: message.content.replace(oldName, '你是烛光笔记的学习笔记编辑器。').replace(profile + '\n', profile + unknown + '\n').replace(oldGoal, nextGoal).replace(oldOrganization, nextOrganization)
-      .replaceAll('"sourcePages":[1]', `"sourcePages":${JSON.stringify(context.source.length ? [context.source[0].number] : [])}`) + referenceRule,
+      .replaceAll('"sourcePages":[1]', `"sourcePages":${JSON.stringify(context.source.length ? [context.source[0].number] : [])}`) + referenceRule + contentRules,
   });
 }

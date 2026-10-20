@@ -311,6 +311,7 @@ test('verified excerpt IDs resolve to actual text; invalid references cannot fab
 test('one malformed source match preserves other work and does not halt the entire tree',async()=>{
   const {runner}=await setup();const regular=provider();let broken=0;
   const completion=async(messages,task)=>{
+    if(task.stage==='recovery-plan')return '{}';
     const context=JSON.parse(messages[1].content);
     if(task.stage==='research'&&context.branch.id==='B2'){broken++;return JSON.stringify({selections:[{nodeId:'N2',sourceIds:['Sverified'],explanation:'错误引用测试。',evidence:[{sourceId:'Sverified',excerptId:'E999'}]}]});}
     return regular(messages,task);

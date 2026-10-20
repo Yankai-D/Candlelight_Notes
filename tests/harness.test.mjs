@@ -145,7 +145,7 @@ test('truncated DeepSeek output is discarded and retried once at 64K with the or
   assert.deepEqual(calls.map(call => call.max_tokens), [32768, 65536]);
   assert.deepEqual(calls[0].messages, calls[1].messages, 'Never use truncated JSON as an assistant prefix');
   assert.equal(validateResult(request, output).blocks[0].text, '完整的生成正文');
-  assert.deepEqual(diagnostics.map(d => d.finishReason), ['length', 'stop']);
+  assert.deepEqual(diagnostics.filter(d => d.finishReason).map(d => d.finishReason), ['length', 'stop']);
   assert.equal(diagnostics[1].reasoningTokens, 0);
 
   let attempts = 0;

@@ -1,0 +1,85 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.26",
+  "status": "verified-local-candidate",
+  "codeRevision": "90d477cef75581e36d734e005627322df98a7171",
+  "sourceFingerprint": "7e2d175b839c70e919dfe3f1d6e79be1bb2caf0ce5885c82224b5cc0228cb0ac",
+  "changes": [
+    "Stateful stage execution retains candidates, precise validation issues and recovery history",
+    "Model-guided bounded recovery can repair, reframe or use an application-provided partitioner",
+    "Generation and review checkpoints are reused without regenerating accepted prose",
+    "Actual HTTP attempts share a budget; protocol recovery and content correction have separate allowances",
+    "Member-access dollars remain literal in the shared note, inline explanation and export parser",
+    "Format diagnostics include field paths, character offsets and local context for targeted recovery"
+  ],
+  "validation": {
+    "tests": 446,
+    "browserSuites": 11,
+    "stages": 14,
+    "actualModelCalls": 0,
+    "sourceChangedDuringChecks": false,
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.25",
+        "asarSha256": "256c0f4333ae8818f065104d71924f36740c479c3f6327a809ba3a156b2e24aa"
+      },
+      "to": {
+        "version": "0.1.26",
+        "asarSha256": "13db11a176bd408f9f9edb036fcd8fd502888db759d4e2c61b8165ff82388893"
+      },
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "installerContents": {
+      "status": "pass",
+      "files": 36,
+      "sourceRevision": "90d477cef75581e36d734e005627322df98a7171",
+      "installerSha256": "e3e085fcc64334183013ec6e9df3f990bd4d03718737f5beb72fef6ecbcfc09f",
+      "scope": "Every file extracted from the final Setup.exe matches the tested win-unpacked directory byte-for-byte"
+    },
+    "payloadFilesVerified": 12091,
+    "checkReportSha256": "96780d5768436a7148abb713208e1de34410a51577d326dd20e5b06ba2460119",
+    "reportedParserIncident": {
+      "mode": "offline-saved-response-replay",
+      "candidatesAccepted": 3,
+      "blocksPerCandidate": 31,
+      "originalNoteWritten": false
+    }
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.26-Setup-x64.exe",
+      "bytes": 138118483,
+      "sha256": "e3e085fcc64334183013ec6e9df3f990bd4d03718737f5beb72fef6ecbcfc09f"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false,
+    "publishedToGitHub": false
+  },
+  "limitations": [
+    "No new live model calls in this final release verification; saved-response replay is not a new live eight-chapter end-to-end trial",
+    "Recovery controller and content reviewer use the same configured model and can share reasoning errors",
+    "Cancellation, authentication failures, missing external input and exhausted budgets remain stopping boundaries",
+    "Independent paper-search and research-evaluation utilities retain their existing bounded runners",
+    "No complete NSIS installation/upgrade/uninstall lifecycle test on a clean Windows account or VM",
+    "Engineering checks do not establish an independent teaching-quality advantage",
+    "Remote publication and CI results are recorded on GitHub separately from this local snapshot"
+  ]
+}

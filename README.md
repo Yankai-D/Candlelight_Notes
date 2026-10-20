@@ -18,9 +18,9 @@ Author: [Yankai-D](https://github.com/Yankai-D) · [Repository](https://github.c
 
 ## 下载与使用 / Download and use
 
-[下载 Windows x64 安装包和对外源码](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.20)。0.1.20 已通过本机工程验收，作为预发布版本提供。安装后从桌面或开始菜单打开“烛光笔记 Candlelight”，无需安装 Node 或浏览器。
+[下载 Windows x64 安装包和对外源码](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.26)。0.1.26 已通过本机工程验收，作为预发布版本提供。安装后从桌面或开始菜单打开“烛光笔记 Candlelight”，无需安装 Node 或浏览器。
 
-[Download the Windows x64 installer and public source](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.20). Version 0.1.20 passed local engineering checks and is offered as a prerelease. Open “烛光笔记 Candlelight” from the desktop or Start menu; Node and an external browser are not required.
+[Download the Windows x64 installer and public source](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.26). Version 0.1.26 passed local engineering checks and is offered as a prerelease. Open “烛光笔记 Candlelight” from the desktop or Start menu; Node and an external browser are not required.
 
 首次引导可填写学习画像和 DeepSeek 连接，也可直接跳过，之后在设置中调整。“?”、F1 和桌面帮助菜单提供分主题指南。发行包仅附三份描述性统计公开选编及完整署名，不含作者的 Key、画像、个人资料或笔记。
 
@@ -72,9 +72,9 @@ Open <http://127.0.0.1:5173>. The public entry point verifies and prepares the t
 - 学习目标、稳定画像、来源范围和模板快照分别约束生成；画像改变铺垫深度，核心文风保持稳定。题解按小题原文、简短思路和必要解法组织，优先遵守仅提示或仅答案等要求。
 
   Goals, stable learner profiles, source scope, and template snapshots constrain generation separately. Profiles change prerequisite depth while retaining the core style. Exercises retain each subquestion, a concise approach, and the necessary solution, respecting requests for hints or answers only.
-- 模板选择先判断任务，再判断资料类型，对不一致结果最多修复一次。缺少题面或数据时明确缺项，不编造数值；当前不自动获取外部数据或运行统计代码。见 [学习任务](docs/learning-tasks.md)。
+- 模板选择先判断任务，再判断资料类型，对不一致结果在共享额度内诊断并恢复。缺少题面或数据时明确缺项，不编造数值；当前不自动获取外部数据或运行统计代码。见 [学习任务](docs/learning-tasks.md)。
 
-  Template routing considers the task before document genre and allows one correction for a mismatch. Missing questions or data are reported rather than invented; external datasets and statistical code are not fetched or executed automatically. See [learning tasks](docs/learning-tasks.md).
+  Template routing considers the task before document genre and diagnoses and recovers mismatches within shared limits. Missing questions or data are reported rather than invented; external datasets and statistical code are not fetched or executed automatically. See [learning tasks](docs/learning-tasks.md).
 - “调整并重新生成”合并学习目标与修改意见，原正文和小纸条保留为历史版本；长期偏好在“设置 → 模板风格”中调整。
 
   “Adjust and regenerate” combines goal changes with revision feedback, retaining previous text and inline notes in history. Long-term preferences belong in Settings → Template style.
@@ -95,6 +95,10 @@ Open <http://127.0.0.1:5173>. The public entry point verifies and prepares the t
 
 See the [architecture](docs/architecture.md) and [project walkthrough](docs/project-walkthrough.md). Explanation templates and long-term usage feedback are maintained product assets; evidence and limits are documented in [product quality](docs/product-quality.md).
 
+0.1.26 将阶段结果、校验失败和恢复历史纳入共享执行层，在同一次操作内诊断并选择定向修复、重新推导或程序提供的拆分处理。已经通过的阶段可复用；实际请求与恢复共享有限预算，内容修订另计。恢复结果仍须通过原校验器。修正代码中的成员访问符号（如 `data$column`）被误识别成公式的问题，并向恢复阶段提供具体字段与字符位置。
+
+Version 0.1.26 retains stage results, validation failures, and recovery history in a shared executor. It diagnoses failures within the same operation and selects targeted repair, fresh reasoning, or application-provided partitioning. Accepted stages can be reused. Actual requests and recovery share bounded budgets, with a separate allowance for content correction; recovered results still pass the original validators. Member-access dollars such as `data$column` no longer trigger false math errors, and format diagnostics include field paths and character offsets.
+
 ## 验证与构建 / Verification and builds
 
 ```sh
@@ -108,9 +112,9 @@ npm run package:desktop
 
 `check` uses isolated data and mock providers without reading personal keys. Tests, authored calibration cases, public selections, and versioned development experiments are retained for replay. Historical local revision IDs identify evidence sources; those private commits are not included in public Git history.
 
-0.1.20 本机验收通过 **408 项测试、11 套浏览器流程、14 个检查阶段**，并验证 0.1.19 → 0.1.20 的应用数据读取、重启保存及打包后的多格式解析。安装器解出的 36 个外层文件与受测程序逐字节一致；内部 12,086 个应用与资源文件通过发行审计。见 [版本记录](docs/releases/v0.1.20.json)和 [公开发布说明](PUBLICATION.md)。
+0.1.26 本机验收通过 **446 项测试、11 套浏览器流程、14 个检查阶段**，并验证 0.1.25 → 0.1.26 的应用数据读取、重启保存及打包后的多格式解析。安装器解出的 36 个外层文件与受测程序逐字节一致；内部 12,091 个应用与资源文件通过发行审计。见 [版本记录](docs/releases/v0.1.26.json)和 [公开发布说明](PUBLICATION.md)。
 
-Local verification for 0.1.20 passed **408 tests, 11 browser suites, and 14 engineering stages**, including application-data compatibility from 0.1.19, restart persistence, and packaged multi-format parsing. All 36 outer installer files match the tested application byte-for-byte; 12,086 internal application/resource files passed distribution auditing. See the [release record](docs/releases/v0.1.20.json) and [publication notes](PUBLICATION.md).
+Local verification for 0.1.26 passed **446 tests, 11 browser suites, and 14 engineering stages**, including application-data compatibility from 0.1.25, restart persistence, and packaged multi-format parsing. All 36 outer installer files match the tested application byte-for-byte; 12,091 internal application/resource files passed distribution auditing. See the [release record](docs/releases/v0.1.26.json) and [publication notes](PUBLICATION.md).
 
 本轮没有真实模型调用，不新增教学质量结论。异常触发审查不保证发现所有语义问题，工程验收不证明普遍教学优势或完整跨平台兼容。安装包未签名，完整安装器生命周期仍待空白 Windows 环境验证。远程 CI 以 GitHub Actions 实际状态为准。
 

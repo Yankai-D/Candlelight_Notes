@@ -32,6 +32,7 @@ export const preparationSchema = z.object({
   startedAt: z.number(), completedAt: z.number().optional(),
   status: z.enum(['running', 'paused', 'partial', 'complete']),
   completedIds: z.array(z.string()).max(300), errors: z.record(z.string(), z.string().max(2000)),
+  currentErrorIds: z.array(z.string()).max(302).optional(),
   settings: learningSettingsSchema, knowledge: learnerProfileSchema.optional(),
   templateRouting: z.enum(['pending', 'selected']).optional(),
   sourceContext: bundleContextSchema.optional(),

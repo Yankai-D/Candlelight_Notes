@@ -100,10 +100,10 @@ test('organization repairs one invalid response, refuses repeated invalid links,
   });
   assert.deepEqual(result, decodeClassification(input, output)); assert.equal(requests.length, 2);
   assert.match(requests[1].messages.at(-1).content, /校验失败/);
-  assert.deepEqual(JSON.parse(requests[1].messages.at(-1).content).issues, [{ code: 'missing_documents', path: 'groups', refs: ['D3'] }]);
+  assert.deepEqual(JSON.parse(requests[1].messages.at(-1).content).failure.issues, [{ code: 'missing_documents', path: 'groups', refs: ['D3'] }]);
   let calls = 0;
-  await assert.rejects(organizeTree(config, input, undefined, async () => { calls++; return response({ branches: [] }); }), /原学习树已保留/);
-  assert.equal(calls, 2);
+  await assert.rejects(organizeTree(config, input, undefined, async () => { calls++; return response({ branches: [] }); }), { code: 'EXECUTION_BLOCKED' });
+  assert.equal(calls, 5);
   const controller = new AbortController();
   await assert.rejects(organizeTree(config, input, controller.signal, async () => { controller.abort(); return response(output); }), { name: 'AbortError' });
 });
@@ -139,10 +139,10 @@ test('classification diagnostics retain exact validation paths without source, p
   const input = organizationInput(docs), diagnostics = [];
   const config = { baseUrl: 'https://api.deepseek.com', model: 'test', apiKey: 'DO_NOT_LOG_THIS' };
   const response = value => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(value) } }] }));
-  await assert.rejects(organizeTree(config, input, undefined, async () => response({ groups: [{ label: '方法', documents: ['D1'] }] }), { onDiagnostic: record => diagnostics.push(record) }), /模型遗漏了部分资料/);
+  await assert.rejects(organizeTree(config, input, undefined, async () => response({ groups: [{ label: '方法', documents: ['D1'] }] }), { onDiagnostic: record => diagnostics.push(record) }), { code: 'EXECUTION_BLOCKED' });
   assert.equal(diagnostics[0].status, 'failed');
   assert.deepEqual(diagnostics[0].attempts[1].issues[0].refs, ['D2', 'D3']);
-  assert.equal(diagnostics[0].attempts.length, 2);
+  assert.equal(diagnostics[0].attempts.length, 5);
   const serialized = JSON.stringify(diagnostics);
   assert.doesNotMatch(serialized, /DO_NOT_LOG_THIS|Attention|paragraph|messages|prompt|responseBody/);
 });

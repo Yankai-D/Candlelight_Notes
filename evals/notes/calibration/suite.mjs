@@ -80,7 +80,7 @@ export const regressionDefinitions=[
   {id:'missing-anchor',label:'失效纸条锚点在调用前拒绝',expected:'rejected'},
   {id:'paper-insertion',label:'合法纸条保留原文及后续段落',expected:'inserted'},
   {id:'repair-success',label:'格式修复一次后接受完整正文',expected:'accepted',calls:2},
-  {id:'repair-exhausted',label:'连续格式失败在两次调用内结束',expected:'rejected',calls:2},
+  {id:'repair-exhausted',label:'连续格式失败换策略后有界结束',expected:'rejected',calls:5},
   {id:'truncation-exhausted',label:'连续截断不进入格式修复循环',expected:'rejected',calls:2},
 ];
 
@@ -117,7 +117,7 @@ export async function runCalibrationRegressions() {
         if(after.length===3&&after[1].type==='explanation'&&changed.revision===1)outcome='inserted';
       }
       if(definition.id.startsWith('repair-')||definition.id==='truncation-exhausted') {
-        const fetcher=async()=>{calls++;if(calls>2)throw new Error('UNBOUNDED_CALIBRATION_CALLS');return response(definition.id==='repair-success'&&calls===2?JSON.stringify(valid):'{',definition.id==='truncation-exhausted'?'length':'stop');};
+        const fetcher=async()=>{calls++;if(calls>definition.calls)throw new Error('UNBOUNDED_CALIBRATION_CALLS');return response(definition.id==='repair-success'&&calls===2?JSON.stringify(valid):'{',definition.id==='truncation-exhausted'?'length':'stop');};
         const raw=await runModel({baseUrl:'https://api.deepseek.com',model:'calibration-offline',apiKey:'calibration-dummy'},buildMessages(request),undefined,fetcher,{action:'generate',onCompletion:e=>events.push(e)});
         validateResult(request,raw);outcome='accepted';
       }
@@ -130,7 +130,7 @@ export async function runCalibrationRegressions() {
       'stale-revision':()=>detail.includes('笔记已发生变化'),
       'missing-anchor':()=>detail.includes('插入位置已失效'),
       'repair-success':()=>events.filter(e=>e.repair).length===1,
-      'repair-exhausted':()=>errorCode==='INVALID_EDIT_FORMAT'&&events.filter(e=>e.repair).length===1,
+      'repair-exhausted':()=>errorCode==='WORKFLOW_REVIEW_FAILED'&&events.filter(e=>e.repair).length===2,
       'truncation-exhausted':()=>detail.includes('截断')&&events.filter(e=>e.repair).length===0,
     };
     const pass=outcome===definition.expected&&(definition.calls===undefined?calls===0:calls===definition.calls)&&unchanged&&hash(request)===original&&(!reasonMatches[definition.id]||reasonMatches[definition.id]());

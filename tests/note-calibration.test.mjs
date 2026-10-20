@@ -67,7 +67,7 @@ test('mechanical negatives and positive controls use production boundaries, boun
     assert.equal(report.passed,true,JSON.stringify(report.checks.filter(c=>!c.pass)));
     assert.equal(report.checks.length,11);assert.equal(external,0);assert.equal(report.actualModelCalls,0);
     assert.ok(report.checks.every(c=>c.inputUnchanged));
-    assert.equal(report.checks.find(c=>c.id==='repair-exhausted').calls,2);
+    assert.equal(report.checks.find(c=>c.id==='repair-exhausted').calls,5);
     assert.equal(report.checks.find(c=>c.id==='truncation-exhausted').calls,2);
     assert.equal(report.checks.find(c=>c.id==='paper-insertion').outcome,'inserted');
   }finally{globalThis.fetch=original;}

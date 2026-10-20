@@ -1,4 +1,5 @@
 import { brand } from '../shared/brand.mjs';
+import { runStage } from './execution.mjs';
 import { z } from 'zod';
 import { courseSampleSchema, defaultCourseSample } from '../shared/course-style.mjs';
 import { noteBlocks, NOTE_FORMAT, noteFormatPrompt } from '../shared/note-format.mjs';
@@ -77,15 +78,6 @@ export function compileCourseSample(sample) {
   blocks.forEach(check); return { format: NOTE_FORMAT, blocks };
 }
 export async function runCourseStyleCompletion(request, messages, complete, signal) {
-  let conversation = messages;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    signal?.throwIfAborted();
-    const raw = await complete(conversation);
-    signal?.throwIfAborted();
-    try { validateCourseStyleResult(request, raw); return raw; }
-    catch (error) {
-      if (attempt || error.code !== 'COURSE_STYLE_FORMAT') throw error;
-      conversation = [...messages, { role: 'user', content: `上次输出未通过校验：${error.message}\n请基于最初样稿重新返回完整修改结果，保留全部数学占位符，不缩减约定外的内容。` }];
-    }
-  }
+  return (await runStage({ stage: 'course-style', messages, complete, signal,
+    validate: raw => validateCourseStyleResult(request, raw) })).raw;
 }

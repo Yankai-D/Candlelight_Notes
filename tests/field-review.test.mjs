@@ -106,7 +106,7 @@ test('field CLI forbids implicit paid runs and mixed review/generation modes',()
 });
 
 const archived=()=>JSON.parse(readFileSync(new URL('../evals/claims/runs/2026-10-18-field/run.json',import.meta.url),'utf8'));
-test('real trial retains exact historical prompts/cost; new plans differ only by explicit brand/profile/goal/reference migrations',()=>{
+test('real trial retains exact historical prompts/cost; new plans differ only by explicit brand/profile/goal/reference/content migrations',()=>{
   const run=archived(),report=inspectField(run);assert.equal(run.gitRevision,'f81cd94b5308f2aa881e6ed09d67fd28c976a981');assert.equal(run.gitDirty,false);
   assert.equal(fingerprint({ ...run.plan, generationMessages: currentMessagesFromV010(run.plan.generationMessages) }),fingerprint(planField()));
   assert.notEqual(fingerprint(run.plan),fingerprint(planField()), 'Do not rewrite historical evidence to look like current production');

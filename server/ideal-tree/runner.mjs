@@ -1,6 +1,7 @@
 import { mkdir, readdir, readFile, unlink } from 'node:fs/promises';
 import { atomicWrite } from '../atomic-file.mjs';
 import { recoveryDecision, recordRecovery } from '../recovery.mjs';
+import { executionScope, runStage } from '../execution.mjs';
 import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -38,7 +39,7 @@ export class IdealStore {
   }
 }
 export function publicJob(job) {
-  const { input, sources, orientation, ...rest } = job;
+  const { input, sources, orientation, execution, ...rest } = job;
   return { ...rest, ...(job.status === 'review' ? { status: 'complete', stage: '学习路径构建完成' } : {}),
     pathReport: job.pathReport || (['complete','review'].includes(job.status) ? learningPathReport(job) : undefined),
     goal: input.goal, profile: input.profile, sources: sources.map(({ text, asset, ...source }) => ({ ...source, ...(arxivId(source.url || '') ? {arxivId:arxivId(source.url)} : {}), importable: !!asset })),
@@ -207,6 +208,12 @@ export class IdealRunner {
     await this.store.save(job);
   }
   async run(job, complete, signal) {
+    return executionScope({ binding: { id: job.id, model: job.model, provider: complete.identity, input: job.input, promptVersion: job.promptVersion },
+      state: job.execution, save: async state => { job.execution = state; await this.persist(job); },
+      limits: { calls: this.maxCalls, recoveries: Math.min(32, this.maxCalls), perStage: 3 },
+    }, () => this.runStages(job, complete, signal));
+  }
+  async runStages(job, complete, signal) {
     const until = job.metrics.modelCalls + this.maxCalls;
     await this.persist(job);
     const ask = async (stage, context, validate, recover) => {
@@ -217,16 +224,18 @@ export class IdealRunner {
           ...(review ? { review } : {}),
         } };
       }
-      let messages = idealMessages(stage, context), formatRetries = 0, networkRetries = 0;
+      const messages = idealMessages(stage, context);
       const label = job.stage;
-      for (let attempt = 0; attempt < 3; attempt++) {
+      let networkRetries = 0, attempt = 0, latestRaw;
+      const call = async (conversation, action) => {
+        for (;;) {
         signal.throwIfAborted();
         if (job.metrics.modelCalls >= until) throw Object.assign(new Error('本轮调用预算已用完，已保存进度；可继续构建。'), { code: 'BUDGET' });
-        job.metrics.modelCalls++; const started = Date.now(); job.stage = label;
-        job.activity = { stage, branchId:context.branch?.id, attempt:attempt+1, startedAt:started }; await this.persist(job);
+        job.metrics.modelCalls++; attempt++; const started = Date.now(); job.stage = label;
+        job.activity = { stage: action, branchId:context.branch?.id, attempt, startedAt:started }; await this.persist(job);
         const bounded = AbortSignal.any([signal, AbortSignal.timeout(300000)]);
-        let raw, value, requests=0;
-        try { raw = await complete(messages, { stage, signal: bounded, onRequest: () => {
+        let requests=0;
+        try { const raw = await complete(conversation, { stage: action, signal: bounded, onRequest: () => {
           // The first request is reserved above. Token-expansion retries must
           // also consume the same workflow budget, not disappear in transport.
           if (++requests>1) {
@@ -236,27 +245,34 @@ export class IdealRunner {
         }, onCompletion: info => {
           job.metrics.completionTokens += info.completionTokens || 0;
         } }); signal.throwIfAborted();
-          value = validate(raw);
+          if (action !== 'recovery-plan') latestRaw = raw;
+          return raw;
         } catch (error) {
           signal.throwIfAborted(); delete job.activity;
           await this.persist(job, { type:'model', stage, branchId:context.branch?.id, attempt:attempt+1, elapsedMs:Date.now()-started, accepted:false, issue:error.message.slice(0,1500) });
-          if (!raw && recoveryDecision(error, 'transport', signal) === 'retry' && !networkRetries && attempt < 2) {
+          if (recoveryDecision(error, 'transport', signal) === 'retry' && !networkRetries) {
             recordRecovery({layer:'transport',stage:`ideal-${stage}`,attempt:attempt+1,outcome:'retry',error});
             networkRetries++; job.stage = `连接短暂中断，正在重试 · ${label}`;
             await this.persist(job,{type:'retry',stage,reason:'transport'}); await delay(this.retryDelay,undefined,{signal}); continue;
           }
-          if (raw && !formatRetries && attempt < 2) {
-            formatRetries++; job.metrics.repairs++; await this.persist(job, { type: 'repair', stage, elapsedMs: Date.now() - started, issue: error.message.slice(0,1500) });
-            messages = [...messages, { role: 'assistant', content: raw }, { role: 'user', content: `结果未通过校验：${error.message.slice(0,2000)}。只修复具体问题，返回完整本阶段 JSON。` }]; continue;
-          }
-          if (raw && recover) { const value = recover(raw); job.events.push({at:Date.now(),type:'partial',stage,issue:error.message.slice(0,1500)}); return value; }
           throw error;
         }
-        // Saving an accepted response is not model validation. A storage error
-        // must never trigger another paid generation or "format repair".
-        // The caller checkpoints the value and this event together. A separate
-        // event write before returning would lose an accepted value on failure.
-        delete job.activity; job.events.push({ at:Date.now(), type:'model', stage, branchId:context.branch?.id, attempt:attempt+1, elapsedMs:Date.now()-started, accepted:true }); return value;
+        }
+      };
+      try {
+        const result = await runStage({ stage, messages, complete: call, validate, signal,
+          onCandidate: raw => { latestRaw = raw; },
+          onRecovery: ({ strategy }) => { job.metrics.repairs++; job.events.push({ at: Date.now(), type: 'repair', stage, strategy }); } });
+        delete job.activity;
+        job.events.push({ at:Date.now(), type:'model', stage, branchId:context.branch?.id, attempt, accepted:true, reused: result.reused });
+        return result.value;
+      } catch (error) {
+        if (error.code === 'EXECUTION_BLOCKED' && latestRaw && recover) {
+          const value = recover(latestRaw);
+          job.events.push({ at:Date.now(), type:'partial', stage, issue: error.message });
+          return value;
+        }
+        throw error;
       }
     };
     const tool = async (name, input) => {

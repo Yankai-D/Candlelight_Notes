@@ -170,7 +170,9 @@ const server = http.createServer(async (req, res) => {
             await fileCommand({ action: 'status' }); record = await optionalRecord(() => createGenerationRecord(files.index.systemDirectory, input, activeConfig.model), 'generation-record-create');
           }
           try {
-            const raw = await runModel(activeConfig, messages, controller.signal, record?.fetch || fetch, { action: input.action, onCompletion: info => { generation.push(info); record?.event(info); }, onWorkflowReport: value => { workflow = value; if (value) record?.event({ phase: 'workflow-summary', workflow: value }); } });
+            const raw = await runModel(activeConfig, messages, controller.signal, record?.fetch || fetch, { action: input.action,
+              checkpoint: record?.checkpoint, saveCheckpoint: record?.saveCheckpoint,
+              onCompletion: info => { generation.push(info); record?.event(info); }, onWorkflowReport: value => { workflow = value; if (value) record?.event({ phase: 'workflow-summary', workflow: value }); } });
             const result = validateResult(input, raw);
             await record?.finish('accepted', result);
             return send(res, 200, { result, model: activeConfig.model, generation, recordId: record?.id, workflow });

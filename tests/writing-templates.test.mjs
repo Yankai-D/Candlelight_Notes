@@ -77,7 +77,7 @@ test('routing reads distributed source and goal, excludes profile, notes and sam
     return completion({ task: 'review', material: 'course', fit: 'direct', adaptation: '', templateId: calls === 1 ? 'made-up' : 'lecture', reason: '课件按知识点组织，目标是复习。' });
   });
   assert.equal(calls, 2); assert.equal(selectedTemplate(custom(library(), 0), validateResult(input, raw)).id, 'lecture');
-  await assert.rejects(runModel(config, messages, undefined, async () => completion({ templateId: 'bad', reason: 'bad' })), /模板选择无效/);
+  await assert.rejects(runModel(config, messages, undefined, async () => completion({ templateId: 'bad', reason: 'bad' })), { code: 'EXECUTION_BLOCKED' });
   const cancelled = new AbortController(); calls = 0;
   await assert.rejects(runModel(config, messages, cancelled.signal, async () => { calls++; cancelled.abort(); return completion({ task: 'review', material: 'course', fit: 'direct', adaptation: '', templateId: 'lecture', reason: '课程' }); }), { name: 'AbortError' });
   assert.equal(calls, 1);

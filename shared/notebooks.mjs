@@ -79,7 +79,7 @@ export function restoreNotebookVersion(document, chapters, now = Date.now()) {
     readingAnchor: undefined,
     ...(document.entryType === 'note' ? { composition: { version: 1, planned: true } } : {}),
     preparation: { ...preparation, startedAt: document.preparation?.startedAt || now, settings: notebookSettings(document),
-      completedIds, errors: {}, status: complete ? 'complete' : 'partial', ...(complete ? { completedAt: now } : {}) } });
+      completedIds, errors: {}, currentErrorIds: [], status: complete ? 'complete' : 'partial', ...(complete ? { completedAt: now } : {}) } });
 }
 export function notebookStatus(notebook) {
   if (!notebook) return '选择后生成';

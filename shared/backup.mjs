@@ -57,6 +57,7 @@ export function restoreBackup(raw) {
     const validChapters = chapters => new Set(chapters.map(c => c.id)).size === chapters.length && chapters.every(c => c.sourcePages.every(p => p <= result.pages.length));
     if (!validChapters(state.chapters) || state.versions.some(v => !validChapters(v.chapters) || result.entryType !== 'note' && (v.chapters.length !== ids.length || v.chapters.some(c => !ids.includes(c.id))))) throw new Error('备份中的章节或原文页码不完整。');
     if (state.preparation) {
+      if (state.preparation.currentErrorIds?.some(id => !Object.hasOwn(state.preparation.errors, id))) throw new Error('备份中的本轮错误记录与错误列表不一致。');
       const completed = state.preparation.completedIds;
       if (state.preparation.interruption && !ids.includes(state.preparation.interruption.chapterId)) throw new Error('备份中的中断记录与章节不一致。');
       if (state.preparation.workflow?.history.some(report => !ids.includes(report.chapterId))) throw new Error('备份中的任务审查记录与章节不一致。');

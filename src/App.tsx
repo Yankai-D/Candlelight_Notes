@@ -42,7 +42,7 @@ import { defaultEditInstruction, defaultGenerationInstruction } from '../shared/
 import { defaultLearningIntent, normalizeLearningIntent } from '../shared/learning-intent.mjs'
 import { commitNotebook, ensureNotebooks, selectNotebook, reviseNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
 import { prepareDocument, remainingChapters } from '../shared/preparation.mjs'
-import { noteFailureMetadata } from '../shared/note-recovery.mjs'
+import { noteFailureMetadata, preparationErrors } from '../shared/note-recovery.mjs'
 import { applyBundlePlan, bundlePlanRequest, bundleMaterials, captureBundleContext, contextForMaterial, createBundleNote } from '../shared/bundle-context.mjs'
 import { repairFormulaDocument } from '../shared/formula-layout.mjs'
 import { upgradeMathDocument } from '../shared/math-references.mjs'
@@ -128,6 +128,7 @@ export default function App() {
   const modalRef = useRef(modal); modalRef.current = modal
   const importStop = useRef<(()=>void)|null>(null)
   const doc = documents.find(d => d.id === activeId)
+  const canRegenerate = Boolean(doc?.preparation || doc?.chapters.some(c => c.status === 'ready'))
   const docRef = useRef(doc); docRef.current = doc
   const desktopBusy = useRef(false); desktopBusy.current = importing || !!busy || preparing || organizing || exporting || !!pending || onboardingBusy
   const chapter = doc?.chapters.find(c => c.id === doc.currentChapter) || doc?.chapters[0]
@@ -614,7 +615,7 @@ export default function App() {
       if (current.entryType === 'note' && !current.composition?.planned) {
         // Persist the planning checkpoint first: failures cannot trigger an
         // automatic retry loop, and closing the app keeps the frozen sources.
-        current = { ...current, preparation: { startedAt: Date.now(), ...current.preparation, status: 'running', completedIds: [], errors: {}, settings: notebookSettings(current), knowledge: current.preparation?.knowledge || learnerProfile(knowledge), templateRouting: 'pending' } }
+        current = { ...current, preparation: { startedAt: Date.now(), ...current.preparation, status: 'running', completedIds: [], errors: {}, currentErrorIds: [], settings: notebookSettings(current), knowledge: current.preparation?.knowledge || learnerProfile(knowledge), templateRouting: 'pending' } }
         await persist(current)
         const before = current
         try {
@@ -628,7 +629,7 @@ export default function App() {
           await persist(current)
         } catch (failure) {
           const latest = docRef.current!
-          await persist({ ...latest, preparation: { ...current.preparation!, status: signal.aborted ? 'paused' : 'partial', errors: signal.aborted ? {} : { __plan: (failure as Error).message.slice(0, 2000) } } })
+          await persist({ ...latest, preparation: { ...current.preparation!, status: signal.aborted ? 'paused' : 'partial', currentErrorIds: signal.aborted ? [] : ['__plan'], errors: signal.aborted ? {} : { __plan: (failure as Error).message.slice(0, 2000) } } })
           throw failure
         }
       }
@@ -699,6 +700,7 @@ export default function App() {
     onProfile={async profile => { setKnowledge(await storage.saveLearner({ ...knowledge, ...profile }, 'connection')); setOnboarding('connection') }}
     onFinish={async () => { setKnowledge(await storage.saveLearner(knowledge, 'complete')); setModal(null); setView('library'); setOnboarding(null) }} />{help}</>
   const emptyCount = doc ? remainingChapters(doc).length : 0
+  const generationErrors = preparationErrors(doc?.preparation)
   const wordCount = doc?.chapters.reduce((total, c) => total + textOf(c.content).replace(/\s/g, '').length, 0) || 0
   const noteCount = doc?.chapters.reduce((total, c) => total + (c.content.content?.filter(n => n.type === 'explanation').length || 0), 0) || 0
   const contextLabel = context.text ? `已选中 ${context.text.length} 字` : context.label ? `光标所在段落 · ${context.label.slice(0, 18)}…` : '在正文中选择一句话，或将光标放在一个段落'
@@ -714,7 +716,7 @@ export default function App() {
     {view === 'reader' && doc && chapter && <div className={`workspace ${focused ? 'focus-mode' : ''} ${showSidebar ? 'sidebar-open' : ''}`}>
     <aside className="study-sidebar">
       <WorkspaceBrand onHome={() => showLibrary()} />
-      <div className="document-meta"><span className="eyebrow">正在阅读</span><h1 title={doc.title}>{doc.title}</h1><p title={doc.subtitle}>{doc.subtitle}</p><button className="intent-pill" title={doc.intent} disabled={!!busy || preparing} onClick={() => setModal(doc.chapters.some(c => c.status === 'ready') ? 'regenerate' : 'intent')}><Leaf size={13} />{doc.chapters.some(c => c.status === 'ready') ? '调整并重新生成' : '我的学习目标'}<ChevronRight size={12} /></button><div className="reader-template-hint">长期表达偏好可在<button onClick={() => setModal('course-style')}>设置 → 模板风格</button>调整</div>{(doc.sourceContext || doc.preparation?.sourceContext) && <button className="intent-pill" onClick={() => setModal('references')}><FileText size={13} />参考资料 · {(doc.sourceContext || doc.preparation?.sourceContext)!.sources.length} 份<ChevronRight size={12} /></button>}<LearningControls document={doc} locked={!!busy || preparing} onKnowledge={() => setModal('knowledge')} onChange={id => { void switchNotebook(id).catch(e => setError(e.message)) }} /></div>
+      <div className="document-meta"><span className="eyebrow">正在阅读</span><h1 title={doc.title}>{doc.title}</h1><p title={doc.subtitle}>{doc.subtitle}</p><button className="intent-pill" title={doc.intent} disabled={!!busy || preparing} onClick={() => setModal(canRegenerate ? 'regenerate' : 'intent')}><Leaf size={13} />{canRegenerate ? '调整并重新生成' : '我的学习目标'}<ChevronRight size={12} /></button><div className="reader-template-hint">长期表达偏好可在<button onClick={() => setModal('course-style')}>设置 → 模板风格</button>调整</div>{(doc.sourceContext || doc.preparation?.sourceContext) && <button className="intent-pill" onClick={() => setModal('references')}><FileText size={13} />参考资料 · {(doc.sourceContext || doc.preparation?.sourceContext)!.sources.length} 份<ChevronRight size={12} /></button>}<LearningControls document={doc} locked={!!busy || preparing} onKnowledge={() => setModal('knowledge')} onChange={id => { void switchNotebook(id).catch(e => setError(e.message)) }} /></div>
       <ReadingRoute document={doc} currentIndex={chapterIndex} progress={chapterProgress} onNavigate={switchChapter} />
       <div className="sidebar-source"><SourceReader documents={documents} document={doc} position={sourcePosition} chapterTitle={chapter.title} onExpand={() => { setSourceOverride(null); setModal('source') }} /></div>
       <div className="sidebar-footer"><span className="small-seed">✧</span> 理解，在每一次追问中生长。</div>
@@ -737,7 +739,8 @@ export default function App() {
           <p>{preparing ? busy : doc.preparation?.interruption?.message || (doc.preparation ? '这份笔记尚未生成完。继续时只处理未完成章节。' : doc.readingPolicy === 'manual' ? '原件已保存。这份资料不会自动生成笔记；可在此开始，也可以只作为联合资料包的来源。' : '首次选择时生成全文，逐章保存。之后切换直接打开已保存的笔记。')}</p>
           <progress aria-label="全文整理进度" max={doc.chapters.length} value={doc.chapters.length - emptyCount} />
           {!preparing && <button className="secondary" disabled={!!busy} onClick={() => void generateRemaining()}>{config.configured ? doc.preparation ? '继续未完成部分' : '生成这份笔记' : '连接模型，生成笔记'}</button>}
-          {!preparing && doc.preparation && Object.keys(doc.preparation.errors).length > 0 && <details><summary>{Object.keys(doc.preparation.errors).length} 个问题待处理 · 查看原因</summary>{Object.entries(doc.preparation.errors).map(([id, message]) => <p key={id}><b>{id === '__plan' ? '整理规划' : id === '__template' ? '模板选择' : doc.chapters.find(c => c.id === id)?.title}</b> · {message}</p>)}</details>}
+          {!preparing && generationErrors.current.length > 0 && <details className="current-generation-errors"><summary>本轮 {generationErrors.current.length} 个问题 · 查看原因</summary>{generationErrors.current.map(([id, message]) => <p key={id}><b>{id === '__plan' ? '整理规划' : id === '__template' ? '模板选择' : doc.chapters.find(c => c.id === id)?.title}</b> · {message}</p>)}</details>}
+          {!preparing && generationErrors.previous.length > 0 && <details className="previous-generation-errors"><summary>此前错误记录 · {generationErrors.previous.length} 条</summary><p>这些是之前保存的记录，不表示本轮又出现了相同错误。章节完成后会移除对应记录。</p>{generationErrors.previous.map(([id, message]) => <p key={id}><b>{doc.chapters.find(c => c.id === id)?.title || id}</b> · {message}</p>)}</details>}
         </div>}
         {!!doc.sourceWarnings?.length && <details className="source-import-notice"><summary>资料读取说明</summary>{doc.sourceWarnings.map(message=><p key={message}>{message}</p>)}</details>}
         <ContinuousNotes document={doc} fontSize={fontSize} readOnly={readOnly || preparing || !!doc.storageIssue}

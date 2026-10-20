@@ -111,13 +111,13 @@ test('invalid model structure receives one bounded repair and unsafe page refere
   }, { action: 'generate' });
   assert.equal(JSON.parse(result).blocks[0].text, 'a+b');
   assert.equal(calls.length, 2);
-  assert.match(calls[1].messages.at(-1).content, /修复 JSON/);
+  assert.equal(JSON.parse(calls[1].messages.at(-1).content).execution, 'stage-recovery-v1');
   let attempts = 0;
-  await assert.rejects(runModel(modelConfig, buildMessages(request), undefined, async () => { attempts++; return response({ blocks: [] }); }, { action: 'generate' }), /编辑格式/);
-  assert.equal(attempts, 2);
+  await assert.rejects(runModel(modelConfig, buildMessages(request), undefined, async () => { attempts++; return response({ blocks: [] }); }, { action: 'generate' }), { code: 'WORKFLOW_REVIEW_FAILED' });
+  assert.equal(attempts, 5);
   let unsafeCalls = 0;
-  await assert.rejects(runModel(modelConfig, buildMessages(request), undefined, async () => { unsafeCalls++; return response({ blocks: [{ type: 'paragraph', text: 'x', sourcePages: [999] }] }); }, { action: 'generate' }), /本章以外/);
-  assert.equal(unsafeCalls, 2, 'One metadata-only repair is attempted before stopping');
+  await assert.rejects(runModel(modelConfig, buildMessages(request), undefined, async () => { unsafeCalls++; return response({ blocks: [{ type: 'paragraph', text: 'x', sourcePages: [999] }] }); }, { action: 'generate' }), { code: 'WORKFLOW_REVIEW_FAILED' });
+  assert.equal(unsafeCalls, 6, 'Metadata recovery remains bounded and never accepts invalid references');
 });
 
 test('long sources split without lost or duplicated characters, and every segment must validate before any chapter result is returned', async () => {

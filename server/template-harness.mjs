@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { runStage } from './execution.mjs';
 import { builtInTemplates, MAX_TEMPLATES, templateDefinitionSchema, templateSampleSchema, writingTemplateSnapshotSchema } from '../shared/writing-templates.mjs';
 import { parseMath, renderMath } from '../shared/math.mjs';
 import { noteBlocks, noteFormatPrompt, NOTE_FORMAT } from '../shared/note-format.mjs';
@@ -107,14 +108,6 @@ export function validateTemplateOperation(value, raw) {
   return { revision: request.revision, sample: valid, rendering: { format: NOTE_FORMAT, blocks } };
 }
 export async function runTemplateOperation(request, messages, complete, signal) {
-  let conversation = messages;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    signal?.throwIfAborted(); const raw = await complete(conversation); signal?.throwIfAborted();
-    try { validateTemplateOperation(request, raw); return raw; }
-    catch (error) {
-      if (attempt || error.code !== 'TEMPLATE_FORMAT') throw error;
-      const instruction = request.action === 'select-template' ? '核对原始用户任务、资料与目录，返回完整 templateId、reason、task、material、fit、adaptation。不得为了通过校验改变用户任务。' : '对照上次输出修复指定单元，保留其他有效修改；重新返回完整 rules 和 edits，不改变范围。数学占位符已含有原公式，不再为它添加任何定界符或代码标记。';
-      conversation = [...messages, { role: 'assistant', content: typeof raw === 'string' ? raw : JSON.stringify(raw) }, { role: 'user', content: `上次结果未通过校验：${error.message} ${instruction}` }];
-    }
-  }
+  return (await runStage({ stage: request.action, messages, complete, signal,
+    validate: raw => validateTemplateOperation(request, raw) })).raw;
 }
