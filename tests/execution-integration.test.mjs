@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, realpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
 import { createDemo } from '../src/demo.ts';
 import { buildMessages, runModel } from '../server/harness.mjs';
 import { createGenerationRecord, readGenerationRecords } from '../server/generation-records.mjs';
@@ -102,7 +102,10 @@ test('review recovery retains rejected drafts for audit without freezing their w
 });
 
 test('persisted recovery resumes accepted generation and review, with honest cached-review receipt and no secrets', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'candlelight-execution-'));
+  // Windows runners may expose TEMP through an 8.3 alias. Match the canonical
+  // workspace paths supplied by the application before testing record safety.
+  const temporaryRoot = await realpath(tmpdir());
+  const directory = await mkdtemp(join(temporaryRoot, 'candlelight-execution-'));
   try {
     const { request, state } = fixture(), candidate = { blocks: [paragraph('单位需要明确。'), paragraph('数值需要比较。')] };
     let generations = 0, reviews = 0, fail = true;
@@ -136,5 +139,8 @@ test('persisted recovery resumes accepted generation and review, with honest cac
     assert.equal(stored.resumedFrom, first.id); assert.ok(!JSON.stringify(stored).includes(config.apiKey));
     const fresh = await createGenerationRecord(directory, { ...request, instruction: 'Different goal' }, config.model, fetcher);
     assert.equal(fresh.checkpoint, undefined); await fresh.finish('cancelled');
-  } finally { await rm(directory, { recursive: true, force: true }); }
+  } finally {
+    assert.equal(dirname(resolve(directory)), temporaryRoot);
+    await rm(directory, { recursive: true, force: true });
+  }
 });

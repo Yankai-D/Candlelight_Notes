@@ -1,7 +1,7 @@
 {
   "schema": "candlelight-public-source-v1",
   "version": "0.1.26",
-  "sourceRevision": "d8f2e7400187b7c5546e281f82a6ad334ec6f205",
+  "sourceRevision": "0e20b5781caf6b54f99150c57a7ee10a4d4df8d4",
   "applicationRevision": "90d477cef75581e36d734e005627322df98a7171",
   "applicationFilesVerified": 145,
   "installer": {
@@ -1912,8 +1912,8 @@
     },
     {
       "path": "tests/execution-integration.test.mjs",
-      "bytes": 10997,
-      "sha256": "eaffa30355b8c6cff6c975dbbc7a9423244452a7086f8a228ddb31f3e1942faa"
+      "bytes": 11306,
+      "sha256": "947f721db650a32c3154f581d864b75df844267ce62a7fa665b18923db5b8798"
     },
     {
       "path": "tests/execution.test.mjs",
