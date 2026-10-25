@@ -1,6 +1,6 @@
 {
   "name": "reading-tree",
-  "version": "0.1.26",
+  "version": "0.1.32",
   "private": true,
   "author": {
     "name": "Yankai-D",
@@ -29,9 +29,13 @@
     "package:desktop": "node scripts/package-desktop.mjs",
     "test": "node scripts/test.mjs",
     "test:e2e": "node scripts/test-browser.mjs",
+    "test:installer:process": "node scripts/test-installer-process.mjs",
+    "test:installer:upgrade": "node scripts/test-installer-upgrade.mjs",
     "doctor": "node scripts/doctor.mjs",
     "check": "node scripts/check.mjs",
     "demo:harness": "node scripts/demo-harness.mjs",
+    "eval:recovery": "node scripts/evaluate-recovery.mjs",
+    "eval:recovery:agent": "node scripts/evaluate-recovery-agent.mjs",
     "eval:notes": "node scripts/evaluate-notes.mjs",
     "eval:templates": "node scripts/evaluate-template-routing.mjs",
     "eval:notes:pdf": "node scripts/export-note-review.mjs",

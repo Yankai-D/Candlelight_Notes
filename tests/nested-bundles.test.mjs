@@ -61,19 +61,26 @@ test('only outermost enabled bundle appears in the tree and includes recursive m
   assert.equal(treeEntries(documents, c)[1].members.length, 3);
 });
 
-test('plan validates complete provenance coverage, retries once, and preserves page identity through chunking', async () => {
+test('plan validates complete provenance coverage across analysis and repair, and preserves page identity through chunking', async () => {
   const note = createBundleNote(captureBundleContext(documents, collection(), 'maths'), '复习');
   const input = bundlePlanRequest(note);
   const valid = { sections: input.units.map(unit => ({ title: unit.title, purpose: 'Explain the mean and its interpretation.', unitIds: [unit.id] })) };
   assert.throws(() => validateBundlePlan(input, { sections: [valid.sections[0]] }), /遗漏/);
   assert.throws(() => validateBundlePlan(input, { sections: [{ ...valid.sections[0], unitIds: ['fake'] }] }), /来源/);
   assert.throws(() => validateBundlePlan(input, { sections: Array(4).fill(valid.sections[0]) }), /遗漏|重复/);
-  let calls = 0;
-  const result = await runModel({ apiKey: 'mock', model: 'mock', baseUrl: 'http://localhost' }, buildMessages(input), undefined, async () => {
+  let calls = 0, outlines = 0;
+  const result = await runModel({ apiKey: 'mock', model: 'mock', baseUrl: 'http://localhost' }, buildMessages(input), undefined, async (_url, options) => {
     calls++;
-    return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(calls === 1 ? { sections: [valid.sections[0]] } : valid) }, finish_reason: 'stop' }] }));
+    const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content), system = messages[0].content;
+    let result;
+    if (system.startsWith('bundle-intent-v1')) result = { kind: 'lecture', requirements: [{ id: 'r1', text: input.intent, evidenceQuote: input.intent }], organization: '按概念依赖整理。', limitations: [] };
+    else if (system.startsWith('bundle-materials-v1')) result = { units: context.units.map(unit => ({ id: unit.id, topics: ['均值'], prerequisites: [], role: '解释概念', limitations: [] })) };
+    else if (system.startsWith('bundle-plan-review-v1')) result = { candidateDigest: context.candidateDigest, verdict: 'accept', checks: ['goal','coverage','order','coherence'].map(dimension => ({ dimension, status: 'pass' })), findings: [], summary: '完整覆盖。' };
+    else { outlines++; result = { sections: (outlines === 1 ? [valid.sections[0]] : valid.sections).map(section => ({ ...section, requirementIds: ['r1'], dependsOn: [], handoff: '各节互补。' })) }; }
+    return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(result) }, finish_reason: 'stop' }] }));
   });
-  assert.equal(calls, 2); assert.deepEqual(validateResult(input, result), valid);
+  assert.equal(calls, 5); assert.equal(outlines, 2);
+  assert.deepEqual(validateResult(input, result).sections.map(({ requirementIds, dependsOn, handoff, ...section }) => section), valid.sections);
   const planned = applyBundlePlan(note, valid);
   assert.deepEqual(planned.chapters.flatMap(c => c.sourcePages), [1, 2]);
   assert.ok(splitSource(note.pages, 20).flat().every(page => page.sourceId && page.sourcePage === 1));

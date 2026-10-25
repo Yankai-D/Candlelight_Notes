@@ -16,6 +16,7 @@ try {
   report.environment=await doctor();
   const stages=[['types',['node_modules/typescript/bin/tsc','-b']],['build',['node_modules/vite/bin/vite.js','build']],
     ['tests',['scripts/test.mjs']],['browser',['scripts/test-browser.mjs']],['harness-demo',['scripts/demo-harness.mjs']],
+    ['recovery-faults',['scripts/evaluate-recovery.mjs','--out',join(directory,'recovery-faults')]],
     ['note-eval-demo',['scripts/evaluate-notes.mjs','--demo']],['note-calibration',['scripts/calibrate-notes.mjs']],
     ['claim-eval-demo',['scripts/evaluate-claims.mjs','--demo']],['claim-comparison-demo',['scripts/evaluate-claims.mjs','--compare','--demo']],
     ['claim-focused-demo',['scripts/evaluate-claims.mjs','--focused','--demo']],['claim-meaning-demo',['scripts/evaluate-claims.mjs','--meaning','--demo']],

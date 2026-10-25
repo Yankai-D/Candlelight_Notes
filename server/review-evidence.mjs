@@ -5,6 +5,8 @@ import { sourceEvidenceIndex } from './source-evidence-index.mjs';
 const normalize = text => text.replace(/\s+/g, '');
 export const evidenceFailure = (finding, reason) => Object.assign(new Error(reason), {
   code: 'REVIEW_EVIDENCE_INVALID', findingId: finding.id,
+  issues: [{ path: ['findings', finding.id, 'sourceEvidenceIds'], message: reason,
+    findingId: finding.id, sourceEvidenceIds: finding.sourceEvidenceIds || [], locateBy: 'id (not an array index)' }],
 });
 
 // The model selects exact, content-bound spans rather than retyping PDF glyphs.
@@ -18,7 +20,7 @@ export function resolveReviewEvidence(finding, evidence) {
   if (new Set(finding.sourceEvidenceIds).size !== finding.sourceEvidenceIds.length) throw evidenceFailure(finding, '审查引用了重复的证据片段。');
   const spans = finding.sourceEvidenceIds.map(id => {
     const span = evidence.byId.get(id);
-    if (!span) throw evidenceFailure(finding, '审查证据片段不属于当前原文范围。');
+    if (!span) throw evidenceFailure(finding, `审查证据片段不属于当前原文范围：${id}。请从当前 source[].excerpts 重新定位支持本问题的真实片段，不猜测 ID。`);
     return span;
   });
   const pages = [...new Set(spans.map(span => span.page))];

@@ -10,6 +10,7 @@ import {freshTemplateLibrary} from '../shared/writing-templates.mjs';
 import {templateCatalog} from '../shared/template-routing.mjs';
 import {createGenerationRecord} from '../server/generation-records.mjs';
 import {createDemo} from '../src/demo.ts';
+import {executionScope, executionSummary} from '../server/execution.mjs';
 const noWait=async()=>{},config={baseUrl:'https://example.invalid/v1',apiKey:'test',model:'test'};
 test('OneDrive-style EPERM replacement retries the same snapshot, keeping old bytes until commit',async()=>{
  const dir=await fs.mkdtemp(join(tmpdir(),'candlelight-atomic-')),path=join(dir,'tree.json');await fs.writeFile(path,'old');let writes=0,renames=0;
@@ -56,4 +57,19 @@ test('nested completions share a bounded retry budget and empty provider respons
   }
  });assert.equal(calls,5);
  calls=0;const raw=await runModel(config,[{role:'user',content:'JSON'}],undefined,async()=>new Response(JSON.stringify(++calls===1?{choices:[]}:{choices:[{finish_reason:'stop',message:{content:'{}'}}]})),{retryDelays:[0]});assert.equal(raw,'{}');assert.equal(calls,2);
+});
+
+test('real completion adapter reserves a repair call even when the diagnostic provider retries', async () => {
+ const request={action:'select-template',catalog:templateCatalog(freshTemplateLibrary()),document:{title:'Exercise',intent:'逐题解答',chapters:['Q1'],excerpts:[{page:1,text:'Solve x+1=2.'}]}};
+ let calls=0,planners=0,receipt;
+ const raw=await executionScope({binding:'planner-provider-boundary',limits:{calls:4}},async()=>{
+  const result=await runModel(config,buildMessages(request),undefined,async(_,options)=>{
+   calls++;const messages=JSON.parse(options.body).messages;
+   if(messages[0].content.startsWith('execution-recovery-plan')){planners++;return new Response('busy',{status:503})}
+   const content=calls===4?{templateId:'exercise',task:'solve',material:'exercises',fit:'direct',adaptation:'',reason:'逐题解答'}:{};
+   return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(content)}}]}));
+  },{retryDelays:[0]});
+  receipt=executionSummary();return result;
+ });
+ assert.equal(JSON.parse(raw).templateId,'exercise');assert.equal(calls,4);assert.equal(planners,1);assert.equal(receipt.calls,4);
 });

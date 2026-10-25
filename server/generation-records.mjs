@@ -5,6 +5,7 @@ import { atomicJSON, readJSON } from './workspace-state.mjs';
 import { requestSchema, buildMessages } from './harness.mjs';
 import { optionalRecord } from './recovery.mjs';
 import { executionBinding } from './execution.mjs';
+import { bundlePlanInputSchema } from '../shared/bundle-context.mjs';
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const documentId = value => { if (!/^[a-zA-Z0-9_-]{1,100}$/.test(value || '')) throw new Error('无效的资料编号。'); return value; };
 const recordId = value => { if (!/^[a-f0-9-]{36}$/.test(value || '')) throw new Error('无效的生成记录编号。'); return value; };
@@ -14,7 +15,7 @@ async function directory(system, id, create = false) {
   if (create) await mkdir(path, { recursive: true });
   const info = await lstat(path); if (!info.isDirectory() || info.isSymbolicLink() || await realpath(path) !== resolve(path)) throw new Error('生成记录路径被重定向。'); return path;
 }
-const summary = record => ({ id: record.id, documentId: record.documentId, action: record.request.action, notebookId: record.request.notebookId, chapterId: record.request.chapterId, chapterTitle: record.request.document.chapters.find(chapter => chapter.id === record.request.chapterId)?.title,
+const summary = record => ({ id: record.id, documentId: record.documentId, action: record.request.action, notebookId: record.request.notebookId, chapterId: record.request.chapterId, chapterTitle: record.request.action === 'bundle-plan' ? '整理规划' : record.request.document?.chapters.find(chapter => chapter.id === record.request.chapterId)?.title,
   startedAt: record.startedAt, finishedAt: record.finishedAt, status: record.status, model: record.model, revision: record.request.revision,
   calls: record.calls.length, repairs: record.events.filter(event => event.repair).length,
   inputTokens: record.events.filter(event => Number.isFinite(event.promptTokens)).reduce((total, event) => total + event.promptTokens, 0),
@@ -43,11 +44,11 @@ export async function generationRecordFiles(system, id) {
   return files;
 }
 export async function createGenerationRecord(system, input, model, fetcher = fetch) {
-  const request = requestSchema.parse(input), path = await directory(system, request.documentId, true);
+  const request = input.action === 'bundle-plan' ? bundlePlanInputSchema.parse(input) : requestSchema.parse(input), path = await directory(system, request.documentId, true);
   // Resume only the same task/input. A new regeneration workflow, changed goal,
   // source, revision or model starts fresh. Credentials never enter this key.
   const resumeDigest = hash({ messages: executionBinding(buildMessages(request)), revision: request.revision,
-    documentId: request.documentId, notebookId: request.notebookId, workflowId: request.workflow?.id, reviewPolicy: request.workflow?.reviewPolicy, model });
+    documentId: request.documentId, notebookId: request.notebookId, workflowId: request.workflow?.id, planningId: request.planningId, reviewPolicy: request.workflow?.reviewPolicy, model });
   let execution, resumedFrom;
   await optionalRecord(async () => {
     const entries = (await readdir(path)).filter(name => /^[a-f0-9-]{36}\.json$/.test(name));

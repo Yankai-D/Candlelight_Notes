@@ -71,9 +71,31 @@ test('multiple failing patch targets are partitioned against the same snapshot a
     }
     generations++; return response(candidate);
   }));
-  assert.equal(generations, 1); assert.equal(batches, 2); assert.equal(singles, 2);
+  assert.equal(generations, 1); assert.equal(batches, 1); assert.equal(singles, 2);
   assert.equal(result.blocks.length, 3); assert.equal(result.blocks[2].text, candidate.blocks[2].text);
   assert.match(result.blocks[0].text, /第 1 段/); assert.match(result.blocks[1].text, /第 2 段/);
+});
+
+test('a stuck single-finding audit returns to the parent strategy without editing correct prose', async () => {
+  const { request } = fixture(); let generations = 0, grouped = 0; const singles = new Map();
+  const candidate = { blocks: [paragraph('比较前统一单位。'), paragraph('单位决定数值的含义。')] };
+  const raw = await runModel(config, buildMessages(request), undefined, async (_, options) => {
+    const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content), system = messages[0].content;
+    if (system.startsWith('execution-recovery-plan')) return response(plan(context, 'partition'));
+    if (system.startsWith('note-self-review')) return response(findings(context));
+    if (system.startsWith('note-review-audit')) {
+      const batch = context.review.findings.length > 1;
+      if (batch) grouped++;
+      return response({ candidateDigest: context.binding, decisions: context.review.findings.map(f => {
+        if (!batch) singles.set(f.id, (singles.get(f.id) || 0) + 1);
+        return { findingId: f.id, verdict: batch ? (grouped >= 3 ? 'dismiss' : 'uncertain') : f.id === 'f1' ? 'dismiss' : 'uncertain',
+          sourceEvidenceIds: [], reason: '对照原任务和完整正文核查单位解释；不将无法确定的建议直接变成正文修改。' };
+      }) });
+    }
+    assert.ok(!system.startsWith('note-review-patch')); generations++; return response(candidate);
+  });
+  assert.deepEqual(JSON.parse(raw).blocks, candidate.blocks); assert.equal(generations, 1);
+  assert.equal(grouped, 3); assert.equal(singles.get('f1'), 1); assert.equal(singles.get('f2'), 3);
 });
 
 test('review recovery retains rejected drafts for audit without freezing their wording into an editing requirement', async () => {

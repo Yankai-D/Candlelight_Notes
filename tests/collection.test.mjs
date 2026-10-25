@@ -103,7 +103,7 @@ test('organization repairs one invalid response, refuses repeated invalid links,
   assert.deepEqual(JSON.parse(requests[1].messages.at(-1).content).failure.issues, [{ code: 'missing_documents', path: 'groups', refs: ['D3'] }]);
   let calls = 0;
   await assert.rejects(organizeTree(config, input, undefined, async () => { calls++; return response({ branches: [] }); }), { code: 'EXECUTION_BLOCKED' });
-  assert.equal(calls, 5);
+  assert.equal(calls, 5, 'Exhausted rewrites do not disable diagnostic inspection or patching');
   const controller = new AbortController();
   await assert.rejects(organizeTree(config, input, controller.signal, async () => { controller.abort(); return response(output); }), { name: 'AbortError' });
 });

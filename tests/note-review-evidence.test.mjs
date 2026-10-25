@@ -98,8 +98,14 @@ test('an altered PDF quote is repaired as evidence, then the real content error 
   const result = JSON.parse(await runModel(config, buildMessages(request), undefined, async (_, options) => {
     const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content), system = messages[0].content;
     const audit = confirmedAudit(messages); if (audit) return response(audit);
+    if (system.startsWith('execution-recovery-plan-v1')) {
+      phases.push('diagnose');
+      assert.equal(context.failure.code,'REVIEW_EVIDENCE_INVALID');
+      return response({failureId:context.failureId,strategy:'patch',targetDigest:context.toolState.targetDigest,
+        operations:[{op:'set',path:['findings',0,'sourceQuote'],expected:sourceText.replace('\uE020','='),value:sourceText}]});
+    }
     if (system.startsWith('note-self-review-v1')) {
-      phases.push('review'); const review = findingReview(context, ++reviews <= 2);
+      phases.push('review'); const review = findingReview(context, ++reviews <= 1);
       if (reviews === 1) {
         delete review.findings[0].sourceEvidenceIds;
         review.findings[0].sourcePages = [31];
@@ -114,8 +120,8 @@ test('an altered PDF quote is repaired as evidence, then the real content error 
     }
     phases.push('generate'); return response(raw);
   }, { action: 'generate', onWorkflowReport: value => { report = value; }, onCompletion: event => events.push(event) }));
-  assert.deepEqual(phases, ['generate', 'review', 'review', 'patch', 'review']);
-  assert.equal(report.repairsUsed, 1); assert.equal(report.execution.recoveryActions, 1); assert.equal(report.outcome, 'accepted'); assert.equal(report.reviewCalls, 4);
+  assert.deepEqual(phases, ['generate', 'review', 'diagnose', 'patch', 'review']);
+  assert.equal(report.repairsUsed, 1); assert.equal(report.execution.recoveryActions, 1); assert.equal(report.outcome, 'accepted'); assert.equal(report.reviewCalls, 3);
   assert.equal(result.blocks[0].text, corrected.text);
   assert.deepEqual(result.blocks[1], validateResult(request, raw).blocks[1]);
   assert.ok(events.some(event => event.stage === 'note-review' && event.status === 'recovering'));
@@ -133,7 +139,7 @@ test('unresolvable evidence records the exact validator reason and stops without
     }
     return response(raw);
   }, { action: 'generate', onCompletion: event => events.push(event) }), error => error.code === 'WORKFLOW_REVIEW_FAILED' && error.workflow.repairsUsed === 0);
-  assert.equal(calls, 6);
+  assert.equal(calls, 7);
   assert.ok(events.some(event => event.status === 'validation-failed' && event.code === 'REVIEW_EVIDENCE_INVALID'));
 });
 
@@ -144,6 +150,8 @@ test('generation and patch format recover without consuming the content correcti
   const result = JSON.parse(await runModel(config, buildMessages(request), undefined, async (_, options) => {
     calls++; const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content), system = messages[0].content;
     const audit = confirmedAudit(messages); if (audit) return response(audit);
+    if (system.startsWith('execution-recovery-plan-v1')) return response({failureId:context.failureId,strategy:'repair',
+      cause:'修订返回含一个完整 JSON 后的多余内容。',instruction:'按原修订目标返回一个合法 JSON 对象，保留正确的修订内容。'});
     if (system.startsWith('note-self-review-v1')) return response(findingReview(context, reviews++ === 0));
     if (system.startsWith('note-review-patch-v1')) {
       const patch = { candidateDigest: context.binding, changes: [{ findingId: 'f1', blocks: [corrected] }] };
@@ -154,7 +162,7 @@ test('generation and patch format recover without consuming the content correcti
     }
     return ++generates === 1 ? malformed('{"blocks":[}') : response(raw);
   }, { action: 'generate', onCompletion: event => events.push(event), onWorkflowReport: value => { report = value; } }));
-  assert.equal(calls, 7); assert.equal(generates, 2); assert.equal(patches, 2); assert.equal(reviews, 2);
+  assert.equal(calls, 8); assert.equal(generates, 2); assert.equal(patches, 2); assert.equal(reviews, 2);
   assert.equal(report.repairsUsed, 1); assert.equal(report.execution.recoveryActions, 2); assert.equal(report.outcome, 'accepted');
   assert.equal(result.blocks[0].text, corrected.text);
   assert.equal(result.blocks[1].text, raw.blocks[1].text);
@@ -171,7 +179,7 @@ test('a persistently fabricated patch cannot bypass reference checks through rec
       return response({ candidateDigest: context.binding, changes: [{ findingId: 'f1', blocks: [{ ...raw.blocks[0], sourcePages: [999] }] }] });
     return response(raw);
   }, { action: 'generate' }), error => error.code === 'WORKFLOW_REVIEW_FAILED' && error.workflow.repairsUsed === 1);
-  assert.equal(calls, 8);
+  assert.equal(calls, 9);
 });
 
 test('preparation distinguishes this attempt from inherited errors, including legacy records and ordinary failures', async () => {

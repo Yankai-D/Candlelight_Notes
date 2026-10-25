@@ -538,6 +538,7 @@ export default function App() {
       learning: settings, documentId: current.id, ...(settings.mode === 'adaptive' ? { knowledge: learnerProfile(background) } : {}),
       bundleContext: current.entryType === 'note' ? undefined : current.preparation?.sourceContext,
       composition: current.entryType === 'note',
+      taskPlan: current.composition?.plan,
       document: { title: current.title, intent: current.intent, chapters: current.chapters, pages: current.pages } }
   }
   async function requestEdit(override?: EditRequest['action'], prompt?: string, targetChapter?: string) {
@@ -615,7 +616,7 @@ export default function App() {
       if (current.entryType === 'note' && !current.composition?.planned) {
         // Persist the planning checkpoint first: failures cannot trigger an
         // automatic retry loop, and closing the app keeps the frozen sources.
-        current = { ...current, preparation: { startedAt: Date.now(), ...current.preparation, status: 'running', completedIds: [], errors: {}, currentErrorIds: [], settings: notebookSettings(current), knowledge: current.preparation?.knowledge || learnerProfile(knowledge), templateRouting: 'pending' } }
+        current = { ...current, preparation: { startedAt: Date.now(), ...current.preparation, planningId: current.preparation?.planningId || crypto.randomUUID(), status: 'running', completedIds: [], errors: {}, currentErrorIds: [], settings: notebookSettings(current), knowledge: current.preparation?.knowledge || learnerProfile(knowledge), templateRouting: 'pending' } }
         await persist(current)
         const before = current
         try {

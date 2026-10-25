@@ -1,13 +1,13 @@
 {
   "schema": "candlelight-public-source-v1",
-  "version": "0.1.26",
-  "sourceRevision": "0e20b5781caf6b54f99150c57a7ee10a4d4df8d4",
-  "applicationRevision": "90d477cef75581e36d734e005627322df98a7171",
-  "applicationFilesVerified": 145,
+  "version": "0.1.32",
+  "sourceRevision": "c29de1ddcab9ec47c582562dca32598d0804da45",
+  "applicationRevision": "c29de1ddcab9ec47c582562dca32598d0804da45",
+  "applicationFilesVerified": 153,
   "installer": {
-    "file": "Candlelight-Notes-0.1.26-Setup-x64.exe",
-    "bytes": 138118483,
-    "sha256": "e3e085fcc64334183013ec6e9df3f990bd4d03718737f5beb72fef6ecbcfc09f"
+    "file": "Candlelight-Notes-0.1.32-Setup-x64.exe",
+    "bytes": 138133402,
+    "sha256": "283155805b087a479e9379c98b3adcbe227b6c2be399c092dd3fa04d2e28a1d8"
   },
   "gitHistoryIncluded": false,
   "personalDataIncluded": false,
@@ -15,28 +15,154 @@
   "publicMaterialCount": 3,
   "transformations": [
     {
-      "path": "docs/releases/v0.1.11.json",
-      "operation": "remove-selfUse-local-runtime-record",
-      "originalSha256": "434e83fb95efd7008bf03ff67c114ddfafbc0ec13f657cd679b1e9709239659e"
-    },
-    {
-      "path": "docs/releases/v0.1.12.json",
-      "operation": "remove-selfUse-local-runtime-record",
-      "originalSha256": "fa0ef406d91853606987213deebfc8dcd7f2b0e6c69c0f0d7adac68c3e38ec49"
-    },
-    {
-      "path": "docs/releases/v0.1.13.json",
-      "operation": "remove-selfUse-local-runtime-record",
-      "originalSha256": "dbc5074e7ff9b632a0ae8654ef3abe9be6fb4a40bbd398345a929be92fb3fd19"
+      "path": "docs/operational-harness.md",
+      "operation": "checked-documentation-only-addendum"
     },
     {
       "path": "README.md",
-      "operation": "public-distribution-documentation",
-      "originalSha256": "4eb9376f7204b2cef5b25ca59de0b7acfa0e4b0665627d60486c183140337e60"
+      "operation": "bilingual-public-0.1.32-documentation"
+    },
+    {
+      "path": "packaging/source/README.public.md",
+      "operation": "bilingual-public-0.1.32-documentation"
     },
     {
       "path": "PUBLICATION.md",
-      "operation": "public-distribution-documentation"
+      "operation": "bilingual-public-0.1.32-documentation"
+    },
+    {
+      "path": "packaging/source/PUBLICATION.public.md",
+      "operation": "bilingual-public-0.1.32-documentation"
+    },
+    {
+      "path": "examples/course/descriptive-statistics/sources.json",
+      "originalSha256": "64b86925f37e2ff77ba6c3eeaf31a51c0eb4daf627485b4a2bd222a7a87f90d0",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "materials/descriptive-statistics/manifest.json",
+      "originalSha256": "3135cfc54f43a7ce50daabcf398c6bfbcb3dafaee436a5b65be251a567cae785",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "scripts/package-download.ps1",
+      "originalSha256": "f1563e7a190eab1f39071aa2d8627a05088ffb5c64af7c8677d5b8183bbf4f9a",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "server/harness.mjs",
+      "originalSha256": "69ed495fcb4e4619f655c3c736066ed12ca65bd19d8f4b6940c41612e0316494",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "server/note-review.mjs",
+      "originalSha256": "ee9bcc2b0af513a1f35e8bd9473a56cf46313a55ba99487937feca9076bda531",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "server/template-harness.mjs",
+      "originalSha256": "7dac8389b128094817139a47c6c3818ab5ff27b3ce4a0f534c4c691721bec10a",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "shared/adam-math.json",
+      "originalSha256": "bd2075271c5d5de83ef83dadc3c6ab113c8825b6bcc7ced6090a4f97a199b85e",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "shared/document.mjs",
+      "originalSha256": "a12050555f5d7ab1263fd19925bcf8767d87d8e678367547d924a29cab77e357",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "shared/math-references.mjs",
+      "originalSha256": "c57171dd2bec44b38a32b387059471323012432badabb7178ead59dd66473b13",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "shared/math-syntax.mjs",
+      "originalSha256": "f4d90c8d32d7fcc16580ffc22336d5ea4270dd4dab0d3c08812330e03a179217",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "shared/math.mjs",
+      "originalSha256": "d297f6ba056669a20c41b31f7f7ff4a0453bb48138ef73d0689d95a040c20d7d",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/App.tsx",
+      "originalSha256": "35127235f29525c2d247022a8a7f647ed294fe02e0c22d24d8aedbbe099b6cd0",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/components/ConflictModal.tsx",
+      "originalSha256": "55940821a1f6588147a269b35354a3e5cd64163239881af42292c39568e2841e",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/components/LibraryHome.tsx",
+      "originalSha256": "9ceb16c76ae20fb86f9843259d2c21c3a0bea8b22dc1418bc3b59f3bca987267",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/components/LibraryModal.tsx",
+      "originalSha256": "cfd627fe547dd4943cd41e30b7f637f678de6fcdf3323fdce2a30f42e230b01e",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/components/MaintenanceModal.tsx",
+      "originalSha256": "91425885fcbcbc96c13532447b5562faff78c79d2cbb8f495d001d5ab4d1ccb6",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/components/NoteEditor.tsx",
+      "originalSha256": "fe2da138f71164d746e3ee276c5e9feacf615756784c7958d0ffd18eb7586cba",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/demo.ts",
+      "originalSha256": "291ee02e52ddc5c53fe0cad349c4c650ce87c9e848bacf0ee9cac34bc6f35f6a",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/learning.css",
+      "originalSha256": "a3297b43269619462293ccc02e4bfdb7b1104b74c6e118aad1f2849886165dcd",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/pdf.ts",
+      "originalSha256": "46d75559a360107ef1d2f1fa3e5755bc264a24237ea0ca93b514fc06f5ddbc26",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/styles.css",
+      "originalSha256": "df9adf173d10cbc715a2331792f318b1797068d8e01e6100523d4c7c7eaead96",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "src/welcome.css",
+      "originalSha256": "b4a5fbd4c0c55adf712ac6f2abc51bea1908a13599a73e3723975a606e87cfe5",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "tests/api.test.mjs",
+      "originalSha256": "272bb923fd843f0fc3ca65c696013933194b80d87047638cec33448ded4f7154",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "tests/browser/ideal-tree.mjs",
+      "originalSha256": "1e396df18cf04fff5dcb17c5edf3c3c4c523f57efbec351993347dd8b158ea20",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "tests/editor.test.mjs",
+      "originalSha256": "fed478dc438a08ce98f214fd7fccb077adff221a75cdf44b0d2b9389f7867a0d",
+      "operation": "Git LF text line-ending normalization"
+    },
+    {
+      "path": "tests/writing-templates.test.mjs",
+      "originalSha256": "567b14520be08fb97cfb9f516511954cfa38c984aaae0611d8ea400c77b64c93",
+      "operation": "Git LF text line-ending normalization"
     }
   ],
   "files": [
@@ -112,8 +238,8 @@
     },
     {
       "path": "docs/engineering.md",
-      "bytes": 16448,
-      "sha256": "ca4291c61df1840a436fa9de885445446f6db7502d928633def74834354db16d"
+      "bytes": 18064,
+      "sha256": "92287fdab8d33b2b814d72684a14e8b439b2d18f91d47bb4ae31583ac02e4ab1"
     },
     {
       "path": "docs/import-formats.md",
@@ -127,8 +253,8 @@
     },
     {
       "path": "docs/operational-harness.md",
-      "bytes": 15842,
-      "sha256": "3677afcc69c0d16c7969eecd270841fa6023c12b9ee5f754148da7d4cbf6b9b8"
+      "bytes": 39821,
+      "sha256": "a0eaed3d3ac20d7a05d4ea45c1b1d3acf00501286d9fe702d020ddf5e828bccc"
     },
     {
       "path": "docs/product-quality.md",
@@ -226,9 +352,54 @@
       "sha256": "d8b2a9af5a1e83aac69b7f7a2312625aa9390f7c5331590ed868e1a22f68f323"
     },
     {
+      "path": "docs/releases/v0.1.27.json",
+      "bytes": 5614,
+      "sha256": "90212c156132bcb1d059cdb052ef19d983fd860a3875d13310bbf8b0ebe5e596"
+    },
+    {
+      "path": "docs/releases/v0.1.28.json",
+      "bytes": 7026,
+      "sha256": "859f9b8eb5495096270bf718ddcdf0b05136c0a2b9781747a249f5a66496b014"
+    },
+    {
+      "path": "docs/releases/v0.1.29.json",
+      "bytes": 9256,
+      "sha256": "b3b311202f13431aeeda1fd06386465cf8d75cdfc2e1c168edaec9bac4239c6d"
+    },
+    {
       "path": "docs/releases/v0.1.3-desktop.json",
       "bytes": 3695,
       "sha256": "ba81e92fbc179b1a77d8edbb9288d4deae9662851765041772fa4d54e1e7efbd"
+    },
+    {
+      "path": "docs/releases/v0.1.30-installer-r2.md",
+      "bytes": 4195,
+      "sha256": "da0adaba782850639a9d5d3161978f2ccc98dd152ec9b60bc5c6e899d13e0255"
+    },
+    {
+      "path": "docs/releases/v0.1.30-installer-r3.md",
+      "bytes": 4221,
+      "sha256": "2bb78e771ffce4d8c00b8fe82aa3df31ed902909afbc219250fd127ee7c9fbb1"
+    },
+    {
+      "path": "docs/releases/v0.1.30.md",
+      "bytes": 3484,
+      "sha256": "bd77c8de417d5221e170b971001168d3534d8c303c68488bacbaeb39296b3bdf"
+    },
+    {
+      "path": "docs/releases/v0.1.31.md",
+      "bytes": 5828,
+      "sha256": "3e5ed0821be4541c0fa32dec7502860314069830b504276e73dbab016104adb6"
+    },
+    {
+      "path": "docs/releases/v0.1.32.json",
+      "bytes": 4537,
+      "sha256": "c3b46d320a660defa07471f95c21243dd9c21f4a13ebcbe851c35378da3e92cb"
+    },
+    {
+      "path": "docs/releases/v0.1.32.md",
+      "bytes": 2026,
+      "sha256": "26f125d561957cc40ded8414a39a1e106786ed0a50e0f680a2f71da218c00fba"
     },
     {
       "path": "docs/releases/v0.1.4-desktop.json",
@@ -572,8 +743,8 @@
     },
     {
       "path": "evals/notes/calibration/suite.mjs",
-      "bytes": 13071,
-      "sha256": "62ff12722e97b2290fb76ed4b75a11627472d86689770ceb053e5a69ce8d4170"
+      "bytes": 13086,
+      "sha256": "95378b23a17d1c79450851322629df9f774d030a3762e6ded2eab953766a4ce5"
     },
     {
       "path": "evals/notes/cases.mjs",
@@ -716,6 +887,26 @@
       "sha256": "71064dcb71dea7da1fd4b04327f5b995690cc92939e22d2559868be70e419f96"
     },
     {
+      "path": "evals/recovery/agent-cases.mjs",
+      "bytes": 5082,
+      "sha256": "cbbbe9b0ce729623afcdc51bbcf1d28e1305435357da7293a780890884623919"
+    },
+    {
+      "path": "evals/recovery/agent-evidence.md",
+      "bytes": 6160,
+      "sha256": "dedf71776fe5ed33eaffc39dd90962a9569e6333414f82d715994209d74dc473"
+    },
+    {
+      "path": "evals/recovery/README.md",
+      "bytes": 7244,
+      "sha256": "e7da8f9868541ac3d04b6ca68df4fd8abbce8cfb4eaa0a9eb7f19f3e7dd57a7d"
+    },
+    {
+      "path": "evals/recovery/scenarios.mjs",
+      "bytes": 16053,
+      "sha256": "96473f8480820122e4aa01c0250e5ecefe378f83fc1c5289cdb742e788363fd0"
+    },
+    {
       "path": "evals/template-routing-cases.mjs",
       "bytes": 3297,
       "sha256": "299e180e10c0ec01d8cbb5e55438beebfbc4c48ad75f2f12efbb4cc557fc1c86"
@@ -793,17 +984,22 @@
     {
       "path": "package-lock.json",
       "bytes": 230191,
-      "sha256": "0d1feb184f646cc49108c654daa1687a9341f84c701bf8de7a5b5a86233f5ab7"
+      "sha256": "a9ffc4d18fcee65134743df7ed9ba0887dbdfc53c4dbb9e64723c8111daf30e9"
     },
     {
       "path": "package.json",
-      "bytes": 2439,
-      "sha256": "92be2d1d926a80ecd6ce2dce60dd0430cb8034ce8fb769f1fae1dc9c969ae8c9"
+      "bytes": 2715,
+      "sha256": "f32cd0149969fd60bc079ec2bfb60a3e8b6135f56f9809fb04f7afc1381ab921"
     },
     {
       "path": "packaging/desktop/使用说明.txt",
       "bytes": 6388,
       "sha256": "9e4345487fd8f4d3a4c4dac1d04b9e349874f25714f6f2f11d179a0845de36a8"
+    },
+    {
+      "path": "packaging/desktop/app-running.nsh",
+      "bytes": 3790,
+      "sha256": "759c9a52c112787c492ed63b85bbf1ca911b9a710578555ce998259d1ca1a15d"
     },
     {
       "path": "packaging/desktop/config.mjs",
@@ -816,9 +1012,19 @@
       "sha256": "86b61f6a131e6ee4c6c5d6031a65d9fb8447703f4f74a7f5021ad0708018af7f"
     },
     {
+      "path": "packaging/desktop/installer-handoff.nsh",
+      "bytes": 2815,
+      "sha256": "91a08f5988982ca82d348128843c81909c9207d73b1183106d366548c6c9255d"
+    },
+    {
+      "path": "packaging/desktop/installer-upgrade.nsh",
+      "bytes": 4189,
+      "sha256": "d4b338583d7a4379473b8d5c8ee6d46e0bb65988aebf975add6e242d06ffad17"
+    },
+    {
       "path": "packaging/desktop/uninstall.nsh",
-      "bytes": 1169,
-      "sha256": "16ee0118ebc6bf0622c990bd4432f1d6b9efc8831ccbd1ca0cc4106ca96cee29"
+      "bytes": 1412,
+      "sha256": "27b6f0b6f0b6ece5317ab745d9ec3b1d8c5d0b47c11c24b84825a221a98d7a5b"
     },
     {
       "path": "packaging/source/policy.mjs",
@@ -827,13 +1033,13 @@
     },
     {
       "path": "packaging/source/PUBLICATION.public.md",
-      "bytes": 6987,
-      "sha256": "58996cceef200aab5aa6d25d737a896f65f3c81b81d0195bd013bd0be86c08ae"
+      "bytes": 4730,
+      "sha256": "0243c24084bfcbce686e31f692b38c9da48c8f01d46663e4e32ab0f5c8c332cd"
     },
     {
       "path": "packaging/source/README.public.md",
-      "bytes": 16757,
-      "sha256": "61539ea34bdfce47fc7a3aff23a52a565f4185a46904e6ef1e97f1d70f46f247"
+      "bytes": 17310,
+      "sha256": "2d0d1048ec623fd61b812555519b68fba8d2fd57822f6f363dfc77c7089d4bf4"
     },
     {
       "path": "packaging/windows/使用说明.txt",
@@ -892,13 +1098,13 @@
     },
     {
       "path": "PUBLICATION.md",
-      "bytes": 6987,
-      "sha256": "58996cceef200aab5aa6d25d737a896f65f3c81b81d0195bd013bd0be86c08ae"
+      "bytes": 4730,
+      "sha256": "0243c24084bfcbce686e31f692b38c9da48c8f01d46663e4e32ab0f5c8c332cd"
     },
     {
       "path": "README.md",
-      "bytes": 16757,
-      "sha256": "61539ea34bdfce47fc7a3aff23a52a565f4185a46904e6ef1e97f1d70f46f247"
+      "bytes": 17310,
+      "sha256": "2d0d1048ec623fd61b812555519b68fba8d2fd57822f6f363dfc77c7089d4bf4"
     },
     {
       "path": "scripts/audit-desktop.mjs",
@@ -917,8 +1123,8 @@
     },
     {
       "path": "scripts/check.mjs",
-      "bytes": 3452,
-      "sha256": "1d274eab0f98df75ca9d2cdcfe42ab57aa700883ceb46e7a05e44eac8dc37f29"
+      "bytes": 3553,
+      "sha256": "1bbe1ea679cfa179c1e7de3a7893a344aef7a9177667af17c9b9a3af5078c257"
     },
     {
       "path": "scripts/create-demo.mjs",
@@ -954,6 +1160,16 @@
       "path": "scripts/evaluate-notes.mjs",
       "bytes": 5712,
       "sha256": "e7de473f4c7d9edf2ed3cb71337603efb873a90e25d126ad40760a8e9763342b"
+    },
+    {
+      "path": "scripts/evaluate-recovery-agent.mjs",
+      "bytes": 4743,
+      "sha256": "57add0ae8205ab54ae362fc1910e0562af844ac69ba021e4751bb7f604bf330a"
+    },
+    {
+      "path": "scripts/evaluate-recovery.mjs",
+      "bytes": 1661,
+      "sha256": "4460c34d222240b0601eb81b2d830d3e8f81b027e1aa83bf51ac07bc30e1e7d4"
     },
     {
       "path": "scripts/evaluate-template-routing.mjs",
@@ -1066,6 +1282,16 @@
       "sha256": "2e5bf9694c222ce2c6df82e0762e29d9b2728b79028a0cd89bc749ad1cd21674"
     },
     {
+      "path": "scripts/test-installer-process.mjs",
+      "bytes": 9357,
+      "sha256": "22b918b30a36ad6e2d5b2639cf0c529f9c9ed340ee32bbffd360e10d52ec9b0c"
+    },
+    {
+      "path": "scripts/test-installer-upgrade.mjs",
+      "bytes": 10367,
+      "sha256": "7b400085a3a9c35cd7af7865dd45f28663074fee244caa5a2e45a80ca40d7f8c"
+    },
+    {
       "path": "scripts/test-portable.mjs",
       "bytes": 10606,
       "sha256": "5b88221f6fdc552ea65ef47111b9d7d071c73bcb83532999494840d39a93300d"
@@ -1086,9 +1312,24 @@
       "sha256": "813ce29e278642ca408729fa61c1b848841fbbf7c7f5364ae333473faff629ea"
     },
     {
+      "path": "server/bundle-plan-review.mjs",
+      "bytes": 13472,
+      "sha256": "42749e5aca3471a6528cb4e94cbff80d35e88833d1831b75c87fe91a44d8f710"
+    },
+    {
+      "path": "server/bundle-planner.mjs",
+      "bytes": 14452,
+      "sha256": "f828a847194eda2e372e71089346a1be7e7e959beca531924c76609bdc1e9e76"
+    },
+    {
       "path": "server/calculation-review.mjs",
       "bytes": 10593,
       "sha256": "5db7991cd9bc5f49ede3d3a39386feefe9bd2b0a8bea9c26f3b00e14867ebdf3"
+    },
+    {
+      "path": "server/chapter-analysis.mjs",
+      "bytes": 4702,
+      "sha256": "aefe32f7e7bdda2ad3521808d90a218b165972ab244da26436a8ee1aea33415f"
     },
     {
       "path": "server/claim-arithmetic.mjs",
@@ -1122,8 +1363,8 @@
     },
     {
       "path": "server/execution.mjs",
-      "bytes": 12266,
-      "sha256": "a6d041ad1883a8543e396b8eafed426d9b49bdf1c39ed6cc39f47f842fad7607"
+      "bytes": 25030,
+      "sha256": "5fb9fa09e6e6a8c8fab5016dad10b42508d963745cec2687403eada78010c112"
     },
     {
       "path": "server/file-discovery.mjs",
@@ -1137,13 +1378,13 @@
     },
     {
       "path": "server/generation-records.mjs",
-      "bytes": 7949,
-      "sha256": "80525357398931bb54011a5b5d2cd4745e206a148485f6b322eef4b99101deec"
+      "bytes": 8181,
+      "sha256": "5a16a6c0bcbc7bb77c9e572c090f03586b3fb3a60bb359b5ee3ce36f487912ac"
     },
     {
       "path": "server/harness.mjs",
-      "bytes": 45805,
-      "sha256": "8bf39afe315180bddb25419780445c15d7f248899e8deb9154060575fc961e04"
+      "bytes": 48577,
+      "sha256": "25c54ae88c9ad4f9e0132927c297a413fe293cb5039f36d4aea2fde8c6a5e3b3"
     },
     {
       "path": "server/ideal-tree/adapter.mjs",
@@ -1177,13 +1418,13 @@
     },
     {
       "path": "server/ideal-tree/runner.mjs",
-      "bytes": 30734,
-      "sha256": "f141b72eeaaaac17a79d6469b231e58e76e39d269174f36f734fd68c1ee09f8c"
+      "bytes": 30685,
+      "sha256": "f956b43316528c00388fb4fd7c7dac29d9da04b9ea7cfc501db8179c016a0145"
     },
     {
       "path": "server/index.mjs",
-      "bytes": 16882,
-      "sha256": "f13de77cb47c9c1b609cf2ae0ea59f2d202a56fef1205b3c6b5cc913fe62e417"
+      "bytes": 16939,
+      "sha256": "cb4a3c331849bf841df272d32614028e75b9254e2f7550052ddb9d690c673752"
     },
     {
       "path": "server/library.mjs",
@@ -1207,18 +1448,18 @@
     },
     {
       "path": "server/note-review-audit.mjs",
-      "bytes": 5868,
-      "sha256": "2e31f1c0e9a3df817e3a7652389ced6010f58ce3d2bf2895e369a54dc19d9fad"
+      "bytes": 9025,
+      "sha256": "5da55a106335854d8fefc408c127037b88eac755e1c4316caa1dade6666f09fc"
     },
     {
       "path": "server/note-review.mjs",
-      "bytes": 21213,
-      "sha256": "b45afb8292e58594815995cf9edac51f9d2d4599d8dba518656417a8c621eab6"
+      "bytes": 23686,
+      "sha256": "5c633ef11569674f7465021bda6fc479d3648bacd01b01d80be3dd2d76ec75be"
     },
     {
       "path": "server/note-revision.mjs",
-      "bytes": 4877,
-      "sha256": "8cc84a0ee49d256ee7b29d71f062cb0b5f4181e0e5ad618727f2b34c24c5d9b5"
+      "bytes": 8007,
+      "sha256": "f897ac2f0d51196b42624ac3a59eef3fe4e66d1afb8c6fe62e000010b3d28497"
     },
     {
       "path": "server/organization-harness.mjs",
@@ -1231,6 +1472,11 @@
       "sha256": "8f2451cd4c996bd4a4ce665a38401ef3e91c16991ab4c026cea7d3fe21f23624"
     },
     {
+      "path": "server/output-contract.mjs",
+      "bytes": 597,
+      "sha256": "762a5d3eb7312eec0386a2336ffb5f2368a6207de880d3115dbba88393642619"
+    },
+    {
       "path": "server/pdf-export.mjs",
       "bytes": 3641,
       "sha256": "eb916f884db375f3b8d9a4227b1bdf769492703f1efae59f26e1719e3ef25340"
@@ -1241,14 +1487,19 @@
       "sha256": "a822dea4bb73fc5a2f6acfc72b4b1a55ad061645e7f25dbb52063eb380426b50"
     },
     {
+      "path": "server/recovery-workbench.mjs",
+      "bytes": 17286,
+      "sha256": "c657e82a0656a11c438bfc2b1a31fbd4724361df8ebceb1557288a02f8e5e258"
+    },
+    {
       "path": "server/recovery.mjs",
       "bytes": 2977,
       "sha256": "37feed3d408eadde784cff5ee950fe38a18ff826798dab07d657c6fcbbaae34f"
     },
     {
       "path": "server/review-evidence.mjs",
-      "bytes": 3632,
-      "sha256": "bc752598acc769c5c3b674b9f6fe2add0f3d4e4d7d69ff10e2acb0b9caadf64d"
+      "bytes": 3933,
+      "sha256": "b425d56a538f05ed1ebc36463bac539f623342e733eb99362d01902e566b6dd0"
     },
     {
       "path": "server/reviewed-source.mjs",
@@ -1321,9 +1572,14 @@
       "sha256": "b83476ee95737105dd772b8024318cfa20990e54b80d158a7ee954fa3818d307"
     },
     {
+      "path": "shared/bundle-blueprint.mjs",
+      "bytes": 4826,
+      "sha256": "61213467dd3c5482619cca89845ba5c4d0767585a2733a8f17c6599493b0a515"
+    },
+    {
       "path": "shared/bundle-context.mjs",
-      "bytes": 10687,
-      "sha256": "0bff4c4f9be1fd582d3186928ba21890495f6086112fc2b89f5bcc55b5d0f4d1"
+      "bytes": 12556,
+      "sha256": "5cd8e53d682772aa5d5c7a0fdde6856e9a5150b987ccc1cc54869515350f8678"
     },
     {
       "path": "shared/collection.mjs",
@@ -1337,8 +1593,8 @@
     },
     {
       "path": "shared/course-policy.mjs",
-      "bytes": 5935,
-      "sha256": "f6bcd4aef80c3664ea110224a6bb8b7f5f5ccdedbae8cd9f697358af2dca41c8"
+      "bytes": 6072,
+      "sha256": "421faceb0ce02fd301e5049072aa53f092fc5931a0ff38f8031ef651ac34f483"
     },
     {
       "path": "shared/course-style-store.mjs",
@@ -1387,8 +1643,8 @@
     },
     {
       "path": "shared/learning-goal.mjs",
-      "bytes": 7200,
-      "sha256": "28ccd3e1f2f12757a70ce71187fc258a112acf5381f99c0b6fad36388284409c"
+      "bytes": 7810,
+      "sha256": "43fe77b814447b11a7ddf31f4960cad4529111958a6e3526cad8aab643930516"
     },
     {
       "path": "shared/learning-intent.mjs",
@@ -1402,8 +1658,13 @@
     },
     {
       "path": "shared/learning.mjs",
-      "bytes": 3814,
-      "sha256": "266d4e0cc0d86bd7ddb3c8047cb30ee038b19f7e9149e2194d74957b73b9add3"
+      "bytes": 3858,
+      "sha256": "aefc73e8042b259e3379a1b1bfbdb6caeac9369c74201e5755711640db07ef38"
+    },
+    {
+      "path": "shared/lecture-synthesis.mjs",
+      "bytes": 9180,
+      "sha256": "077de14cad18c5572daeed5b00581c7df27f8080b108612e96dc532350b56fe1"
     },
     {
       "path": "shared/library.mjs",
@@ -1497,18 +1758,18 @@
     },
     {
       "path": "shared/workflow-review.mjs",
-      "bytes": 4408,
-      "sha256": "23eed79dd1aa4e0876e69a67323b93ad630e3ee1a90a87139fe363243cf3e18c"
+      "bytes": 4327,
+      "sha256": "322b7301f3fedd9a6c85c8344f6ced10bf10395b1b208e1c6c384b921a39c5cb"
     },
     {
       "path": "shared/writing-templates.mjs",
-      "bytes": 15388,
-      "sha256": "d510fe01b1cf415bc614e866009f1da9e241386dbf87cca510bf05642f1e58e3"
+      "bytes": 16790,
+      "sha256": "3ee3588751fdd219700a88c467e7ffd454dd1b2b4bbe01905ac0047844cd9fa7"
     },
     {
       "path": "src/App.tsx",
-      "bytes": 78039,
-      "sha256": "3c5f3d5f63eb3aaa4b644e16f2c1ae6fbcc9a7e8e2c4742eed401dde3a6650a5"
+      "bytes": 78150,
+      "sha256": "42ae8351d088eaaf9ee777d4396b49465bd81cd470cadf82d4a0ae9ff4db33fd"
     },
     {
       "path": "src/collection.css",
@@ -1767,8 +2028,8 @@
     },
     {
       "path": "src/types.ts",
-      "bytes": 6858,
-      "sha256": "8e160d215e0fe738f1915a3db257e62b0200194ebd4d592faefb65c3a756acfe"
+      "bytes": 7027,
+      "sha256": "a34ff9de0499d07bb18f133dfd315707863284aada3be37de40afb61b78e8395"
     },
     {
       "path": "src/vite-env.d.ts",
@@ -1846,6 +2107,16 @@
       "sha256": "d408e8f676e870094f0566324630fa65edaf33c59688d3a56c7250667b243d0e"
     },
     {
+      "path": "tests/bundle-plan-review.test.mjs",
+      "bytes": 10917,
+      "sha256": "391383eccf04045f1c13c565d4d15eca2331a04cd7d0de7bfed368d5fdbe8024"
+    },
+    {
+      "path": "tests/bundle-planner.test.mjs",
+      "bytes": 21902,
+      "sha256": "30905583be6c89f7454db730379b971d13cb8e4e24f92b2542fbf2351c6f70b5"
+    },
+    {
       "path": "tests/bundles.test.mjs",
       "bytes": 6692,
       "sha256": "ebbdaaf6c2bbd3cedd88c0efb586a593a781c2c097497964d72d3a9d57c0dff4"
@@ -1872,8 +2143,8 @@
     },
     {
       "path": "tests/collection.test.mjs",
-      "bytes": 13245,
-      "sha256": "ef0d041161f6f96dc6eb349bb0279ddb9e8af3bcc814ef1f962bac054fad9acf"
+      "bytes": 13316,
+      "sha256": "3458baf1b625775c1596079a1cb89f5843e07b5273f71eec50c88933319bc3d5"
     },
     {
       "path": "tests/condition-review.test.mjs",
@@ -1902,8 +2173,8 @@
     },
     {
       "path": "tests/editor.test.mjs",
-      "bytes": 40493,
-      "sha256": "9eb0c9489baabd37c3f23d3079356238fa85756f311887d1884bd3f04b176bea"
+      "bytes": 40318,
+      "sha256": "24b84957bf149f43d288ce2eb67ad05e34828ac70a9086878d1d865125723b52"
     },
     {
       "path": "tests/editorial.test.mjs",
@@ -1911,14 +2182,19 @@
       "sha256": "12be9246b82b7e9e508730fb39eaeab95a60e8b5ebe8bac3d32740aafeba8a1c"
     },
     {
+      "path": "tests/execution-faults.test.mjs",
+      "bytes": 401,
+      "sha256": "1ca54e66ec358e42833521dda11e6ffc313521c9dbf1eff90565e832bc623b03"
+    },
+    {
       "path": "tests/execution-integration.test.mjs",
-      "bytes": 11306,
-      "sha256": "947f721db650a32c3154f581d864b75df844267ce62a7fa665b18923db5b8798"
+      "bytes": 12952,
+      "sha256": "a9c3e89707fd100283646bc0c1e0b98f802bfe32b9b57a84fe3f9ab0bfb1f23f"
     },
     {
       "path": "tests/execution.test.mjs",
-      "bytes": 7338,
-      "sha256": "930bd07b76d832036f64f11c4cb179858245806151b610c4d7869193eef25c0e"
+      "bytes": 13051,
+      "sha256": "e17966ce2022d42b49e39d03eb40519c480ee7931c005d104217ddf2cbc3026d"
     },
     {
       "path": "tests/exercise-template.test.mjs",
@@ -1927,8 +2203,8 @@
     },
     {
       "path": "tests/field-review.test.mjs",
-      "bytes": 13054,
-      "sha256": "e096d214bf162065ba148a2521f753322cc138ff517b3263f1328365d28e255d"
+      "bytes": 13285,
+      "sha256": "e5100cfd84209ff2766597e3d992ca1b1ba868e66f2cfc9be056e7f40b56aa5d"
     },
     {
       "path": "tests/file-library.test.mjs",
@@ -1944,6 +2220,21 @@
       "path": "tests/fixtures/inline-math.mjs",
       "bytes": 2351,
       "sha256": "68be32b5031f7f08f9b3062ca41dd1628e6fe66c0b895a1e21b15097e3cbb834"
+    },
+    {
+      "path": "tests/fixtures/lecture-prompt-migration-v030.json",
+      "bytes": 24489,
+      "sha256": "1c01e50ec640f641a2f743115c7329ced96951856c15e41297d90389404025b1"
+    },
+    {
+      "path": "tests/fixtures/lecture-template-v2.json",
+      "bytes": 3689,
+      "sha256": "c9285f282104d03aa3bf7dfaa5ed5f859b781bfd65f0bf8ead2079f82182bebd"
+    },
+    {
+      "path": "tests/fixtures/note-output-contract-v1.json",
+      "bytes": 4714,
+      "sha256": "00d606e1e55c6f0c47769f0ecdc1c420d07412151574fc3ea3e1ef378f9fdc5a"
     },
     {
       "path": "tests/formula-layout.test.mjs",
@@ -1986,6 +2277,11 @@
       "sha256": "c20b3f3a1a34e84f045ef7bbf6fdb9531df5a3e28a3e7951ae3cc852036bee46"
     },
     {
+      "path": "tests/lecture-synthesis.test.mjs",
+      "bytes": 9347,
+      "sha256": "df3cf55fc026787d98d5d517d97cc6ef9e74b9d1b69bf7d4bab69b4e7fdbaaa0"
+    },
+    {
       "path": "tests/library.test.mjs",
       "bytes": 2834,
       "sha256": "d4e65b7e31e9edf0a6a7ce976b83f553c4792bb648cc3e4f47c7a67cfcaab994"
@@ -2012,8 +2308,8 @@
     },
     {
       "path": "tests/nested-bundles.test.mjs",
-      "bytes": 9088,
-      "sha256": "42011ea5c2e00247a013720d801254ee15ea8bde89e70a9acf362d2ebce7b41d"
+      "bytes": 10231,
+      "sha256": "7f558254500e3f6e25a420f6df96ffe63d143264707fb16c4e8b4f2b45f973c9"
     },
     {
       "path": "tests/note-calibration.test.mjs",
@@ -2042,23 +2338,23 @@
     },
     {
       "path": "tests/note-review-audit.test.mjs",
-      "bytes": 11446,
-      "sha256": "7c0d915d984ad2eed910447de9fff3050a2ecf808c3cbed7e7db2cd4cd3e5673"
+      "bytes": 16152,
+      "sha256": "63f0c9f2b170c7fbbb697e9a8e7f9730174a2f9d713c896dc0035c2fb96982cf"
     },
     {
       "path": "tests/note-review-evidence.test.mjs",
-      "bytes": 14798,
-      "sha256": "42a4a0963ddaafb6587bbacb1e69dc1f93c3e0abd0215abc0a326ee021e0f8ef"
+      "bytes": 15494,
+      "sha256": "f2d01ddc25480d6303b437c474f843f492022c2772b9e771c83421e96bf9db91"
     },
     {
       "path": "tests/note-revision.test.mjs",
-      "bytes": 13014,
-      "sha256": "f34e643d37d2c16cd3a08c6d237ad6c06352634d5d6d45c1fe74cc6d7eb95cc5"
+      "bytes": 18329,
+      "sha256": "bf7f6651e824e51e1159a49ef73ae7eaaab6c3f40d2d5a0ee3b37d75885b64a2"
     },
     {
       "path": "tests/note-workflow-review.test.mjs",
-      "bytes": 18167,
-      "sha256": "33449d7f8f68106537181d7a68a1bfccc6a207e9ce7eb9b10ce839d332203244"
+      "bytes": 18352,
+      "sha256": "e751fc9ab5c8aa2c1169c75ce1197697a271a8cff1735531e894b2317c57a793"
     },
     {
       "path": "tests/notebooks.test.mjs",
@@ -2086,9 +2382,14 @@
       "sha256": "2c4e33dceedc451ba6ccc4ccca8ebfe99be236a612efb9cb0660aad01fbe5b5e"
     },
     {
+      "path": "tests/recovery-workbench.test.mjs",
+      "bytes": 19672,
+      "sha256": "1dd5670a59d9b2a1af48f18bda24df386201e96c8fc18cc201f9ddb0dc3ffa91"
+    },
+    {
       "path": "tests/recovery.test.mjs",
-      "bytes": 5825,
-      "sha256": "50944eb0d45d3c421f6a3ea079ba37c905b1698029f978a90d142cd864e31a23"
+      "bytes": 7072,
+      "sha256": "2013a7916416a415d1cfc458613718754f046a54ea9fa158cb318c1c6fb132e2"
     },
     {
       "path": "tests/review-boundaries.test.mjs",
@@ -2147,8 +2448,8 @@
     },
     {
       "path": "tests/support/prompt-history.mjs",
-      "bytes": 5637,
-      "sha256": "fdb9402981b8bc7308f6e05811e56e8d46ecf6c526d8cff7336d0066e8b32ee1"
+      "bytes": 7113,
+      "sha256": "7ba4c05ecf8264e00906e19e4d8d4513d6e2cf05a72dec2f077c54aab5df9fff"
     },
     {
       "path": "tests/support/review-audit.mjs",
@@ -2159,6 +2460,11 @@
       "path": "tests/support/server.mjs",
       "bytes": 3034,
       "sha256": "f731a30280af50e631bcfecf93b88a9bdbe2b7f34bcf11250bf113752505a76f"
+    },
+    {
+      "path": "tests/support/source-loader.mjs",
+      "bytes": 2153,
+      "sha256": "33755afb3310900b8548fede3b3f5971ca0625b501c1077a5266b703c66580c9"
     },
     {
       "path": "tests/support/workflow-receipt.mjs",
@@ -2187,8 +2493,8 @@
     },
     {
       "path": "tests/writing-templates.test.mjs",
-      "bytes": 16325,
-      "sha256": "07c83302d1831c744808fe09f672fc0fb60ebed8d7668f73f0b17c97b00bd65b"
+      "bytes": 16363,
+      "sha256": "049a220ce87ca9bbd9ee9f1e72ae6d770e2ef88167fa4fdc33e5e9a19a4dbddb"
     },
     {
       "path": "tsconfig.json",
@@ -2200,5 +2506,6 @@
       "bytes": 161,
       "sha256": "8221ce2e64e3606e2ba8783116bb310aca02fef7d918cd51fdd0e82f7ff71f18"
     }
-  ]
+  ],
+  "applicationSourceComparison": "Exact tested bytes, allowing only Git LF line-ending normalization"
 }

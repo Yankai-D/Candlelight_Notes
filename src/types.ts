@@ -13,8 +13,9 @@ export type LearnerProfile = { background: string; foundations: string[] }
 export type Knowledge = LearnerProfile & { materials: ReadMaterial[] }
 export type CourseSample = { baseVersion: string; paragraphs: { id: string; text: string }[]; rules: string[]; updatedAt: number; editCount: number; lastRequest: string }
 export type CourseStylePreferences = { version: 1; revision: number; selected: 'default' | 'personal'; personal: CourseSample; undo?: { selected: 'default' | 'personal'; personal: CourseSample } }
-export type WorkflowReview = { version: 1; id: string; attempt: number; chapterId: string; totalChapters: number; completedChapters: number; reviewPolicy: 'always' | 'on-anomaly'; repairAllowance: number; priorDiagnoses: string[] }
-export type Preparation = { startedAt: number; completedAt?: number; status: 'running' | 'paused' | 'partial' | 'complete'; completedIds: string[]; errors: Record<string, string>; currentErrorIds?: string[]; settings: LearningSettings; knowledge?: LearnerProfile; templateRouting?: 'pending' | 'selected'; sourceContext?: BundleContext; interruption?: { code: string; chapterId: string; message: string }; workflow?: import('zod').infer<typeof import('../shared/workflow-review.mjs').workflowStateSchema> }
+export type WorkflowReview = { version: 1; id: string; attempt: number; chapterId: string; totalChapters: number; completedChapters: number; reviewPolicy: 'always' | 'on-anomaly'; priorDiagnoses: string[] }
+export type BundleBlueprint = import('zod').infer<typeof import('../shared/bundle-blueprint.mjs').bundleBlueprintSchema>
+export type Preparation = { startedAt: number; completedAt?: number; status: 'running' | 'paused' | 'partial' | 'complete'; completedIds: string[]; errors: Record<string, string>; currentErrorIds?: string[]; settings: LearningSettings; knowledge?: LearnerProfile; templateRouting?: 'pending' | 'selected'; planningId?: string; sourceContext?: BundleContext; interruption?: { code: string; chapterId: string; message: string }; workflow?: import('zod').infer<typeof import('../shared/workflow-review.mjs').workflowStateSchema> }
 export type StudyStatus = 'imported' | 'studying' | 'completed'
 export type TreeConcept = { label: string; description: string; chapterIds: string[] }
 export type StudyTreeData = { version: 'study-tree-v1'; generatedAt: number; fingerprint: string; model: string;
@@ -32,7 +33,7 @@ export type LearningDocument = {
   storageIssue?: { missing: string[]; notePath: string; sourcePath?: string | null; error?: string };
   id: string; title: string; subtitle: string; filename: string; kind: 'pdf' | 'text'; sourceWarnings?: string[];
   sourceState?: 'deferred' | 'ready'; readingPolicy?: 'manual' | 'automatic';
-  entryType?: 'note'; sourceContext?: BundleContext; composition?: { version: 1; planned: boolean };
+  entryType?: 'note'; sourceContext?: BundleContext; composition?: { version: 1; planned: boolean; plan?: BundleBlueprint };
   intent: string; createdAt: number; updatedAt: number; revision: number;
   intentSource?: 'default' | 'user';
   pages: SourcePage[]; chapters: Chapter[]; currentChapter: string; currentPage: number;
@@ -62,6 +63,6 @@ export type EditRequest = {
   instruction: string; revision: number; chapterId: string; anchorId?: string; selection?: string;
   learning?: LearningSettings; knowledge?: LearnerProfile; documentId?: string;
   notebookId?: string;
-  bundleContext?: BundleContext; composition?: boolean; workflow?: WorkflowReview;
+  bundleContext?: BundleContext; composition?: boolean; taskPlan?: BundleBlueprint; workflow?: WorkflowReview;
   document: Pick<LearningDocument, 'title' | 'intent' | 'chapters' | 'pages'>;
 }

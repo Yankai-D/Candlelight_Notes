@@ -102,7 +102,7 @@ test('invalid reviewer output changes strategy within a finite budget and cannot
     assert.equal(error.code, 'WORKFLOW_REVIEW_FAILED'); assert.equal(error.workflow.outcome, 'blocked'); assert.equal(error.workflow.repairsUsed, 0);
     assert.equal(error.workflow.execution.recoveryActions, 2); return true;
   });
-  assert.equal(calls, 6);
+  assert.equal(calls, 7, 'Review recovery starts with diagnosis; invalid controller output still cannot approve prose or loop indefinitely');
 });
 
 test('unresolved recheck stops without returning a chapter or starting another repair loop', async () => {
@@ -114,17 +114,19 @@ test('unresolved recheck stops without returning a chapter or starting another r
     if (messages[0].content.includes('note-review-patch-v1')) return response({ candidateDigest: context.binding, changes: [{ findingId: 'f1', blocks: [solved] }] });
     return response(original);
   }, { action: 'generate' }), { code: 'WORKFLOW_REVIEW_FAILED' });
-  assert.equal(calls, 9);
+  assert.equal(calls, 10);
 });
 
-test('shared remaining budget can prohibit repairs but still allow normal reviewed generation', async () => {
-  const input = fixture(); input.workflow.repairAllowance = 0; let calls = 0;
-  await assert.rejects(runModel(config, buildMessages(input), undefined, async (_, options) => {
-    calls++; const messages = JSON.parse(options.body).messages;
+test('an exhausted legacy allowance cannot stop a valid correction', async () => {
+  const input = fixture(); input.workflow.repairAllowance = 0; let calls = 0, reviews=0;
+  const raw=await runModel(config, buildMessages(input), undefined, async (_, options) => {
+    calls++; const messages = JSON.parse(options.body).messages, context=JSON.parse(messages[1].content);
     const audit = confirmedAudit(messages); if (audit) return response(audit);
-    return response(calls === 1 ? original : review(JSON.parse(messages[1].content), true));
-  }, { action: 'generate' }), error => error.code === 'WORKFLOW_REVIEW_FAILED' && error.workflow.repairsUsed === 0);
-  assert.equal(calls, 3, 'Advice can be audited, but no patch is sent after the task budget is exhausted');
+    if(messages[0].content.startsWith('note-self-review-v1'))return response(review(context,reviews++===0));
+    if(messages[0].content.startsWith('note-review-patch-v1'))return response({candidateDigest:context.binding,edits:[{findingId:'f1',...solved}]});
+    return response(original);
+  }, { action: 'generate' });
+  assert.equal(calls,5);assert.equal(JSON.parse(raw).blocks[0].text,solved.text);
 });
 
 test('local citation recovery is followed by review, and prior diagnosis is carried into subsequent chapter prompts', async () => {
@@ -156,7 +158,7 @@ test('task state carries diagnosis and consumed budget across chapters; accepted
       return { result: original, workflow: { version: 1, id: workflow.id, attempt: workflow.attempt, chapterId, outcome: 'accepted', totalSegments: 1, reviewedSegments: 1, reviewCalls: 2, repairsUsed: chapterId === 'c1' ? 1 : 0, diagnoses: chapterId === 'c1' ? ['GOAL_MISMATCH'] : [] } };
     } });
   assert.equal(latest.preparation.status, 'complete'); assert.equal(latest.preparation.workflow.history.length, 4);
-  assert.equal(requests[1].repairAllowance, requests[0].repairAllowance - 1); assert.equal(requests[1].completedChapters, 1); assert.deepEqual(requests[1].priorDiagnoses, ['GOAL_MISMATCH']);
+  assert.ok(requests.every(r=>r.repairAllowance===undefined)); assert.equal(requests[1].completedChapters, 1); assert.deepEqual(requests[1].priorDiagnoses, ['GOAL_MISMATCH']);
   const state = startWorkflow(undefined, 4), request = workflowRequest(state, 'c1', 4, 0), previous = latest.preparation.workflow.history[0];
   assert.throws(() => acceptWorkflowReport(state, request, previous, 'accepted'), { code: 'WORKFLOW_REVIEW_FAILED' });
   const receipt = { ...previous, id: state.id, attempt: state.attempt };
@@ -198,7 +200,7 @@ test('HTTP and preparation preserve task memory and budget across a reviewed cor
       } });
     assert.equal(latest.preparation.status, 'complete'); assert.equal(upstreamCalls, 6);
     assert.equal(latest.preparation.workflow.history.length, 2); assert.equal(latest.preparation.workflow.repairsUsed, 1);
-    assert.equal(inputs[1].completedChapters, 1); assert.equal(inputs[1].repairAllowance, inputs[0].repairAllowance - 1);
+    assert.equal(inputs[1].completedChapters, 1); assert.equal(inputs[1].repairAllowance, undefined);
     assert.ok(inputs[1].priorDiagnoses.includes('GOAL_MISMATCH'));
     assert.ok(latest.preparation.workflow.history[0].reviewTriggers.includes('MISSING_SOLUTION'));
     assert.equal(latest.preparation.workflow.history[1].reviewCalls, 0);

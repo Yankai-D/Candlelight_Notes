@@ -80,7 +80,7 @@ export const regressionDefinitions=[
   {id:'missing-anchor',label:'失效纸条锚点在调用前拒绝',expected:'rejected'},
   {id:'paper-insertion',label:'合法纸条保留原文及后续段落',expected:'inserted'},
   {id:'repair-success',label:'格式修复一次后接受完整正文',expected:'accepted',calls:2},
-  {id:'repair-exhausted',label:'连续格式失败换策略后有界结束',expected:'rejected',calls:5},
+  {id:'repair-exhausted',label:'连续格式失败保留局部恢复机会后有界结束',expected:'rejected',calls:5},
   {id:'truncation-exhausted',label:'连续截断不进入格式修复循环',expected:'rejected',calls:2},
 ];
 

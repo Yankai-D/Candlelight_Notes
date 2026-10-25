@@ -21,6 +21,14 @@
 
 交付记录分别说明“自用服务已更新”和“公开候选包已更新”，注明各自对应的代码修订与验证结果。已有安装包不会因自用服务的源码修复而自动更新。
 
+开发修改只落在项目源码；构建副本与发行产物放在项目的 `output/` 中。不得直接修改已安装应用的源码、`app.asar` 或安装目录文件来交付修复。安装版由用户运行新安装包更新。桌面验收使用项目内打包产物和隔离的临时用户数据，不替换日常使用的安装版或其资料。
+
+Development changes belong in the project source; build snapshots and release artifacts live under the project's `output/` directory. Do not deliver fixes by editing an installed application's source, `app.asar`, or installation files. The user updates the installed application by running the new installer. Desktop verification uses project build artifacts and isolated temporary user data, without replacing the everyday installation or its materials.
+
+涉及 Windows 安装器或卸载钩子的修改，除钩子测试外，必须运行 `npm run test:installer:upgrade -- <win-unpacked>`。该测试以独立注册身份执行完整安装、覆盖升级、旧卸载器失败、真实文件锁回滚、再次安装及卸载，不能用编译通过或解包校验替代。报告的钩子哈希必须与最终构建输入一致。
+
+Changes to the Windows installer or uninstall hooks require `npm run test:installer:upgrade -- <win-unpacked>` in addition to hook tests. It performs full install, upgrade, legacy-uninstaller failure, real file-lock rollback, reinstall, and uninstall transactions under an isolated registration identity. Compilation and payload extraction do not replace these checks. Reported hook hashes must match the final build inputs.
+
 ## v0.1.0 的收束边界
 
 本版收束为可运行、可演示、可复现验收的本地单用户工程基线。结束条件是：现有功能与生产 harness 固定；最终代码完成一次 `npm run check`；验收结果、范围和已知限制绑定到本地版本标签。后续质量评测不自动延长本版。封版记录见 [v0.1.0 验收与决策](releases/v0.1.0.json)。

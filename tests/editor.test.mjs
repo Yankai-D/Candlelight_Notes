@@ -1,16 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
+import { createSourceLoader } from './support/source-loader.mjs';
 import 'fake-indexeddb/auto';
 import { createDemo } from '../src/demo.ts';
 import { paragraph } from '../shared/document.mjs';
 import { compileResult } from '../shared/note-format.mjs';
 import { mockWorkflowReceipt } from './support/workflow-receipt.mjs';
 
-// Cold Vite SSR loading of the full editor can exceed a minute on Windows.
-// Keep the per-interaction waitUntil deadline unchanged; this budget includes
-// module initialization plus all notebook/edit/history integration assertions.
-test('rich editor and independent notebooks preserve edits, selection, history and persistence', { timeout: 120000 }, async () => {
+// Keep all interaction assertions without depending on a development server.
+// Production bundling and CSS are verified by the separate browser checks.
+test('rich editor and independent notebooks preserve edits, selection, history and persistence', { timeout: 120000 }, async t => {
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: 'http://localhost:5173', pretendToBeVisual: true });
   for (const name of ['window', 'document', 'navigator', 'Node', 'Element', 'HTMLElement', 'HTMLInputElement', 'DocumentFragment', 'MutationObserver', 'DOMParser', 'getComputedStyle']) Object.defineProperty(globalThis, name, { value: dom.window[name], configurable: true, writable: true });
   globalThis.requestAnimationFrame = dom.window.requestAnimationFrame.bind(dom.window);
@@ -45,12 +45,12 @@ test('rich editor and independent notebooks preserve edits, selection, history a
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   dom.window.Range.prototype.getClientRects = () => [];
   dom.window.Range.prototype.getBoundingClientRect = () => ({ left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0 });
-  const { createServer } = await import('vite');
-  const vite = await createServer({ server: { middlewareMode: true, hmr: false, ws: false }, appType: 'custom', logLevel: 'error' });
+  const source = createSourceLoader();
+  t.after(() => source.close());
   const React = await import('react');
   const { createRoot } = await import('react-dom/client');
-  const { NoteEditor } = await vite.ssrLoadModule('/src/components/NoteEditor.tsx');
-  const storage = await vite.ssrLoadModule('/src/storage.ts');
+  const { NoteEditor } = await source.load('/src/components/NoteEditor.tsx');
+  const storage = await source.load('/src/storage.ts');
   const document = createDemo();
   const content = document.chapters[1].content;
   let editor, changed, selectedContext;
@@ -121,7 +121,7 @@ test('rich editor and independent notebooks preserve edits, selection, history a
     };
     try {
       await storage.saveLearner({ background: '用于测试的学习者，已学过基本概率。', foundations: ['基础概率'], materials: [] }, 'complete');
-      const { default: App } = await vite.ssrLoadModule('/src/App.tsx');
+      const { default: App } = await source.load('/src/App.tsx');
       await React.act(async () => { root.render(React.createElement(App)); });
       await waitUntil(() => dom.window.document.querySelector('.paper-library'));
       assert.equal(aiRequest, undefined, 'The default library must not start note generation');
@@ -453,7 +453,7 @@ test('rich editor and independent notebooks preserve edits, selection, history a
 
       // A small navigation area must keep the active chapter visible and let
       // the reader reach any other chapter without scrolling the sidebar.
-      const { ReadingRoute } = await vite.ssrLoadModule('/src/components/ReadingRoute.tsx');
+      const { ReadingRoute } = await source.load('/src/components/ReadingRoute.tsx');
       let resizeRoute, navigated;
       globalThis.ResizeObserver = class { constructor(callback) { resizeRoute = callback; } observe() {} disconnect() {} };
       const longDocument = { ...document, chapters: Array.from({ length: 100 }, (_, i) => ({ ...document.chapters[0], id: `chapter-${i}`, title: `Chapter ${i + 1}` })) };
@@ -478,6 +478,6 @@ test('rich editor and independent notebooks preserve edits, selection, history a
   } finally {
     globalThis.fetch = originalFetch;
     await React.act(async () => root.unmount());
-    await vite.close(); dom.window.close();
+    dom.window.close();
   }
 });

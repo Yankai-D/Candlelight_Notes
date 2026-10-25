@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { z } from 'zod';
 import { executionScope, executionSummary, runStage, reserveExecutionCall } from '../server/execution.mjs';
+import { candidateDigest } from '../server/recovery-workbench.mjs';
 
 const messages = [{ role: 'system', content: 'Return a parcel with capacity 17 and exactly three distinct labels.' },
   { role: 'user', content: JSON.stringify({ labels: ['amber', 'indigo', 'jade'] }) }];
@@ -90,8 +91,41 @@ test('invalid controller output has bounded fallback; unchanged failures cannot 
     stage: 'parcel', messages, validate,
     complete: async () => { await reserveExecutionCall(); calls++; return '{}'; },
   })), e => e.code === 'EXECUTION_BLOCKED' && e.reason === 'no-progress');
-  assert.equal(calls, 5);
+  assert.equal(calls, 5, 'Give the controller a chance to inspect or patch after both full rewrites failed; invalid plans still stop');
   assert.deepEqual(events.filter(e => e.status === 'recovering').map(e => e.strategy), ['repair', 'reframe']);
+});
+
+test('failed repair and reframe do not disable inspection and a subsequent local fix', async () => {
+  let calls = 0, planners = 0; const events = [];
+  const result = await executionScope({ binding: 'late-patch', event: event => events.push(event) }, () => runStage({
+    stage: 'parcel', messages, validate,
+    complete: async (conversation, action) => {
+      await reserveExecutionCall(); calls++;
+      if (action !== 'recovery-plan') return JSON.stringify({ ...valid, labels: ['amber','amber','jade'] });
+      const context = JSON.parse(conversation[1].content); planners++;
+      if (planners === 1) return plan(conversation, 'reframe');
+      if (planners === 2) return JSON.stringify({ failureId: context.failureId, strategy: 'inspect', cause: 'Both whole-result corrections retained a duplicate.', instruction: 'Read the actual candidate labels.', target: 'candidate', path: ['labels'], start: 0, length: 1000 });
+      assert.match(conversation.at(-1).content, /amber/);
+      return JSON.stringify({ failureId: context.failureId, strategy: 'patch', cause: 'The second field repeats amber while the source permits indigo.', instruction: 'Change only label 2 to indigo.',
+        candidateDigest: candidateDigest(context.rejectedResult), operations: [{ op: 'set', path: ['labels',1], expected: 'amber', value: 'indigo' }] });
+    },
+  }));
+  assert.deepEqual(result.value, valid);
+  assert.deepEqual(events.filter(event => event.status === 'recovering').map(event => event.strategy), ['repair','reframe','patch']);
+  assert.equal(calls, 6);
+});
+
+test('a concrete new hypothesis may reuse a method; identical instructions receive feedback instead of another rewrite', async () => {
+  let generated = 0, planners = 0;
+  const result = await runStage({ stage: 'parcel', messages, validate, complete: async (conversation, action) => {
+    await reserveExecutionCall();
+    if (action !== 'recovery-plan') return JSON.stringify(++generated === 4 ? valid : { ...valid, labels: ['amber','amber','jade'] });
+    const context = JSON.parse(conversation[1].content); planners++;
+    if (planners <= 2) return plan(conversation, 'reframe');
+    assert.match(conversation.at(-1).content, /RECOVERY_NO_NEW_ACTION/);
+    return JSON.stringify({ failureId: context.failureId, strategy: 'reframe', cause: 'The previous reconstruction retained the repeated middle label.', instruction: 'Bind each output label by its position to the three distinct labels in the user context; do not copy the candidate label array.' });
+  } });
+  assert.deepEqual(result.value, valid); assert.equal(generated, 4); assert.equal(planners, 3);
 });
 
 test('actual call budget covers diagnostic calls and children without changing acceptance rules', async () => {
@@ -101,6 +135,58 @@ test('actual call budget covers diagnostic calls and children without changing a
     complete: async (conversation, action) => { await reserveExecutionCall(); calls++; return action === 'recovery-plan' ? plan(conversation) : '{}'; },
   })), e => e.code === 'EXECUTION_BLOCKED' && e.reason === 'budget');
   assert.equal(calls, 3);
+});
+
+test('production recovery completes more than 32 calls and 8 actions in one stage, and resumes with its statistics', async () => {
+  const expected = Array.from({ length: 40 }, (_, index) => `source-${index}`);
+  const input = [{ role: 'system', content: 'Copy every source value; preserve the title.' },
+    { role: 'user', content: JSON.stringify({ source: expected }) }];
+  let state, calls = 0;
+  const execute = () => executionScope({ binding: 'forty-independent-defects', state, save: saved => { state = saved; } }, () => runStage({
+    stage: 'recover-all-fields', messages: input, initialRaw: JSON.stringify({ title: 'Keep this', values: expected.map(() => null) }),
+    preferLocalRecovery: true,
+    validate: raw => {
+      const value = JSON.parse(raw);
+      const index = value.values.findIndex((item, i) => item !== expected[i]);
+      assert.equal(value.title, 'Keep this');
+      if (index !== -1) throw Object.assign(new Error('The indexed value disagrees with the source.'), {
+        code: 'STAGE_CONTRACT', issues: [{ path: ['values', index], expected: expected[index] }],
+      });
+      return value;
+    },
+    complete: async (conversation, action) => {
+      await reserveExecutionCall(); calls++;
+      assert.equal(action, 'recovery-plan');
+      const context = JSON.parse(conversation[1].content);
+      assert.equal(context.budget.calls, null, 'No implicit quota is advertised to the controller');
+      const { path, expected: value } = context.failure.issues[0];
+      return JSON.stringify({ failureId: context.failureId, strategy: 'patch', cause: 'Correct the next source mismatch.',
+        candidateDigest: candidateDigest(context.rejectedResult), operations: [{ op: 'set', path, expected: null, value }] });
+    },
+  }));
+  const result = await execute();
+  assert.deepEqual(result.value.values, expected);
+  assert.equal(calls, 40); assert.equal(state.calls, 40); assert.equal(state.recoveries, 40);
+  const resumed = await execute();
+  assert.equal(resumed.reused, true); assert.equal(calls, 40);
+  assert.equal(state.calls, 40); assert.equal(state.recoveries, 40);
+});
+
+test('a user can cancel after the former call limit and no further requests run', async () => {
+  const controller = new AbortController(); let calls = 0, state;
+  await assert.rejects(executionScope({ binding: 'cancel-long-task', save: saved => { state = saved; } }, async () => {
+    for (let index = 0; index < 50; index++) {
+      await runStage({ stage: `part-${index}`, messages, validate, signal: controller.signal,
+        complete: async () => {
+          await reserveExecutionCall(controller.signal); calls++;
+          if (calls === 40) controller.abort();
+          return JSON.stringify(valid);
+        },
+      });
+    }
+  }), { name: 'AbortError' });
+  assert.equal(calls, 40);
+  assert.equal(Object.values(state.stages).filter(stage => stage.status === 'accepted').length, 39);
 });
 
 test('cancellation and provider failures never become content-repair prompts', async () => {

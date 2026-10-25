@@ -51,7 +51,7 @@ const summary = job => ({ id: job.id, title: job.contract?.title || job.input.go
 const compactBranch = branch => branch ? { branchId: branch.branchId, nodes: branch.nodes.map(n => ({ id: n.id, title: n.title, kind: n.kind, parentId: n.parentId, dependsOn: n.dependsOn, requirementIds: n.requirementIds, outcome: n.outcome, body: n.body.slice(0,1400), deliverable: n.deliverable, feedback: n.feedback })) } : undefined;
 
 export class IdealRunner {
-  constructor({ directory = '.local-ideal-trees', store, tools, maxCalls = 160, retryDelay = 1500 } = {}) {
+  constructor({ directory = '.local-ideal-trees', store, tools, maxCalls = Infinity, retryDelay = 1500 } = {}) {
     this.store = store || new IdealStore(directory); this.tools = tools || createResearchTools(this.store.directory);
     this.active = new Map(); this.paperActive = new Map(); this.control = Promise.resolve(); this.maxCalls = maxCalls; this.retryDelay = retryDelay;
   }
@@ -210,7 +210,7 @@ export class IdealRunner {
   async run(job, complete, signal) {
     return executionScope({ binding: { id: job.id, model: job.model, provider: complete.identity, input: job.input, promptVersion: job.promptVersion },
       state: job.execution, save: async state => { job.execution = state; await this.persist(job); },
-      limits: { calls: this.maxCalls, recoveries: Math.min(32, this.maxCalls), perStage: 3 },
+      limits: { calls: this.maxCalls },
     }, () => this.runStages(job, complete, signal));
   }
   async runStages(job, complete, signal) {

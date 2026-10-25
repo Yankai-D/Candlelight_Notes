@@ -3,9 +3,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createDemo } from '../src/demo.ts';
 import { buildMessages, runModel, validateResult, continuationContext } from '../server/harness.mjs';
-import { candidateDigest, parseRevision, applyRevision } from '../server/note-revision.mjs';
+import { candidateDigest, parseRevision, applyRevision, revisionContract } from '../server/note-revision.mjs';
 import { buildNoteReview } from '../server/note-review.mjs';
-import { startWorkflow, workflowRequest } from '../shared/workflow-review.mjs';
+import { startWorkflow, workflowRequest, acceptWorkflowReport } from '../shared/workflow-review.mjs';
+import {runStage,reserveExecutionCall} from '../server/execution.mjs';
 
 const paragraph = (text, sourcePages = [8]) => ({ type: 'paragraph', text, sourcePages, sourceQuote: '' });
 const original = { blocks: [paragraph('这里的阈值写错了，需要修正。'), paragraph('这个公式还缺少适用条件。'), paragraph('已经正确的背景段落，保持原样。')] };
@@ -35,14 +36,15 @@ test('flat revisions preserve ordered blocks per finding and reject ambiguous mi
   assert.throws(() => parseRevision({ candidateDigest: 'a'.repeat(64), edits: [{ ...edits[0], execute: 'unexpected' }] }));
 });
 
-test('shared repair capacity scales with chapters, keeps a hard ceiling and is not multiplied per segment', () => {
-  assert.equal(startWorkflow(undefined, 1).repairLimit, 3);
-  assert.equal(startWorkflow(undefined, 8).repairLimit, 8);
-  assert.equal(startWorkflow(undefined, 300).repairLimit, 12);
+test('legacy shared limits migrate out of state and requests without losing history or identity', () => {
+  assert.equal(startWorkflow(undefined, 1).repairLimit, undefined);
+  assert.equal(startWorkflow(undefined, 8).repairLimit, undefined);
+  assert.equal(startWorkflow(undefined, 300).repairLimit, undefined);
   const old = { ...startWorkflow(undefined, 8), repairLimit: 3, repairsUsed: 3 };
   const resumed = startWorkflow(old, 8);
   assert.equal(resumed.id, old.id); assert.equal(resumed.attempt, old.attempt + 1);
-  assert.equal(resumed.repairLimit, 8); assert.equal(resumed.repairsUsed, 0);
+  assert.equal(resumed.repairLimit, undefined); assert.equal(resumed.repairsUsed, 0);
+  assert.equal(workflowRequest(old,'c1',8,0).repairAllowance,undefined);
 });
 
 test('composition review receives chapter responsibilities rather than treating shared source as repeated whole-course coverage', () => {
@@ -70,6 +72,7 @@ test('a copied neighboring paragraph is removed from the patch only, with exact 
     block => { block.text += '这里增加了条件。'; },
     block => { block.sourcePages = [9]; },
     block => { block.sourceQuote = 'A different exact quote'; },
+    block => { block.learningRoles = ['concept', 'method']; },
   ]) {
     const distinct = structuredClone(raw); change(distinct.changes[0].blocks[1]);
     assert.equal(applyRevision(candidate, review, distinct).normalizations.length, 0, 'No fuzzy deletion of conditions, citations or prose');
@@ -108,6 +111,66 @@ test('two bounded content corrections carry previous findings and exact mappings
   assert.ok(events.some(event => event.phase === 'review-patch-normalized'));
 });
 
+test('independent findings on one paragraph are audited separately, written once and both rechecked', async () => {
+  let reviews = 0, writes = 0, audits = 0;
+  const raw = await runModel(config, buildMessages(fixture()), undefined, async (_, options) => {
+    const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content);
+    const audit = confirmedAudit(messages);
+    if (audit) { audits++; assert.deepEqual(audit.decisions.map(d=>d.findingId), ['f1','f2']); return response(audit); }
+    if (messages[0].content.startsWith('note-self-review-v1')) {
+      if (reviews++ === 0) {
+        const result = review(context, 0);
+        result.findings.push({ ...result.findings[0], id:'f2', problem:'还缺少独立条件。',instruction:'说明乘积公式需要独立事件。' });
+        return response(result);
+      }
+      assert.deepEqual(context.revisionReview.changeMap.map(c=>[c.findingId,c.currentIndices]),[['f1',[0]],['f2',[0]]]);
+      assert.equal(context.revisionReview.findings.length,2);
+      return response(review(context));
+    }
+    if (messages[0].content.startsWith('note-review-patch-v1')) {
+      writes++;
+      assert.equal(context.review.findings.length,1);
+      assert.deepEqual(context.review.findings[0].relatedFindings.map(f=>f.id),['f1','f2']);
+      return response({candidateDigest:context.binding,edits:[{findingId:'f1',...paragraph('阈值为 0.05；乘积公式需要独立事件。')}]});
+    }
+    return response(original);
+  }, {action:'generate'});
+  assert.equal(audits,1);assert.equal(writes,1);assert.equal(reviews,2);
+  assert.equal(JSON.parse(raw).blocks.length,3);
+  assert.deepEqual(JSON.parse(raw).blocks.slice(1),original.blocks.slice(1));
+});
+
+test('confirmed same-target aliases preserve all prose and mappings, while dismissed targets get exact diagnostics',()=>{
+  const findings=[{id:'f1',target:{type:'replace',index:0}},{id:'f2',target:{type:'replace',index:0}}];
+  const review={candidateDigest:candidateDigest(original),findings};
+  const edits=[{findingId:'f1',...paragraph('更正阈值。')},{findingId:'f2',...paragraph('补充独立条件。')}];
+  const result=applyRevision(original,review,{candidateDigest:review.candidateDigest,edits});
+  assert.deepEqual(result.candidate.blocks.slice(0,2).map(b=>b.text),['更正阈值。','补充独立条件。']);
+  assert.deepEqual(result.candidate.blocks.slice(2),original.blocks.slice(1));
+  assert.deepEqual(result.changeMap.map(c=>[c.findingId,c.currentIndices]),[['f1',[0,1]],['f2',[0,1]]]);
+  assert.deepEqual(result.patch.changes.map(c=>c.findingId),['f1']);
+  assert.deepEqual(result.normalizations,[{kind:'same-target-alias',findingId:'f2',canonicalId:'f1'}]);
+  assert.throws(()=>applyRevision(original,review,{candidateDigest:review.candidateDigest,edits:[...edits,{findingId:'dismissed',...paragraph('不该修改。')}]}),e=>{
+    assert.equal(e.code,'REVISION_TARGETS');assert.deepEqual(e.issues[0].path,['edits',2,'findingId']);
+    assert.deepEqual(e.issues[0].expected,revisionContract(review));return true;
+  });
+});
+
+test('one diagnostic action removes a withdrawn edit while original validation preserves every confirmed target',async()=>{
+  const review={candidateDigest:candidateDigest(original),findings:[{id:'f1',target:{type:'replace',index:0}}]};
+  const edits=[{findingId:'f1',...paragraph('只更正已确认的阈值。')},{findingId:'withdrawn',...paragraph('不能恢复撤销的批评。')}];
+  const raw=JSON.stringify({candidateDigest:review.candidateDigest,edits});let calls=0;
+  const result=await runStage({stage:'revision',messages:[{role:'system',content:'Repair only the current revision targets.'}],initialRaw:raw,
+    preferLocalRecovery:true,validate:value=>applyRevision(original,review,value),complete:async(messages,action)=>{
+      await reserveExecutionCall();calls++;assert.equal(action,'recovery-plan');const context=JSON.parse(messages[1].content);
+      const issue=context.failure.issues[0];assert.equal(issue.code,'UNAUTHORIZED_REVISION_TARGET');
+      return JSON.stringify({failureId:context.failureId,strategy:'patch',targetDigest:context.toolState.targetDigest,
+        operations:[{op:'remove',path:issue.path.slice(0,-1),expected:edits[1]}]});}});
+  assert.equal(calls,1);assert.deepEqual(result.value.candidate.blocks.slice(1),original.blocks.slice(1));
+  assert.throws(()=>applyRevision(original,review,{candidateDigest:review.candidateDigest,edits:[]}),e=>
+    e.code==='REVISION_TARGETS'&&e.issues.some(i=>i.code==='MISSING_REVISION_TARGET'));
+});
+
 test('an unchanged revision is diagnosed without accepting unchanged content or invoking another reviewer', async () => {
   let calls = 0;
   await assert.rejects(runModel(config, buildMessages(fixture()), undefined, async (_, options) => {
@@ -118,22 +181,28 @@ test('an unchanged revision is diagnosed without accepting unchanged content or 
       return response({ candidateDigest: context.binding, edits: [{ findingId: 'f1', ...context.blocks[0] }] });
     return response(original);
   }, { action: 'generate' }), error => error.code === 'WORKFLOW_REVIEW_FAILED' && error.executionStage === 'note-review-patch');
-  assert.equal(calls, 8);
+  assert.equal(calls, 9);
 });
 
-test('even changing findings cannot exceed three content corrections or a smaller shared budget', async () => {
-  for (const allowance of [1, 3]) {
+test('ongoing corrections pass the former chapter, notebook and call limits, including exhausted legacy requests', async () => {
+  for (const allowance of [0, 3]) {
     const input = fixture(); input.workflow.repairAllowance = allowance;
-    let calls = 0, reviews = 0, patches = 0;
-    await assert.rejects(runModel(config, buildMessages(input), undefined, async (_, options) => {
+    let calls = 0, reviews = 0, patches = 0, report;
+    const raw = await runModel(config, buildMessages(input), undefined, async (_, options) => {
       calls++; const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content);
     const audit = confirmedAudit(messages); if (audit) return response(audit);
-      if (messages[0].content.startsWith('note-self-review-v1')) return response(review(context, 0, `发现另一项问题 ${++reviews}。`));
+      if (messages[0].content.startsWith('note-self-review-v1')) { reviews++; return response(review(context, patches < 13 ? 0 : undefined, `剩余待修正项目 ${13-patches}。`)); }
       if (messages[0].content.startsWith('note-review-patch-v1'))
         return response({ candidateDigest: context.binding, edits: [{ findingId: 'f1', ...paragraph(`修订内容 ${++patches}。`) }] });
       return response(original);
-    }, { action: 'generate' }), error => error.code === 'WORKFLOW_REVIEW_FAILED' && error.workflow.repairsUsed <= allowance);
-    assert.equal(patches, Math.min(3, allowance)); assert.equal(calls, allowance === 1 ? 6 : 12);
+    }, { action: 'generate', onWorkflowReport:value=>{report=value;} });
+    assert.equal(patches,13); assert.equal(calls,41); assert.equal(reviews,14);
+    assert.equal(report.repairsUsed,13); assert.equal(report.outcome,'accepted');
+    assert.equal(JSON.parse(raw).blocks[0].text,'修订内容 13。');
+    const prior={...startWorkflow(undefined,2),repairLimit:12,repairsUsed:12};
+    const request=workflowRequest(prior,'c1',2,0);
+    const updated=acceptWorkflowReport(prior,request,{...report,id:prior.id,attempt:prior.attempt,chapterId:'c1'},'accepted');
+    assert.equal(updated.repairsUsed,25);assert.equal(updated.repairLimit,undefined);
   }
 });
 

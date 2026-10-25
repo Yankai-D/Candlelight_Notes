@@ -9,7 +9,6 @@ import { conditionPrompt } from '../server/condition-review.mjs';
 import { planField, planWindows, runField, inspectField } from '../evals/claims/field/experiment.mjs';
 import { createFieldReview, validateFieldReview, summarizeFieldReview } from '../evals/claims/field/review.mjs';
 import { fieldReviewHTML } from '../evals/claims/field/page.mjs';
-import { currentMessagesFromV010 } from './support/prompt-history.mjs';
 
 const config={apiKey:'mock-only-secret',model:'mock',baseUrl:'https://api.deepseek.com'};
 const response=value=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:typeof value==='string'?value:JSON.stringify(value)}}]}));
@@ -106,9 +105,13 @@ test('field CLI forbids implicit paid runs and mixed review/generation modes',()
 });
 
 const archived=()=>JSON.parse(readFileSync(new URL('../evals/claims/runs/2026-10-18-field/run.json',import.meta.url),'utf8'));
-test('real trial retains exact historical prompts/cost; new plans differ only by explicit brand/profile/goal/reference/content migrations',()=>{
+test('real trial retains exact historical prompts/cost; current lecture plan has a separately pinned synthesis and output contract',()=>{
   const run=archived(),report=inspectField(run);assert.equal(run.gitRevision,'f81cd94b5308f2aa881e6ed09d67fd28c976a981');assert.equal(run.gitDirty,false);
-  assert.equal(fingerprint({ ...run.plan, generationMessages: currentMessagesFromV010(run.plan.generationMessages) }),fingerprint(planField()));
+  // The concise lecture template changes organization, sample, goal constraints
+  // and output schema. Keep both complete plans pinned, not normalized as an
+  // equivalent historical trial or used to claim a current model-quality score.
+  assert.equal(fingerprint(run.plan),'2fc9ac6354a879b81a3fd6ff204cf2dbe501b5d51e693522bc2e551930a7c10c');
+  assert.equal(fingerprint(planField()),'830d9c712afb68879003cebb98ecc24f750cc2e399c0f1216767afcf9d0c44fe');
   assert.notEqual(fingerprint(run.plan),fingerprint(planField()), 'Do not rewrite historical evidence to look like current production');
   assert.equal(report.calls,7);assert.equal(report.promptTokens,21383);assert.equal(report.completionTokens,2226);
   assert.equal(run.generation.result.blocks.length,11);assert.equal(report.windows,6);assert.equal(report.coverage.length,39);assert.equal(report.failedWindows,0);

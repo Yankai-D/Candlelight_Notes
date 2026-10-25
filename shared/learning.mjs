@@ -35,6 +35,7 @@ export const preparationSchema = z.object({
   currentErrorIds: z.array(z.string()).max(302).optional(),
   settings: learningSettingsSchema, knowledge: learnerProfileSchema.optional(),
   templateRouting: z.enum(['pending', 'selected']).optional(),
+  planningId: z.string().uuid().optional(),
   sourceContext: bundleContextSchema.optional(),
   interruption: z.object({ code: z.string().max(80), chapterId: z.string().max(100), message: z.string().max(2000) }).optional(),
   workflow: workflowStateSchema.optional(),

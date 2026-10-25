@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { bundleForDocument, descendantFolderIds, folderPath, folderOutline } from './folders.mjs';
+import { bundleBlueprintSchema, planningIssue } from './bundle-blueprint.mjs';
 
 export const defaultBundleIntent = '整理当前资料包以及下属资料包的全部资料，形成一份完整、层次清晰的学习笔记。';
 export const sourcePageSchema = z.object({ number: z.number().int().positive(), text: z.string().max(150000),
@@ -72,7 +73,7 @@ export function createBundleNote(context, title, intent = defaultBundleIntent, n
     composition: { version: 1, planned: false } };
 }
 
-export const compositionSchema = z.object({ version: z.literal(1), planned: z.boolean() });
+export const compositionSchema = z.object({ version: z.literal(1), planned: z.boolean(), plan: bundleBlueprintSchema.optional() });
 
 // Metadata-only planner input: units partition ALL source pages, including blank
 // ones. Generation receives the complete assigned texts, not these excerpts.
@@ -87,20 +88,42 @@ export function bundlePlanRequest(document) {
   }
   if (units.length > 300) throw new Error('资料包内容过多，请选择下属资料包分别整理。');
   const feedback = document.preparation?.settings?.regenerationFeedback || document.notebooks?.[document.activeNotebookId]?.settings?.regenerationFeedback;
-  return { action: 'bundle-plan', title: document.title, intent: document.intent, ...(feedback ? { feedback } : {}), units: units.map(({ size, ...unit }) => unit) };
+  return { action: 'bundle-plan', title: document.title, intent: document.intent,
+    documentId: document.id, notebookId: document.activeNotebookId || 'adaptive', revision: document.revision,
+    planningId: document.preparation?.planningId,
+    ...(feedback ? { feedback } : {}), units: units.map(({ size, ...unit }) => unit) };
 }
 
 export const bundlePlanInputSchema = z.object({ action: z.literal('bundle-plan'), title: z.string().max(400), intent: z.string().min(1).max(4000),
+  documentId: z.string().max(100).optional(), notebookId: z.string().max(100).optional(),
+  revision: z.number().int().nonnegative().optional(), planningId: z.string().uuid().optional(),
   feedback: z.string().max(4000).optional(),
   units: z.array(z.object({ id: z.string().max(100), sourceId: z.string().max(100), title: z.string().max(400), pages: z.array(z.number().int().positive()).min(1).max(1000), excerpts: z.array(z.object({ page: z.number().int().positive(), text: z.string().max(600) })).max(3) })).min(1).max(300) });
-const planSchema = z.object({ sections: z.array(z.object({ title: z.string().trim().min(1).max(400), purpose: z.string().trim().min(1).max(1200), unitIds: z.array(z.string()).min(1).max(300) }).strict()).min(1).max(300) }).strict();
 export function validateBundlePlan(input, raw) {
   const request = bundlePlanInputSchema.parse(input);
-  const plan = planSchema.parse(typeof raw === 'string' ? JSON.parse(raw) : raw);
+  const plan = bundleBlueprintSchema.parse(typeof raw === 'string' ? JSON.parse(raw) : raw);
   const required = request.units.map(unit => unit.id), actual = plan.sections.flatMap(section => section.unitIds);
-  if (new Set(required).size !== required.length || required.some(id => !actual.includes(id)) || actual.some(id => !required.includes(id))) throw new Error('整理规划遗漏资料或引用了不存在的来源，请重试。');
-  if (plan.sections.some(section => new Set(section.unitIds).size !== section.unitIds.length)) throw new Error('同一章节重复引用了来源单元。');
-  if (actual.length > required.length * 3 || actual.some(id => actual.filter(other => other === id).length > 3)) throw new Error('整理规划重复使用过多来源，请缩小输出要求。');
+  const counts = new Map();
+  for (const id of actual) counts.set(id, (counts.get(id) || 0) + 1);
+  const issues = [];
+  if (new Set(required).size !== required.length) throw planningIssue('来源输入的单元编号重复。', [{ path: ['units'], code: 'INPUT_UNIT_ID', expected: 'unique IDs' }]);
+  const missing = required.filter(id => !actual.includes(id));
+  if (missing.length) issues.push({ path: ['sections'], code: 'MISSING_UNITS', refs: missing, expected: required });
+  plan.sections.forEach((section, index) => {
+    const unknown = section.unitIds.filter(id => !required.includes(id));
+    if (unknown.length) issues.push({ path: ['sections', index, 'unitIds'], code: 'UNKNOWN_UNITS', refs: unknown, expected: required });
+    if (new Set(section.unitIds).size !== section.unitIds.length) issues.push({ path: ['sections', index, 'unitIds'], code: 'DUPLICATE_UNITS' });
+    if (section.dependsOn?.some(n => n > index)) issues.push({ path: ['sections', index, 'dependsOn'], code: 'FORWARD_DEPENDENCY', maximum: index });
+  });
+  const repeated = [...counts].filter(([, count]) => count > 3).map(([id]) => id);
+  if (repeated.length) issues.push({ path: ['sections'], code: 'OVERUSED_UNITS', refs: repeated, maximum: 3 });
+  if (issues.length) throw planningIssue('整理规划遗漏资料、重复分配或引用了不存在的来源／章节关系。', issues);
+  if (plan.analysis) {
+    if (plan.analysis.pendingChecks?.some(check => check.unitIds.some(id => !required.includes(id)))) throw planningIssue('待核查事项引用了不存在的来源单元。', [{ path: ['analysis', 'pendingChecks'], code: 'PENDING_CHECK_SOURCE', expected: required }]);
+    const requirements = plan.analysis.task.requirements.map(requirement => requirement.id);
+    const assigned = plan.sections.flatMap(section => section.requirementIds || []);
+    if (requirements.some(id => !assigned.includes(id)) || assigned.some(id => !requirements.includes(id))) throw planningIssue('章节分工未覆盖已分析的用户要求。', [{ path: ['sections'], code: 'REQUIREMENT_COVERAGE', expected: requirements, refs: requirements.filter(id => !assigned.includes(id)) }]);
+  }
   return plan;
 }
 
@@ -122,5 +145,5 @@ export function applyBundlePlan(document, result) {
   const input = bundlePlanRequest(document), plan = validateBundlePlan(input, result);
   const chapters = plan.sections.map((section, index) => ({ id: `note-section-${index + 1}`, title: section.title, subtitle: section.purpose,
     sourcePages: [...new Set(section.unitIds.flatMap(id => input.units.find(unit => unit.id === id).pages))], status: 'empty', content: { type: 'doc', content: [] } }));
-  return { ...document, chapters, composition: { version: 1, planned: true }, currentChapter: chapters[0].id, currentPage: chapters[0].sourcePages[0], revision: document.revision + 1, updatedAt: Date.now() };
+  return { ...document, chapters, composition: { version: 1, planned: true, ...(plan.analysis ? { plan } : {}) }, currentChapter: chapters[0].id, currentPage: chapters[0].sourcePages[0], revision: document.revision + 1, updatedAt: Date.now() };
 }

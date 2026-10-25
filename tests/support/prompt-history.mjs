@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { learningGoalPrompt } from '../../shared/learning-goal.mjs';
 
@@ -9,6 +10,17 @@ import { learningGoalPrompt } from '../../shared/learning-goal.mjs';
 // b71cb99: source-reference-v2 distinguishes original pages from citation IDs.
 // 3846ece: generation keeps mathematical conditions and readable source quotes.
 export function currentMessagesFromV010(messages) {
+  const originalContext = JSON.parse(messages[1].content);
+  if (originalContext.writingTemplate?.layout === 'structured') {
+    // The reviewed lecture replacement changes the sample and organization,
+    // not only wording. Pin both sides instead of normalizing future changes.
+    const raw = readFileSync(new URL('../fixtures/lecture-prompt-migration-v030.json', import.meta.url), 'utf8');
+    assert.equal(createHash('sha256').update(raw).digest('hex'), '1c01e50ec640f641a2f743115c7329ced96951856c15e41297d90389404025b1');
+    const originalHash = createHash('sha256').update(JSON.stringify(messages)).digest('hex');
+    const migration = JSON.parse(raw).find(item => item.originalHash === originalHash);
+    assert.ok(migration, 'No reviewed lecture migration for this historical prompt');
+    return structuredClone(migration.messages);
+  }
   const oldName = '你是旁烛笔记的学习笔记编辑器。';
   const profile = '用户画像约束 stable-profile-v1：learner 仅包含用户明确维护的稳定背景与基础知识。资料库状态、已读记录、学习树的分类和概念均不代表用户画像，不据此推断掌握程度或省略必要解释。';
   const unknown = '画像留空或未声明的基础保持未知，不假定学历、专业或知识掌握；依据资料与学习目标解释必要前提，不编造用户背景。';
@@ -36,8 +48,13 @@ export function currentMessagesFromV010(messages) {
     mapping: context.source.map(page => ({ id: page.number, title: page.sourceTitle, originalPage: page.sourcePage })),
     rule: 'sourcePages 只填写 allowedIds 内的 id；originalPage 是原文件显示页码，不可用作定位号。不得按本节顺序从 1 重新编号。无来源的补充可用空数组，不为通过校验删除实际来源。' };
   const nextContext = Object.fromEntries(Object.entries(context).flatMap(entry => entry[0] === 'source' ? [entry, ['sourceReferences', sourceReferences]] : [entry]));
+  // v0.1.30 adds the actual output schema before the first provider call.
+  // Pin this explicit migration without changing any historical experiment.
+  const contracts = readFileSync(new URL('../fixtures/note-output-contract-v1.json', import.meta.url), 'utf8');
+  assert.equal(hash(contracts), '00d606e1e55c6f0c47769f0ecdc1c420d07412151574fc3ea3e1ef378f9fdc5a');
+  const outputRule = '\n输出必须满足以下 JSON Schema；包括字段类型、必需字段和数组上限。语义要求仍以任务与来源为准。\n' + JSON.stringify(JSON.parse(contracts)[action]);
   return messages.map((message, index) => index === 1 ? { ...message, content: JSON.stringify(nextContext) } : index ? structuredClone(message) : {
     ...message, content: message.content.replace(oldName, '你是烛光笔记的学习笔记编辑器。').replace(profile + '\n', profile + unknown + '\n').replace(oldGoal, nextGoal).replace(oldOrganization, nextOrganization)
-      .replaceAll('"sourcePages":[1]', `"sourcePages":${JSON.stringify(context.source.length ? [context.source[0].number] : [])}`) + referenceRule + contentRules,
+      .replaceAll('"sourcePages":[1]', `"sourcePages":${JSON.stringify(context.source.length ? [context.source[0].number] : [])}`) + referenceRule + contentRules + outputRule,
   });
 }

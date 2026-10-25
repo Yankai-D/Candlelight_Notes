@@ -1,62 +1,29 @@
 # 公开源码与发行包 / Public source and distribution
 
-本仓库是 Candlelight Notes 0.1.26 的干净源码快照，配套 Windows x64 安装包在 GitHub Releases 下载。
+本仓库提供 Candlelight Notes 0.1.32 对外源码。Windows x64 安装包、源码 ZIP 和 SHA-256 校验文件见 [v0.1.32](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.32)。
 
-This repository provides the clean source snapshot for Candlelight Notes 0.1.26. The matching Windows x64 installer is available through GitHub Releases.
+This repository provides Candlelight Notes 0.1.32 public source. The Windows x64 installer, source ZIP and SHA-256 checksums are available under [v0.1.32](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.32).
 
-## 与安装版的关系 / Relationship to the installer
+应用代码、依赖和测试来自已验证构建快照 `c29de1ddcab9ec47c582562dca32598d0804da45`。公开时更新双语发行文档和版本证据，应用运行文件逐一核对不变；保留既有公开 Git 历史，不上传自用开发历史。安装包内记录原构建快照，公开提交记录文档与发行整理，两者通过 PUBLIC-SOURCE.json 对应。
 
-应用代码对应已验收安装包，本机代码修订为 `90d477cef75581e36d734e005627322df98a7171`。公开时仅调整发行文档并移除历史记录中的自用运行信息，不改写应用依赖、测试或讲述模板。构建时间和来源元数据可能变化，不承诺重建二进制逐字节相同。
+Application code, dependencies and tests come from verified build snapshot `c29de1ddcab9ec47c582562dca32598d0804da45`. Publication updates bilingual documentation and release evidence, while checking every application runtime file remains unchanged. Existing public Git history is preserved; private development history is excluded. The installer identifies the original build snapshot and the public commit records distribution preparation; PUBLIC-SOURCE.json binds them together.
 
-Application code corresponds to the verified installer built from local revision `90d477cef75581e36d734e005627322df98a7171`. Publication adjusts distribution documentation and removes historical personal-runtime records without altering application dependencies, tests, or explanation templates. Build times and provenance metadata may change; rebuilt binaries are not promised to be byte-identical.
+本机通过 517 项测试、15 个工程检查阶段、桌面启动与 0.1.31 → 0.1.32 数据兼容检查。全部 36 个安装器文件与受测程序一致，12,098 个内部文件通过审计。六项隔离安装事务复测通过；首次并行测试中的错误日志缺少文件名问题保留为诊断限制，不计作成功。细节见 [版本记录](docs/releases/v0.1.32.json)。
 
-本机通过 446 项测试、11 套浏览器流程、14 个检查阶段及 10 项桌面检查，验证 0.1.25 → 0.1.26 数据读取与重启保存。安装器解出的 36 个文件与受测程序逐字节一致，12,091 个内部应用与资源文件通过审计。见 [版本记录](docs/releases/v0.1.26.json)。
+Local verification passed 517 tests, 15 engineering stages, desktop launch and data compatibility from 0.1.31. All 36 installer files match the tested application, and 12,098 internal files passed auditing. All six isolated installation transactions passed in the serial rerun; the initial parallel-run missing-filename diagnostic remains recorded as a limitation, not a passing result. See the [release record](docs/releases/v0.1.32.json).
 
-Local verification passed 446 tests, 11 browser suites, 14 engineering stages, and 10 desktop checks, including application-data compatibility from 0.1.25 and restart persistence. All 36 extracted installer files match the tested application byte-for-byte, and 12,091 internal application/resource files passed auditing. See the [release record](docs/releases/v0.1.26.json).
+发布包不含个人资料、画像、笔记、API Key、.env、运行记录或缓存。仅包含三份附署名和许可的 OpenIntro 描述性统计选编，以及用于测试与演示的原创或注明来源的工程材料。历史 JSON 的自用记录已移除。详见 [致谢与材料许可](ACKNOWLEDGEMENTS.md)。
 
-本次加入有状态阶段执行、诊断与有限恢复，保留已完成阶段并分开管理协议恢复和正文修订预算。修正代码中的 `$` 被误判为公式定界符的问题；错误诊断带上具体字段、位置及局部上下文。协议与局限见 [运行时 harness](docs/operational-harness.md)。
+The distribution excludes personal materials, profiles, notes, API keys, .env, runtime records and caches. It includes three attributed and licensed OpenIntro descriptive-statistics selections, plus authored or attributed engineering fixtures for testing and demonstration. Historical personal-runtime JSON records are removed. See [acknowledgements and material licensing](ACKNOWLEDGEMENTS.md).
 
-This release adds stateful execution, diagnosis, and bounded recovery, preserving accepted stages and separating protocol recovery from content-correction budgets. It fixes code dollars being misread as math delimiters and adds field, offset, and local-context diagnostics. See the [operational harness](docs/operational-harness.md) for protocols and limits.
+源码入口为 `npm ci`、`npm run dev:public`；完整检查为 `npm run check`。Windows x64 构建先运行 `npm run prepare:materials` 再运行 `npm run package:desktop`。打包要求干净 Git 工作区，源码 ZIP 用户应先初始化 Git 并提交。
 
-## 发布边界 / Publication boundaries
+Run `npm ci` and `npm run dev:public` from source; use `npm run check` for full verification. Build the Windows x64 installer with `npm run prepare:materials` followed by `npm run package:desktop`. Packaging requires a clean Git worktree; initialize Git and commit first when starting from the source ZIP.
 
-延续既有公开 Git 历史，不包含自用开发历史、个人论文、笔记、画像、API Key、`.env`、生成记录或缓存。`.env.example` 的 Key 为空。历史发行 JSON 移除 `selfUse`，其余验收数据保留；旧修订号仅标识证据来源。
+本轮取消额度没有新增真实模型调用。旧版本真实实验、离线回放与本轮合成测试分别记录，不能据此承诺模型总能修好错误或知识绝对正确。用户取消、认证失败、外部问题和重复无进展仍是停止条件；独立评测显式授权的限额仍受执行器约束。安装包未签名，未完成空白 Windows VM 全面验收，远程 CI 状态以 GitHub 为准。
 
-Existing public Git history is retained. Private development history, personal papers, notes, profiles, keys, `.env`, generation records, and caches are excluded. The key in `.env.example` is empty. Historical release JSON omits `selfUse` while retaining engineering evidence; local revision IDs identify evidence sources only.
+Quota removal adds no live model calls. Historical live experiments, offline replays and current synthetic tests are recorded separately; they do not guarantee every error is repairable or every claim is correct. Cancellation, authentication failures, external problems and repeated non-progress remain stopping conditions; explicit evaluation limits remain enforced. The installer is unsigned and has not undergone comprehensive clean-Windows-VM validation. GitHub records remote CI status.
 
-测试与评测包含原创校准案例、带出处的公开论文片段、模型实验和去除身份信息的使用反馈，不是产品预装资料库。预装学习材料限三份 OpenIntro 统计选编，附署名、许可和页码映射；另有原创 Attention PDF 用于回归。
+公开 Git 文件按仓库规则统一文本换行为 LF；核对时只允许这项换行转换，其他应用代码必须与受测构建一致。
 
-Tests and evaluations contain authored calibration cases, attributed public-paper excerpts, model experiments, and de-identified feedback, not a preinstalled personal library. Bundled learning materials are limited to three OpenIntro statistics selections with attribution, licensing, and page mappings. An authored Attention PDF supports regression tests.
-
-`PUBLIC-SOURCE.json` 记录文件摘要、应用代码对应关系和安装包摘要，不包含自身摘要。核对发行版应使用对应 tag 或源码 ZIP；发行资产摘要见 Releases 的 `SHA256SUMS.txt`。本机验收记录保留当时状态，上传与远程 CI 状态以 GitHub 为准。
-
-`PUBLIC-SOURCE.json` records file hashes, application-code provenance, and the installer hash, excluding its own hash. Verify a release using its tag or source ZIP and the `SHA256SUMS.txt` asset. Local records retain their original status; GitHub records publication and remote CI outcomes.
-
-## 本地复现 / Local reproduction
-
-```sh
-npm ci
-npm run dev:public
-```
-
-完整检查为 `npm run check`。Windows x64 构建安装包：先执行 `npm run prepare:materials`，再执行 `npm run package:desktop`。打包要求干净 Git 工作区；从源码 ZIP 开始时先初始化 Git 并提交源码。
-
-Run `npm run check` for full verification. To build the Windows x64 installer, run `npm run prepare:materials`, then `npm run package:desktop`. Packaging requires a clean Git worktree; when starting from the source ZIP, initialize Git and commit the source first.
-
-测试使用隔离数据和模拟模型，不读取个人 Key，也不自动发起付费试验。浏览器版 PDF 与界面测试需要 Chrome、Edge 或 Chromium；Linux 需要中文字体。安装版内置运行时及 PDF 引擎。
-
-Tests use isolated data and mock models without reading personal keys or starting paid experiments automatically. Browser-based PDF and UI tests need Chrome, Edge, or Chromium, plus Chinese fonts on Linux. The installer bundles its runtime and PDF engine.
-
-## 当前验证范围 / Verification limits
-
-本次发布验收没有新增真实模型调用。旧响应回放通过了具体故障检查，不代表新版整份八章任务的真实复测。恢复控制器与审查者使用同一配置模型，可能共享推理错误；异常触发审查不能发现所有语义问题。工程验收不构成独立教学质量评测。
-
-This release verification made no new live model calls. Saved-response replay passed specific failure checks, not a new live end-to-end run of the full eight-chapter task. The recovery controller and reviewer use the same configured model and may share reasoning errors. Anomaly-triggered review cannot detect every semantic issue; engineering checks are not independent teaching-quality evaluations.
-
-完整 NSIS 安装、快捷方式和卸载生命周期仍待空白 Windows 用户或 VM 验收，安装包未签名。跨版本测试针对应用数据与重启，不等同于完整安装器生命周期验收。
-
-The complete NSIS installation, shortcut, and uninstall lifecycle still needs verification in a clean Windows account or VM. The installer is unsigned. Cross-version checks cover application data and restarts, not the entire installer lifecycle.
-
-项目代码尚未指定开源许可证，第三方软件和学习资料保留各自许可；详见 [致谢](ACKNOWLEDGEMENTS.md)。
-
-The project code has no selected open-source license. Third-party software and learning materials retain their own terms; see [acknowledgements](ACKNOWLEDGEMENTS.md).
+Public Git files normalize text line endings to LF under repository rules. Verification permits only this line-ending conversion; all other application code must match the tested build.

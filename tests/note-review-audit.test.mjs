@@ -48,7 +48,7 @@ test('an independently dismissed criticism cannot modify a correct note; persist
       assert.deepEqual(JSON.parse(await run).blocks, candidate.blocks);
       assert.equal(report.outcome, 'accepted'); assert.equal(report.repairsUsed, 0); assert.equal(report.reviewCalls, 2);
     } else await assert.rejects(run, { code: 'WORKFLOW_REVIEW_FAILED' });
-    assert.equal(calls, verdict === 'dismiss' ? 3 : 7);
+    assert.equal(calls, verdict === 'dismiss' ? 3 : 7, 'Failed rewrites retain one diagnostic opportunity for local repair, never permission to approve uncertain advice');
     if (verdict === 'uncertain') { assert.equal(report.repairsUsed, 0); assert.equal(report.reviewCalls, 4); assert.equal(report.execution.recoveryActions, 2); }
   }
 });
@@ -88,9 +88,13 @@ test('format and audit recovery preserve the separate content correction budget 
   const { request, candidate } = fixture();
   request.workflow.repairAllowance = 4;
   candidate.blocks[0].text = '期望的线性性需要随机变量独立。';
-  let generations = 0, reviews = 0, audits = 0, patches = 0, report;
+  let generations = 0, reviews = 0, audits = 0, patches = 0, diagnostics = 0, report;
   const result = await runModel(config, buildMessages(request), undefined, async (_, options) => {
     const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content);
+    if (messages[0].content.startsWith('execution-recovery-plan-v1')) {
+      diagnostics++;
+      return response({failureId:context.failureId,strategy:'repair',cause:'当前审查缺少可执行的 instruction。',instruction:'保留问题与证据，补全该问题的定向修订指令。'});
+    }
     if (messages[0].content.startsWith('note-self-review-v1')) {
       reviews++;
       if (patches) return response({ candidateDigest: context.binding.candidateDigest, verdict: 'accept',
@@ -111,6 +115,7 @@ test('format and audit recovery preserve the separate content correction budget 
   }, { action: 'generate', onWorkflowReport: value => { report = value; } });
   assert.equal(JSON.parse(result).blocks[0].text, '期望的线性性不要求随机变量独立。');
   assert.equal(generations, 2); assert.equal(reviews, 3); assert.equal(audits, 2); assert.equal(patches, 1);
+  assert.equal(diagnostics,1);
   assert.equal(report.repairsUsed, 1); assert.equal(report.execution.recoveryActions, 3); assert.equal(report.outcome, 'accepted');
 });
 
@@ -153,4 +158,57 @@ test('a missing descriptive summary does not discard valid findings or relax req
   assert.equal(reviewed.summary, ''); assert.equal(reviewed.verdict, 'revise'); assert.equal(reviewed.findings.length, 1);
   delete raw.findings[0].instruction;
   assert.throws(() => validateNoteReview(request, candidate, raw));
+});
+
+test('a mixed finding can be narrowed to its real defect and repaired without dropping the defect or altering correct neighboring prose', async () => {
+  const { request } = fixture();
+  const candidate = { blocks: [
+    { type: 'paragraph', text: '期望的线性性不要求独立。', sourcePages: [8], sourceQuote: '' },
+    { type: 'paragraph', text: '线性姓适用于可积的随机变量。', sourcePages: [8], sourceQuote: '' },
+  ] };
+  let reviews = 0, audits = 0, patches = 0, report;
+  const result = JSON.parse(await runModel(config, buildMessages(request), undefined, async (_, options) => {
+    const messages = JSON.parse(options.body).messages, context = JSON.parse(messages[1].content), system = messages[0].content;
+    if (system.startsWith('note-self-review')) {
+      if (++reviews === 2) return response({ candidateDigest: context.binding.candidateDigest, verdict: 'accept', checks: ['goal','coverage','grounding','clarity'].map(dimension => ({ dimension,status:'pass' })), findings: [], summary: '笔误已修正，正确条件保留。' });
+      const review = criticism(context);
+      Object.assign(review.findings[0], { target: { type:'replace',index:1 }, noteEvidenceId: context.blocks[1].evidenceId,
+        problem: '第二段有笔误，且上一段应增加独立条件。', instruction: '纠正笔误，并给期望的线性性添加独立条件。' });
+      return response(review);
+    }
+    if (system.startsWith('note-review-audit')) {
+      audits++;
+      return response({ candidateDigest: context.binding, decisions: [{ findingId:'f1', verdict:'refine',
+        reason:'笔误确实需要纠正，但原文明确无需独立，另一项批评不成立；只改原目标中的笔误。',
+        sourceEvidenceIds:[context.source[0].excerpts[0].id], refinement:{ problem:'第二段将线性性误写为线性姓。', instruction:'仅将线性姓改为线性性，保留可积条件。' } }] });
+    }
+    if (system.startsWith('note-review-patch')) {
+      patches++;
+      assert.equal(context.review.findings[0].target.index,1);
+      assert.equal(context.review.findings[0].auditRefinement,undefined,'The writer must not receive withdrawn instructions');
+      assert.doesNotMatch(JSON.stringify(context.review),/添加独立条件/);
+      assert.doesNotMatch(context.review.findings[0].instruction,/添加独立/);
+      return response({candidateDigest:context.binding,edits:[{findingId:'f1',type:'paragraph',text:'线性性适用于可积的随机变量。',sourcePages:[8],sourceQuote:''}]});
+    }
+    return response(candidate);
+  }, { onWorkflowReport: value => { report = value; } }));
+  assert.deepEqual(result.blocks[0],candidate.blocks[0]);
+  assert.match(result.blocks[1].text,/线性性/);
+  assert.equal(audits,1); assert.equal(patches,1); assert.equal(reviews,2);
+  assert.equal(report.repairsUsed,1); assert.equal(report.execution.recoveryActions,0);
+});
+
+test('refinement is bound to the existing finding and target, and cannot bypass evidence requirements', () => {
+  const { request, candidate }=fixture(), context=JSON.parse(buildNoteReview(request,candidate)[1].content);
+  const review=validateNoteReview(request,candidate,criticism(context));
+  const raw={candidateDigest:review.candidateDigest,decisions:[{findingId:'f1',verdict:'refine',reason:'只保留原意见中有依据的部分，修正错误指令，且不移动原来的编辑位置。',sourceEvidenceIds:[context.source[0].excerpts[0].id],refinement:{problem:'真实局部问题。',instruction:'只修正原目标。'}}]};
+  const result=applyReviewAudit(request,candidate,review,raw);
+  assert.equal(result.review.verdict,'revise');
+  assert.deepEqual(result.review.findings[0].target,review.findings[0].target);
+  const changed=structuredClone(raw);changed.decisions[0].refinement.target={type:'replace',index:99};
+  assert.throws(()=>applyReviewAudit(request,candidate,review,changed));
+  delete changed.decisions[0].refinement;
+  assert.throws(()=>applyReviewAudit(request,candidate,review,changed));
+  changed.decisions[0].refinement=raw.decisions[0].refinement; changed.decisions[0].sourceEvidenceIds=[];
+  assert.throws(()=>applyReviewAudit(request,candidate,review,changed),/原文依据/);
 });

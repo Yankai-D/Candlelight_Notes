@@ -156,7 +156,7 @@ const server = http.createServer(async (req, res) => {
         if (!activeConfig.apiKey && !localIdealCommand) return send(res, 400, { error: '请先在模型设置中填写 DeepSeek API Key。' });
         const controller = new AbortController();
         controllers.add(controller);
-        const timer = setTimeout(() => controller.abort(), path === '/api/test' ? 45000 : 360000);
+        const timer = setTimeout(() => controller.abort(), path === '/api/test' ? 45000 : input.action === 'bundle-plan' ? 900000 : 360000);
         res.on('close', () => { if (!res.writableEnded) controller.abort(); });
         try {
           if (path === '/api/test') {
@@ -166,7 +166,7 @@ const server = http.createServer(async (req, res) => {
           const generation = [];
           const messages = buildMessages(input);
           let record, workflow;
-          if (process.env.READING_TREE_FILE_STORAGE !== '0' && input.documentId && ['generate', 'explain', 'rewrite', 'style'].includes(input.action)) {
+          if (process.env.READING_TREE_FILE_STORAGE !== '0' && input.documentId && ['generate', 'explain', 'rewrite', 'style', 'bundle-plan'].includes(input.action)) {
             await fileCommand({ action: 'status' }); record = await optionalRecord(() => createGenerationRecord(files.index.systemDirectory, input, activeConfig.model), 'generation-record-create');
           }
           try {

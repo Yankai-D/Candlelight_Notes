@@ -1,0 +1,149 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.28",
+  "status": "verified-local-candidate",
+  "codeRevision": "73ca3b8c74215e4bfcdd472ec582f2ec43efe331",
+  "sourceFingerprint": "1b4b5fa387a02114785c0793be470e76774e20adac29b2c0079745ee84ab66a7",
+  "changes": [
+    "Controller retains inspection, search and local patching after both whole-result rewrite methods fail",
+    "Different concrete hypotheses can reuse a repair method; identical failed instructions receive bounded no-progress feedback",
+    "Bundle planning runs requirement analysis, batched source-index analysis, chapter relationships and independent semantic plan review",
+    "Planning checkpoints persist with explicit task identity and resume accepted analysis across process restarts",
+    "Saved task contracts and chapter dependencies reach both prose generation and review",
+    "Full-source chapter analysis precedes bundle writing; concrete concerns trigger knowledge review under the existing on-anomaly policy"
+  ],
+  "validation": {
+    "tests": 484,
+    "browserSuites": 11,
+    "stages": 15,
+    "engineeringEvidence": {
+      "mode": "Reuse preceding full check with byte-identical application source",
+      "checkedSourceFingerprint": "c905c6f883d89fed9882dd574616043f13fe76a1ef9a26c937607716dbc4f777",
+      "reportSha256": "f9d4babf579f0121bd038cd965ede5358b93de87d8c52ad66ab93f4d54105455",
+      "runtimeFilesIdentical": 150,
+      "metadataChanges": [
+        {
+          "path": "package.json",
+          "reason": "Release version only; dependency versions and runtime code unchanged"
+        },
+        {
+          "path": "package-lock.json",
+          "reason": "Release version only; dependency versions and runtime code unchanged"
+        },
+        {
+          "path": "README.md",
+          "reason": "Release version only; dependency versions and runtime code unchanged"
+        }
+      ],
+      "historicalSelfUseMetadataRemoved": 3
+    },
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.27",
+        "asarSha256": "9fdeaad77b7c86fc42aa3e90bcbb91cfac241b95e8a492a903d51b07fc30ea10"
+      },
+      "to": {
+        "version": "0.1.28",
+        "asarSha256": "23e1829a068059483e5e6daba66e2766b9cc6f314a502a0331b1d930bea0211a"
+      },
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ],
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "installerContents": {
+      "status": "pass",
+      "filesVerified": 36,
+      "scope": "Every file extracted from the final Setup.exe matches the tested win-unpacked directory byte-for-byte"
+    },
+    "payloadFilesVerified": 12095,
+    "actualNewModelCalls": 0,
+    "offlineControllerComparison": {
+      "status": "pass",
+      "type": "offline-controller-regression",
+      "beforeVersion": "0.1.27",
+      "before": {
+        "outcome": "blocked",
+        "code": "EXECUTION_BLOCKED",
+        "reason": "no-progress",
+        "calls": 4,
+        "strategies": [
+          "repair",
+          "reframe"
+        ],
+        "saved": true
+      },
+      "after": {
+        "outcome": "accepted",
+        "result": {
+          "labels": [
+            "amber",
+            "indigo",
+            "jade"
+          ]
+        },
+        "calls": 6,
+        "strategies": [
+          "repair",
+          "reframe",
+          "patch"
+        ],
+        "saved": true
+      },
+      "actualModelCalls": 0,
+      "limitations": "Deterministic failure injection proves control-flow reachability and candidate preservation, not autonomous model reasoning or reproduction of the user’s unrecorded planning response.",
+      "verifiedAt": "2026-10-23T15:30:40.082Z"
+    },
+    "liveScope": "The new multi-stage planner has offline and integration evidence; the reported field response was not recorded and has not been replayed",
+    "priorLiveRecoveryAssessment": {
+      "calls": 22,
+      "report": "evals/recovery/agent-evidence.md",
+      "scope": "Small-sample real API fault injection and content-review assessment; not universal recovery coverage"
+    }
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.28-Setup-x64.exe",
+      "bytes": 138128809,
+      "sha256": "fca3e8effdc6a9bf7e72b945b0fda01695d16f5854128cac67f577bb53a687c7",
+      "path": "output/releases/pangzhu-desktop-0.1.28/installer/Candlelight-Notes-0.1.28-Setup-x64.exe"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false,
+    "publishedToGitHub": false,
+    "installedAutomatically": false
+  },
+  "boundaries": [
+    "Changes were made in project source; the build used a separate clean snapshot under project output",
+    "Desktop tests used packaged executables and temporary profiles, not the user installation",
+    "The user updates the installed application by running the installer",
+    "Fresh launch and application-data upgrade verified; full NSIS installation, shortcuts and uninstall lifecycle not repeated this review"
+  ],
+  "checkedAt": "2026-10-23T15:53:47.870Z"
+}

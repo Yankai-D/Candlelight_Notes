@@ -1,0 +1,110 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.27",
+  "status": "verified-local-candidate",
+  "codeRevision": "f8b4e2f6f8d27af647a01876acd99f45cd926e38",
+  "sourceFingerprint": "92e2a04d9676724c765ef0371f9227fc66c073028d3daf3185a42a3aa536f9a1",
+  "changes": [
+    "A bounded recovery workbench lets the controller inspect candidates, search provided sources, and apply atomic local patches",
+    "Recovered candidates are checked by unchanged production validators before acceptance",
+    "Recognizable malformed repair plans receive actionable schema feedback; decoded text patches avoid JSON escaping mismatches",
+    "Actual API attempts, diagnosis and recovery share finite task budgets; accepted stage results remain reusable"
+  ],
+  "validation": {
+    "tests": 477,
+    "browserSuites": 11,
+    "stages": 15,
+    "engineeringEvidence": {
+      "mode": "Reuse preceding full check with byte-identical application source",
+      "checkedSourceFingerprint": "e750090ba3b62db47d2f5a488597227d2937c1f7eee58e4075a8f1673eb066b3",
+      "reportSha256": "337d68ef91b33d2bb596469bcf9747360dd60e454d79381230dadb4fece62c6a",
+      "runtimeFilesIdentical": 147,
+      "metadataChanges": [
+        {
+          "path": "package.json",
+          "reason": "Release version only; dependency versions and runtime code unchanged"
+        },
+        {
+          "path": "package-lock.json",
+          "reason": "Release version only; dependency versions and runtime code unchanged"
+        },
+        {
+          "path": "README.md",
+          "reason": "Release version only; dependency versions and runtime code unchanged"
+        }
+      ],
+      "historicalSelfUseMetadataRemoved": 3
+    },
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.26",
+        "asarSha256": "13db11a176bd408f9f9edb036fcd8fd502888db759d4e2c61b8165ff82388893"
+      },
+      "to": {
+        "version": "0.1.27",
+        "asarSha256": "9fdeaad77b7c86fc42aa3e90bcbb91cfac241b95e8a492a903d51b07fc30ea10"
+      },
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ],
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "installerContents": {
+      "status": "pass",
+      "filesVerified": 36,
+      "scope": "Every file extracted from the final Setup.exe matches the tested win-unpacked directory byte-for-byte"
+    },
+    "payloadFilesVerified": 12092,
+    "actualNewModelCalls": 0,
+    "priorLiveRecoveryAssessment": {
+      "calls": 22,
+      "report": "evals/recovery/agent-evidence.md",
+      "scope": "Small-sample real API fault injection and content-review assessment; not universal recovery coverage"
+    }
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.27-Setup-x64.exe",
+      "bytes": 138122591,
+      "sha256": "3c7539c640be464fac1fc9bd92acc2c137eedb385b0f8282e3cb91c03cf41ee0",
+      "path": "output/releases/pangzhu-desktop-0.1.27/installer/Candlelight-Notes-0.1.27-Setup-x64.exe"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false,
+    "publishedToGitHub": false,
+    "installedAutomatically": false
+  },
+  "boundaries": [
+    "Changes were made in project source; the build used a separate clean snapshot under project output",
+    "Desktop tests used packaged executables and temporary profiles, not the user installation",
+    "The user updates the installed application by running the installer",
+    "Fresh launch and application-data upgrade verified; full NSIS installation, shortcuts and uninstall lifecycle not repeated this review"
+  ],
+  "checkedAt": "2026-10-21T11:16:58.604Z"
+}

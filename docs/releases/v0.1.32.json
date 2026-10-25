@@ -1,0 +1,79 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.32",
+  "status": "verified-local-candidate",
+  "codeRevision": "c29de1ddcab9ec47c582562dca32598d0804da45",
+  "sourceFingerprint": "12bcdd496e0227d6eeca76e31e3f37fefe31d84625686874f5a6aa793755f9d1",
+  "changes": [
+    "Remove implicit call, recovery and revision quotas, including legacy state allowances",
+    "Continue distinct diagnostic operations beyond the former four-turn ceiling",
+    "Use task/source/chapter planning and concise lecture synthesis",
+    "Recover candidate syntax and local edits while preserving original source and validation boundaries"
+  ],
+  "validation": {
+    "tests": 517,
+    "stages": 15,
+    "actualModelCalls": 0,
+    "checkReportSha256": "d6018c5e1be21c2b624d8ff9e662b00061eb62a2fc61f681033e91d9cbde2103",
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "installerLifecycle": [
+      "Fresh installation: every runtime file matches the prepackaged payload",
+      "Upgrade succeeds even with a deliberately failing legacy uninstaller; legacy code is never executed and credentials survive",
+      "A real locked app.asar stops replacement, names the file, restores all original runtime bytes, and preserves credentials",
+      "Reinstall succeeds after the lock is released, without nested installation paths",
+      "Setup launched inside the installation directory hands off and finishes the full upgrade",
+      "Real uninstall removes application and credentials while retaining external papers and notes"
+    ],
+    "installerDiagnostics": {
+      "initialParallelRun": "Missing locked-file path in error log; original bytes and credentials remained intact",
+      "serialRerun": "All six transactions passed with unchanged source and payload",
+      "initialFailureRetained": true
+    },
+    "installerFilesVerified": 36,
+    "payloadFilesVerified": 12098
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.32-Setup-x64.exe",
+      "bytes": 138133402,
+      "sha256": "283155805b087a479e9379c98b3adcbe227b6c2be399c092dd3fa04d2e28a1d8"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": [
+    "No new live-model calls for quota removal; previous live chapter validation remains incomplete",
+    "Controller and reviewer share the configured model and may share reasoning errors",
+    "Offline orchestration success does not certify teaching or factual quality",
+    "Isolated local installation testing is not a clean Windows VM acceptance test",
+    "Remote publication and CI outcomes are recorded separately on GitHub"
+  ]
+}

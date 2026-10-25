@@ -1,0 +1,195 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.29",
+  "status": "offline-verified-local-candidate-live-unverified",
+  "codeRevision": "e8da3987f6db1e82ddfca0a5145088731230dcad",
+  "sourceFingerprint": "27a9c2c27ebeb49e224b66544b1d8c553edf2afcf5a259fa76c85b1965bbc60c",
+  "changes": [
+    "Planning output contracts are generated from actual validation schemas before the first model call",
+    "Plan reviews receive application-generated section numbers and located evidence",
+    "Diagnostics identify the exact invalid finding field and separate chapter references, quotations, verdicts and bindings",
+    "Valid evidence assigned to the wrong chapter is rejected with its actual matching locations",
+    "Excerpt visibility is distinguished from full-source availability without increasing recovery allowances",
+    "Small structured inspections return full values, and patch-precondition feedback includes the exact operation and current field",
+    "Non-action captions and review summaries are optional; quote whitespace is normalized without changing wording or mathematical symbols",
+    "Plan review changes undergo independent audit; unresolved source-coverage checks persist into full-source chapter analysis and prose review",
+    "Settled review decisions persist; repairs are verified against open issues and actual changes rather than restarting full critique",
+    "Evidence IDs avoid recopying quotations; unchanged candidates reuse settled verdicts without new review calls"
+  ],
+  "validation": {
+    "tests": 496,
+    "browserSuites": 11,
+    "stages": 15,
+    "engineeringEvidence": {
+      "mode": "Reuse preceding full check with byte-identical application source",
+      "checkedSourceFingerprint": "9147e40c6aae81b8ec3a271e05efd51b1d6b645064e474172a129fb0931ad08d",
+      "reportSha256": "1e7d274c13c884620a4e91c595d516077723d4dbb908adb690f96459cbf8f9e8",
+      "runtimeFilesIdentical": 152,
+      "metadataChanges": [],
+      "historicalSelfUseMetadataRemoved": 3
+    },
+    "desktop": [
+      "First entry offers a blank user-authored profile and skippable model setup",
+      "Packaged application uses the canonical candle mark",
+      "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+      "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+      "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+      "Repeated launch returns to the same application window",
+      "Embedded reader and Chinese/math PDF export work without an external browser",
+      "Window close flushes a pending edit and stops the internal service",
+      "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+    ],
+    "applicationDataUpgrade": {
+      "from": {
+        "version": "0.1.28",
+        "asarSha256": "23e1829a068059483e5e6daba66e2766b9cc6f314a502a0331b1d930bea0211a"
+      },
+      "to": {
+        "version": "0.1.29",
+        "asarSha256": "75c8924ed516ebf97018538619e1b793ab696914f108f7e56d3debbe20af6197"
+      },
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ],
+      "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+    },
+    "installerContents": {
+      "status": "pass",
+      "filesVerified": 36,
+      "scope": "Every file extracted from the final Setup.exe matches the tested win-unpacked directory byte-for-byte"
+    },
+    "payloadFilesVerified": 12097,
+    "actualNewModelCalls": 28,
+    "livePlanningEvaluation": {
+      "firstAttempt": {
+        "status": "failed",
+        "calls": 16,
+        "stopReason": "Authorized evaluation call ceiling"
+      },
+      "continuation": {
+        "status": "fail",
+        "calls": 12,
+        "reusedAnalysisCount": 5
+      },
+      "scope": "Private source-index planning only, separate local output; not notebook prose generation and not universal recovery coverage"
+    },
+    "liveResponseReplay": {
+      "status": "pass",
+      "mode": "actual-provider-response-offline-replay",
+      "actualNewCalls": 0,
+      "checks": [
+        "Executable patch without caption reaches operation validation",
+        "Failed patch identifies the exact field and current value",
+        "One-character inspect request still receives complete small structured value",
+        "Whitespace-wrapped quote and missing summary validate without another call; substantive findings remain"
+      ],
+      "limitation": "This validates adaptation to actual returned values, not the truth of reviewer claims or completion of the planning task."
+    },
+    "continuationReplay": {
+      "status": "pass",
+      "mode": "actual-failure-and-negative-contract-offline-replay",
+      "checks": [
+        "Actual audit reverses its verdict on an unchanged chapter purpose",
+        "Accepted audit retains one actionable issue and one full-source obligation",
+        "Actual recovery-controller patch fixes the self-dependency and passes the structural planner validator",
+        "Programmatic field diff distinguishes a changed handoff from unchanged purpose",
+        "New repair verifier rejects approving an unchanged candidate"
+      ],
+      "actualNewCalls": 0
+    },
+    "finalProtocolLiveStatus": "not-tested-after-authorized-28-call-budget-exhausted",
+    "recordedReviewReplay": {
+      "status": "pass",
+      "mode": "recorded-failure-offline-validation",
+      "realModelCalls": 0,
+      "originalCallCount": 22,
+      "originalRecoveryCount": 8,
+      "sections": 15,
+      "changes": [
+        {
+          "path": [
+            "findings",
+            1,
+            "section"
+          ],
+          "previous": 8,
+          "current": 9,
+          "code": "PLAN_REVIEW_LOCATION"
+        },
+        {
+          "path": [
+            "findings",
+            2,
+            "section"
+          ],
+          "previous": 13,
+          "current": 14,
+          "code": "PLAN_REVIEW_LOCATION"
+        },
+        {
+          "path": [
+            "findings",
+            3,
+            "section"
+          ],
+          "previous": 16,
+          "current": 15,
+          "code": "PLAN_REVIEW_SECTION"
+        },
+        {
+          "path": [
+            "findings",
+            4,
+            "section"
+          ],
+          "previous": 16,
+          "current": 15,
+          "code": "PLAN_REVIEW_SECTION"
+        }
+      ],
+      "validQuotesPreserved": true,
+      "substantiveReviewStillRequiresRevision": true,
+      "scope": "Replays the actual saved failed review. Correction here is deterministic test input derived from unique evidence locations, not a live model decision or proof of completed notebook generation."
+    },
+    "liveScope": "Actual failed field and provider returns were replayed; see livePlanningEvaluation for the separate bounded live outcomes",
+    "priorLiveRecoveryAssessment": {
+      "calls": 22,
+      "report": "evals/recovery/agent-evidence.md",
+      "scope": "Small-sample real API fault injection and content-review assessment; not universal recovery coverage"
+    }
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.29-Setup-x64.exe",
+      "bytes": 138133854,
+      "sha256": "10064fa75584c50aa9fd9e905b2294cdf6ea7432967a2aafca23cb90b43b5049",
+      "path": "output/releases/pangzhu-desktop-0.1.29-final/installer/Candlelight-Notes-0.1.29-Setup-x64.exe"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false,
+    "publishedToGitHub": false,
+    "installedAutomatically": false
+  },
+  "boundaries": [
+    "Changes were made in project source; the build used a separate clean snapshot under project output",
+    "Desktop tests used packaged executables and temporary profiles, not the user installation",
+    "The user updates the installed application by running the installer",
+    "Fresh launch and application-data upgrade verified; full NSIS installation, shortcuts and uninstall lifecycle not repeated this review"
+  ],
+  "checkedAt": "2026-10-23T18:39:25.644Z"
+}

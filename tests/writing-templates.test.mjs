@@ -151,7 +151,8 @@ test('sample edits preserve formulas, accept structured headings, and reject fab
   const value = library(), snapshot = templateSnapshot(value, 'lecture');
   const request = { action: 'template-style', revision: 0, instruction: '标题更清楚', template: snapshot };
   const data = JSON.parse(buildMessages(request)[1].content), paragraph = data.paragraphs.find(p => p.id === 'mean');
-  const reply = { rules: ['标题表达具体问题。'], edits: [{ id: 'mean', text: paragraph.text.replace('均值：保留总量的中心', '均值为什么保留总量') }] };
+  const reply = { rules: ['标题表达具体问题。'], edits: [{ id: 'mean', text: paragraph.text.replace('计算方法', '怎样计算均值和方差') }] };
+  assert.notEqual(reply.edits[0].text, paragraph.text);
   const result = validateResult(request, reply);
   assert.equal(result.rendering.format, 'reading-tree-note-v1'); assert.ok(result.rendering.blocks.some(n => n.type === 'heading'));
   const math = text => parseMath(text).filter(n => n.type === 'math');
