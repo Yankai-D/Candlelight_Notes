@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import sourceLimits from './source-limits.json' with { type: 'json' };
 import { bundleForDocument, bundleTreeId, folderAncestors, descendantFolderIds } from './folders.mjs';
 
 const description = z.string().max(600);
@@ -12,7 +13,7 @@ export const treeSchema = treeResultSchema.extend({ version: z.literal('study-tr
 export const organizationRequestSchema = z.object({ folders: z.array(z.object({ id: z.string().min(1).max(100), name: z.string().min(1).max(60) })).max(200).default([]), documents: z.array(z.object({
   folderId: z.string().nullable().default(null),
   id: z.string().min(1).max(120), title: z.string().min(1).max(400), description: z.string().max(1400),
-  chapters: z.array(z.object({ id: z.string().max(100), title: z.string().max(400), sourcePages: z.array(z.number().int().positive()).max(1000) })).min(1).max(300),
+  chapters: z.array(z.object({ id: z.string().max(100), title: z.string().max(400), sourcePages: z.array(z.number().int().positive()).max(sourceLimits.maxPages) })).min(1).max(300),
 })).min(1).max(250) }).strict();
 
 // All tree consumers use these entries. Member preferences remain saved so

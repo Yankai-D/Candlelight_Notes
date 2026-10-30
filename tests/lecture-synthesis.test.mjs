@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lectureSynthesisSchema, validateLectureSynthesis, validateLectureCoverage } from '../shared/lecture-synthesis.mjs';
+import { reviewEvidence } from '../server/review-evidence.mjs';
 import { freshTemplateLibrary, templateSnapshot, templateLibrarySchema, writingTemplatePrompt } from '../shared/writing-templates.mjs';
 import { buildMessages, runModel, validateResult } from '../server/harness.mjs';
 import { buildNoteReview } from '../server/note-review.mjs';
@@ -23,17 +24,21 @@ test('a bundle lecture extracts units and writes concept/method/example/variant 
     const messages=JSON.parse(options.body).messages, data=JSON.parse(messages[1].content);
     if(messages[0].content.startsWith('chapter-analysis')){
       stages.push('extract'); analyzed=synthesis(data.source.flatMap(page=>page.excerpts.map(e=>e.id)));
-      assert.match(messages[0].content,/lecture-synthesis-v1/);
+      assert.match(messages[0].content,/lecture-synthesis-v3/);
       return response({approach:'合并定义，按方法整理。',connection:'用于之后比较方法。',steps:[{focus:'均值',instruction:'计算并比较权重变体',sourceEvidenceIds:analyzed.units[0].sourceEvidenceIds}],risks:[],synthesis:analyzed});
     }
-    stages.push('write'); assert.deepEqual(data.chapterAnalysis.synthesis,analyzed);
+    if(messages[0].content.startsWith('lecture-outline')){stages.push('select');return response(data.analyses[0]);}
+    stages.push('write');
+    assert.deepEqual(data.chapterAnalysis.synthesis.units,synthesis(reviewEvidence(request).source.flatMap(page=>page.excerpts.map(e=>e.id))).units);
+    assert.deepEqual(data.chapterAnalysis.synthesis.merges,[]);
+    assert.ok(analyzed.units[0].sourceEvidenceIds.every(id => /^S\d+$/.test(id)), 'The provider receives short labels; the writer receives validated content-bound references.');
     assert.match(messages[0].content,/learningRole/);
     return response({blocks:[
       {type:'heading',text:'样本均值',sourcePages:[3]},
       ...['均值描述数据中心。','方法：相加再除以数量。','例题：2、4、6。均值为 (2+4+6)/3=4。','变体：权重不同时用加权总和除以权重和。'].map((text,index)=>({type:'paragraph',text,sourcePages:[index===3?7:3],learningUnitId:'k1',learningRole:['concept','method','example','variant'][index]}))]});
   }));
   const result=JSON.parse(raw);
-  assert.deepEqual(stages,['extract','write']);
+  assert.deepEqual(stages,['extract','select','write']);
   validateLectureCoverage(analyzed,result.blocks);
   assert.ok(!JSON.stringify(result.rendering).includes('learningUnitId'));
   const review=buildNoteReview({...request,chapterAnalysis:{synthesis:analyzed}},result)[0].content;
@@ -41,10 +46,10 @@ test('a bundle lecture extracts units and writes concept/method/example/variant 
   assert.doesNotMatch(writingTemplatePrompt(request.learning.writingTemplate),/不将整理写成压缩摘要/);
 });
 
-test('lecture coverage rejects label-only headings, omitted selected examples, invented evidence and nonexistent merge targets',()=>{
+test('lecture coverage flags headings and missing example annotations for review, and rejects invented evidence and merge targets',()=>{
   const value=lectureSynthesisSchema.parse(synthesis(['a','b'])), evidence=new Map([['a',{}],['b',{}]]);
   validateLectureSynthesis(value,evidence);
-  assert.throws(()=>validateLectureCoverage(value,[{type:'heading',text:'例题',learningUnitId:'k1',learningRole:'example'}]),error=>error.issues.some(issue=>issue.expected.learningRole==='example'));
+  assert.ok(validateLectureCoverage(value,[{type:'heading',text:'例题',learningUnitId:'k1',learningRole:'example'}]).gaps.some(gap=>gap.learningRole==='example'));
   const foreign=structuredClone(value);foreign.units[0].variants[0].sourceEvidenceIds=['foreign'];
   assert.throws(()=>validateLectureSynthesis(foreign,evidence),error=>error.issues[0].code==='SYNTHESIS_EVIDENCE');
   const badMerge=structuredClone(value);badMerge.merges[0].intoUnit='k2';
@@ -60,9 +65,10 @@ test('a concise paragraph may cover concept and method without duplication or vi
   assert.equal(result.blocks.length,2);assert.deepEqual(result.blocks[0].learningRoles,['concept','method']);
   assert.ok(!JSON.stringify(result.rendering).includes('learningRoles'));
   const headingOnly=structuredClone(blocks);headingOnly[0].type='heading';
-  assert.throws(()=>validateLectureCoverage(value,headingOnly),error=>error.issues.some(i=>i.expected.learningRole==='concept'));
+  assert.ok(validateLectureCoverage(value,headingOnly).gaps.some(gap=>gap.learningRole==='concept'));
   const missing=structuredClone(blocks);missing[1].learningRoles=['example'];
-  assert.throws(()=>validateLectureCoverage(value,missing),error=>error.issues.some(i=>i.expected.learningRole==='variant'));
+  assert.ok(validateLectureCoverage(value,missing).gaps.some(gap=>gap.learningRole==='variant'));
+  assert.throws(()=>validateLectureCoverage(value,[{...blocks[0],learningUnitId:'invented'}]),error=>error.issues.some(i=>i.code==='LECTURE_UNIT_BINDING'));
 });
 
 test('invalid JSON provides the actual character location and raw context for local repair',()=>{

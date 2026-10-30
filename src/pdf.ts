@@ -4,6 +4,7 @@ import type { LearningDocument, Chapter } from './types'
 import { paragraph, uid } from '../shared/document.mjs'
 import { defaultLearningIntent } from '../shared/learning-intent.mjs'
 import { richMaterial } from '../shared/material-formats.mjs'
+import sourceLimits from '../shared/source-limits.json' with { type: 'json' }
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
 export { pdfjs }
 
@@ -21,7 +22,7 @@ export async function importMaterial(file: File, intent: string, progress: (mess
     let document
     try {
       document = await loading.promise
-      if (document.numPages > 1000) throw new Error('第一版支持 1,000 页以内的资料，请拆分后导入。')
+      if (document.numPages > sourceLimits.maxPages) throw new Error(`支持 ${sourceLimits.maxPages.toLocaleString('en-US')} 页以内的资料，请拆分后导入。`)
       for (let n = 1; n <= document.numPages; n++) {
         progress(`正在读取第 ${n} / ${document.numPages} 页`)
         const page = await document.getPage(n)
@@ -70,7 +71,19 @@ export async function importMaterial(file: File, intent: string, progress: (mess
       }
     }
   }
-  if (chapters.length > 300) throw new Error('资料章节过多，请按主题拆分后再导入。')
+  if (pages.length > sourceLimits.maxPages) throw new Error(`支持 ${sourceLimits.maxPages.toLocaleString('en-US')} 页以内的资料，请拆分后导入。`)
+  // Keep the reader's chapter count bounded without rejecting a valid long
+  // document. Only adjacent reading sections merge; every source page stays.
+  if (chapters.length > sourceLimits.maxChapters) {
+    const groupSize = Math.ceil(chapters.length / sourceLimits.maxChapters)
+    const grouped: Chapter[] = []
+    for (let i = 0; i < chapters.length; i += groupSize) {
+      const group = chapters.slice(i, i + groupSize), first = group[0], last = group[group.length - 1]
+      const title = first === last ? first.title : `${first.title} — ${last.title}`
+      grouped.push(makeChapter(title.length > 400 ? title.slice(0, 399) + '…' : title, [...new Set(group.flatMap(chapter => chapter.sourcePages))]))
+    }
+    chapters = grouped
+  }
   const now = Date.now()
   const learningIntent = intent.trim() || defaultLearningIntent
   return { id, title: file.name.replace(/\.[^.]+$/, ''), subtitle: '我的学习资料', filename: file.name, kind: pdf ? 'pdf' : 'text', ...(sourceWarnings.length ? {sourceWarnings} : {}), intent: learningIntent, intentSource: learningIntent === defaultLearningIntent ? 'default' : 'user', createdAt: now, updatedAt: now, revision: 0, pages, chapters, currentChapter: chapters[0].id, currentPage: 1, versions: [] }

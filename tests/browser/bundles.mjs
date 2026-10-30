@@ -45,7 +45,7 @@ try {
     throw new Error(`Button not found: ${text}`);
   };
   const selectFolder = async () => {
-    const buttons = await page.$$('.collection-folders button');
+    const buttons = await page.$$('.collection-folder-link');
     for (const button of buttons) if ((await button.evaluate(el => el.querySelector('span').textContent)) === '描述性统计') { await button.click(); break; }
     await page.waitForFunction(() => document.querySelector('.collection-title h1')?.textContent === '描述性统计');
   };

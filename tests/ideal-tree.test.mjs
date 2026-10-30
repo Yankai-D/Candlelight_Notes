@@ -126,11 +126,35 @@ test('explicit rebuild is an idempotent new version with feedback carried throug
   const calls=log.length;await runner.command({command:'resume',id:result.id},provider(log),'fixture');assert.equal(log.length,calls);
 });
 
-test('rebuild rejects stale/unfinished/empty requests; a failed new version leaves the old result intact', async()=>{
+test('rebuild without additional feedback preserves the original goal and profile in a new version', async()=>{
+  const {runner}=await setup();const first=await runner.command(create(runner),provider(),'fixture');
+  const source=await finish(runner,first.job.id), before=structuredClone(source);
+  for(const feedback of [{}, {suggestion:'  ',reason:'\n'}, {suggestion:'精简',reason:''}]){
+    const request={...rebuild(source),suggestion:undefined,reason:undefined,...feedback},log=[];
+    const next=await runner.command(request,provider(log),'fixture');
+    const result=await finish(runner,next.job.id);
+    assert.equal(result.status,'complete');assert.notEqual(result.id,source.id);
+    assert.deepEqual(result.input,source.input);assert.deepEqual(await runner.store.read(source.id),before);
+    const normalized={suggestion:(feedback.suggestion||'').trim(),reason:(feedback.reason||'').trim()};
+    const count=log.length;
+    const retry=await runner.command({...request,...normalized},provider(log),'fixture');
+    assert.equal(retry.job.id,result.id);assert.equal(log.length,count);
+    for(const stage of ['contract','skeleton','branch','review']){
+      const context=log.find(call=>call.stage===stage).context;
+      assert.equal(context.rebuild.suggestion,normalized.suggestion);assert.equal(context.rebuild.reason,normalized.reason);
+      if(['contract','review'].includes(stage))assert.equal(context.goal,input.goal);
+      else assert.deepEqual(context.contract,source.contract);
+      assert.deepEqual(context.profile,input.profile);
+    }
+  }
+});
+
+test('rebuild rejects stale, unfinished and oversized requests; a failed new version leaves the old result intact', async()=>{
   const {runner}=await setup();const first=await runner.command(create(runner),provider(),'fixture');
   const source=await finish(runner,first.job.id), before=structuredClone(source), request=rebuild(source);
   await assert.rejects(runner.command({...request,revision:source.revision-1},provider(),'fixture'),/已更新/);
-  assert.throws(()=>idealCommandSchema.parse({...request,reason:' '}));
+  assert.throws(()=>idealCommandSchema.parse({...request,reason:'x'.repeat(3001)}));
+  assert.throws(()=>idealCommandSchema.parse({...request,suggestion:'x'.repeat(6001)}));
   const log=[];const broken=await runner.command({...request,includeReview:true},async(messages,task)=>{log.push(JSON.parse(messages[1].content));throw new Error('invalid key');},'fixture');
   const failed=await finish(runner,broken.job.id);assert.equal(failed.status,'failed');assert.deepEqual(await runner.store.read(source.id),before);
   assert.equal(log.length,1);assert.deepEqual(log[0].rebuild.review,source.review);

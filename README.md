@@ -18,9 +18,9 @@ Author: [Yankai-D](https://github.com/Yankai-D) · [Repository](https://github.c
 
 ## 下载与使用 / Download and use
 
-[下载 Windows x64 安装包和对外源码](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.32)。0.1.32 已通过本机工程验收，作为预发布版本提供。安装后从桌面或开始菜单打开“烛光笔记 Candlelight”，无需安装 Node 或浏览器。
+[下载 Windows x64 安装包和对外源码](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.42)。0.1.42 已通过本机工程验收，作为预发布版本提供。安装后从桌面或开始菜单打开“烛光笔记 Candlelight”，无需安装 Node 或浏览器。
 
-[Download the Windows x64 installer and public source](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.32). Version 0.1.32 passed local engineering checks and is offered as a prerelease. Open “烛光笔记 Candlelight” from the desktop or Start menu; Node and an external browser are not required.
+[Download the Windows x64 installer and public source](https://github.com/Yankai-D/Candlelight_Notes/releases/tag/v0.1.42). Version 0.1.42 passed local engineering checks and is offered as a prerelease. Open “烛光笔记 Candlelight” from the desktop or Start menu; Node and an external browser are not required.
 
 首次引导可填写学习画像和 DeepSeek 连接，也可直接跳过，之后在设置中调整。“?”、F1 和桌面帮助菜单提供分主题指南。发行包仅附三份描述性统计公开选编及完整署名，不含作者的 Key、画像、个人资料或笔记。
 
@@ -95,9 +95,9 @@ Open <http://127.0.0.1:5173>. The public entry point verifies and prepares the t
 
 See the [architecture](docs/architecture.md) and [project walkthrough](docs/project-walkthrough.md). Explanation templates and long-term usage feedback are maintained product assets; evidence and limits are documented in [product quality](docs/product-quality.md).
 
-0.1.32 取消单章修订、跨章共享额度、执行层调用与恢复次数，以及诊断调查轮数上限。旧记录的剩余额度不再阻断续接。恢复器可检查、搜索和原子修改当前候选，再通过原校验器；有效修正可持续进行，用户取消和重复无进展仍会停止。联合笔记按任务分析、资料分析、章节关系规划与逐章原文分析组织，讲义围绕精简知识点、方法、例题和变体写作。
+0.1.42 重置复习讲义规划：从学习目标确定需要掌握的知识、方法、关键推理和代表题，再选择证据并整章写作。来源字数只影响阅读批次，不再决定要拼接多少段正文；重复或无关材料可有理由地省略，所选原页可按需展开。已有讲义通过“调整并重新生成”采用新规划。见 [讲义契约](docs/lecture-style.md)与 [跨章教学安排](docs/teaching-plan.md)。
 
-Version 0.1.32 removes implicit chapter, shared-notebook, execution-call, recovery-action and investigation-turn ceilings. Exhausted legacy allowances no longer block continuation. The controller can inspect, search and atomically edit the current candidate before original validation; effective corrections can continue, while cancellation and repeated non-progress remain stopping conditions. Bundle notes use task analysis, material analysis, chapter relationships and per-chapter source analysis; lectures organize concise concepts, methods, examples and variations.
+Version 0.1.42 resets revision-handout planning around learning goals: choose the knowledge, methods, decisive reasoning and representative problems, select evidence, then draft a whole chapter. Source volume controls reading batches rather than prose fragments to concatenate. Repeated or irrelevant material may be omitted with reasons; selected pages can be expanded on demand. Existing handouts adopt the new plan through explicit adjustment and regeneration. See the [handout contract](docs/lecture-style.md) and [cross-chapter teaching plan](docs/teaching-plan.md).
 
 ## 验证与构建 / Verification and builds
 
@@ -112,13 +112,13 @@ npm run package:desktop
 
 `check` uses isolated data and mock providers without reading personal keys. Tests, authored calibration cases, public selections, and versioned development experiments are retained for replay. Historical local revision IDs identify evidence sources; those private commits are not included in public Git history.
 
-0.1.32 本机验收通过 **517 项测试和 15 个工程检查阶段**，包含浏览器流程，并验证 0.1.31 → 0.1.32 应用数据读取、重启保存及打包后的多格式解析。安装器解出的 36 个文件与受测程序逐字节一致，12,098 个内部应用与资源文件通过审计。隔离安装测试覆盖真实文件锁回退、重新安装及卸载保留资料；首次并行测试出现错误日志缺少文件名，原始失败记录已保留，随后未改代码的串行复测通过全部六项。见 [版本记录](docs/releases/v0.1.32.json)和 [公开发布说明](PUBLICATION.md)。
+0.1.42 本机验收通过 **615 项测试和 16 个工程检查阶段**，包含浏览器流程、打包程序启动与退出、中文公式 PDF 导出，以及 0.1.32 / 0.1.41 → 0.1.42 的笔记和设置兼容。六项隔离安装事务、十项进程识别场景全部通过；最终安装器解出的 36 个文件与受测程序一致，12,119 个包内文件通过审计。见 [版本记录](docs/releases/v0.1.42.json)和 [公开发布说明](PUBLICATION.md)。
 
-Local verification for 0.1.32 passed **517 tests and 15 engineering stages**, including browser workflows, application-data compatibility from 0.1.31, restart persistence and packaged multi-format parsing. All 36 extracted installer files match the tested application; 12,098 internal files passed auditing. Isolated transactions cover real file-lock rollback, reinstallation and retaining materials on uninstall. An initial parallel run lacked the filename in its failure log; the failure is retained, and an unchanged serial rerun passed all six transactions. See the [release record](docs/releases/v0.1.32.json) and [publication notes](PUBLICATION.md).
+Local verification for 0.1.42 passed **615 tests and 16 engineering stages**, including browser workflows, packaged startup/shutdown, Chinese/math PDF export and note/settings compatibility from both 0.1.32 and 0.1.41. Six isolated installation transactions and ten process-detection scenarios passed. All 36 files extracted from the final installer match the tested runtime; 12,119 packaged files passed auditing. See the [release record](docs/releases/v0.1.42.json) and [publication notes](PUBLICATION.md).
 
-本轮取消额度的验证没有真实模型调用，不新增教学质量结论。异常触发审查不保证发现所有语义问题，工程验收不证明普遍教学优势或完整跨平台兼容。安装包未签名；安装测试使用本机隔离身份与目录，不等同于空白 Windows VM 验收。远程 CI 以 GitHub Actions 实际状态为准。
+本轮规划重置与安装包验收没有真实模型调用，不新增教学质量或节费结论。离线变形测试验证同一知识材料重复 40 倍不增加写作任务，但不能证明模型始终选材准确；短章节新增一次取舍规划也有成本。历史真实试验与离线回放分别保留。安装包未签名，隔离本机安装测试不等同于空白 Windows VM 验收。远程 CI 以 GitHub Actions 实际状态为准。
 
-Quota-removal verification made no live model calls and establishes no new teaching-quality claim. Anomaly-triggered review cannot detect every semantic error; engineering checks do not establish a general teaching advantage or complete cross-platform compatibility. The installer is unsigned. Installation tests use isolated local identities and directories, not a clean Windows VM. GitHub Actions reports actual remote CI status.
+Planning-reset and installer verification made no live model calls and establish no new teaching-quality or cost-saving claim. Offline metamorphic tests show unchanged writing-task counts under forty-fold equivalent source volume, not universally correct model selection; short chapters also incur an additional planning call. Historical live trials and offline replays remain separate. The installer is unsigned, and isolated local installation tests are not clean-Windows-VM acceptance. GitHub Actions reports actual remote CI status.
 
 安装包放在 Releases，不进入 Git 历史；源码快照附来源清单，发行资产附 SHA-256。自用开发历史、运行数据与临时产物不属于公开仓库。
 

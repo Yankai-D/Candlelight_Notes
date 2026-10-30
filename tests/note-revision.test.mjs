@@ -23,8 +23,11 @@ const config = { baseUrl: 'https://api.deepseek.com', model: 'test-only', apiKey
 function review(context, index, problem = '阈值有误。') {
   const issue = Number.isInteger(index);
   return { candidateDigest: context.binding.candidateDigest, verdict: issue ? 'revise' : 'accept',
+    ...(context.revisionReview ? { resolutions: context.revisionReview.findings.map(f => ({ findingId: f.id,
+      status: issue && context.revisionReview.changeMap.find(c => c.findingId === f.id)?.currentIndices.includes(index) ? 'unresolved' : 'resolved', reason: 'Fixture checks the prior target after the actual edit.' })) } : {}),
     checks: ['goal', 'coverage', 'grounding', 'clarity'].map(dimension => ({ dimension, status: issue && dimension === 'grounding' ? 'issue' : 'pass' })),
     findings: issue ? [{ id: 'f1', dimension: 'grounding', target: { type: 'replace', index }, noteEvidenceId: context.blocks[index].evidenceId,
+      ...(context.revisionReview?.changeMap.some(c => c.currentIndices.includes(index)) ? { priorFindingId: context.revisionReview.changeMap.find(c => c.currentIndices.includes(index)).findingId } : {}),
       sourceEvidenceIds: [context.source[0].excerpts[0].id], problem, instruction: `只修正本段的${problem}` }] : [], summary: issue ? problem : '已解决。' };
 }
 
@@ -97,7 +100,7 @@ test('two bounded content corrections carry previous findings and exact mappings
     if (messages[0].content.startsWith('note-review-patch-v1')) {
       phases.push('patch');
       const edits = ++patches === 1
-        ? [{ findingId: 'f1', ...paragraph('更正阈值为 0.05。') }, { findingId: 'f1', ...context.blocks[1] }]
+        ? [{ findingId: 'f1', ...paragraph('更正阈值为 0.05。') }, { findingId: 'f1', ...context.blocks[1], index: undefined }]
         : [{ findingId: 'f1', ...paragraph('乘积公式成立的前提是事件相互独立。') }];
       return response({ candidateDigest: context.binding, edits });
     }

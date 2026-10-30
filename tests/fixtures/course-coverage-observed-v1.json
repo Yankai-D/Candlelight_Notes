@@ -1,0 +1,685 @@
+{
+  "origin": "Original project-authored probability course; actual DeepSeek outputs from 2026-10-30, no personal material. Development replay, not independent quality evidence.",
+  "cases": [
+    {
+      "arm": "baseline",
+      "call": 13,
+      "sourceRunHash": "a6e8a09fe5e9e3f387a024ad873c473f13866d037c9f957d4de70dcae51fda70",
+      "synthesis": {
+        "units": [
+          {
+            "id": "k1",
+            "topic": "条件期望损失与决策阈值",
+            "concept": "给定后验p，拦截的期望损失为C_FP(1−p)，放行的期望损失为C_FN p；C_FP、C_FN为正且同单位，只计这两项误判损失。",
+            "method": [
+              "写出两行动的条件期望损失",
+              "比较C_FP(1−p)与C_FN p",
+              "解得拦截更好当且仅当p>C_FP/(C_FP+C_FN)，相等时期望损失相同",
+              "阈值由代价决定，不是固定50%"
+            ],
+            "sourceEvidenceIds": [
+              "e7-0-0dfb50bb2b3d"
+            ],
+            "examples": [],
+            "variants": []
+          },
+          {
+            "id": "k2",
+            "topic": "同一后验在不同代价下的行动",
+            "concept": "p=2/13时，C_FP=1、C_FN=9给出阈值1/10，拦截损失11/13、放行损失18/13，故拦截；C_FP=4、C_FN=6给出阈值4/10，拦截损失44/13、放行损失12/13，故放行。",
+            "method": [
+              "先算阈值C_FP/(C_FP+C_FN)",
+              "再算两行动期望损失核对",
+              "按p与阈值大小或损失比较下结论"
+            ],
+            "sourceEvidenceIds": [
+              "e8-0-4c27e9b3b746"
+            ],
+            "examples": [
+              {
+                "aim": "训练把同一后验代入不同代价、得到不同行动，并落实阈值公式与损失计算。",
+                "sourceEvidenceIds": [
+                  "e8-0-4c27e9b3b746"
+                ]
+              }
+            ],
+            "variants": [
+              {
+                "difference": "相对主方法只改变代价C_FP、C_FN，后验p不变，结论由拦截变为放行，说明阈值随代价移动。",
+                "sourceEvidenceIds": [
+                  "e8-0-4c27e9b3b746"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "k3",
+            "topic": "决策的边界与常见错法",
+            "concept": "最优期望损失不保证每件判断正确；仅有单次s、f时不能假定重复测量条件独立并直接相乘。",
+            "method": [
+              "把期望损失与单件正确性区分",
+              "不把单次s、f直接相乘当作重复测量概率"
+            ],
+            "sourceEvidenceIds": [
+              "e9-0-7494ce27fb11",
+              "e10-0-2447c6fdc0bc"
+            ],
+            "examples": [],
+            "variants": []
+          }
+        ],
+        "merges": [
+          {
+            "sourceEvidenceIds": [
+              "e10-0-2447c6fdc0bc"
+            ],
+            "intoUnit": "k3",
+            "reason": "复习单中与前三节重复的定义及2/13、2/3结果不重讲，只把其中“行动由损失而非50%决定”“最优期望损失不等于无错误”等错法提示并入边界提示。"
+          },
+          {
+            "sourceEvidenceIds": [
+              "e11-0-a4927461185b"
+            ],
+            "intoUnit": "k3",
+            "reason": "课程通知属行政信息，按用户要求省去，不进入讲义正文。"
+          }
+        ],
+        "omissions": [
+          {
+            "sourceEvidenceIds": [
+              "e11-0-a4927461185b"
+            ],
+            "reason": "教室调整、作业文件名、签到等属行政信息，用户明确要求省去。"
+          },
+          {
+            "sourceEvidenceIds": [
+              "e10-0-2447c6fdc0bc"
+            ],
+            "reason": "复习单重复的条件概率定义与2/13、2/3结果已在前两章讲过，本章只引用不重讲。"
+          }
+        ]
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "决策阈值：把后验变成拦截或放行",
+          "sourcePages": [
+            7
+          ],
+          "sourceQuote": "已知某件产品有缺陷的后验概率 p。只有两种行动：拦截或放行。"
+        },
+        {
+          "type": "paragraph",
+          "text": "上一章得到报警产品有缺陷的后验概率 \\(p\\)。这一章把 \\(p\\) 变成行动：拦截还是放行。关键结论是：**行动由两类误判的代价决定，而不是由 \\(p\\) 是否超过 50% 决定。**",
+          "sourcePages": [
+            7,
+            9
+          ],
+          "sourceQuote": "损失比较才把概率变成行动。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "先约定符号。只有两种行动：拦截或放行。拦截缺陷品、放行合格品都不产生损失；拦截合格品损失 \\(C_{FP}\\)，放行缺陷品损失 \\(C_{FN}\\)。这里 \\(C_{FP}\\)、\\(C_{FN}\\) 是正数且用同一单位，本课只计这两项误判损失，不含检测、库存等额外成本。",
+          "sourcePages": [
+            7
+          ],
+          "sourceQuote": "拦截缺陷品和放行合格品的损失均为零；拦截合格品损失 C_FP，放行缺陷品损失 C_FN，两者是正数且用同一单位。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "给定后验 \\(p=P(D\\mid +)\\)，即这件产品确有缺陷的概率。**拦截**时只有合格品会被误拦，其概率为 \\(1-p\\)，故条件期望损失为 \\(C_{FP}(1-p)\\)；**放行**时只有缺陷品会被误放，其概率为 \\(p\\)，故条件期望损失为 \\(C_{FN}\\,p\\)。",
+          "sourcePages": [
+            7
+          ],
+          "sourceQuote": "条件期望损失分别为 C_FP(1−p)、C_FN p。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept",
+            "method"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "比较两式：拦截更好当且仅当 \\(C_{FP}(1-p)<C_{FN}\\,p\\)。展开并移项得 \\(C_{FP}<(C_{FP}+C_{FN})p\\)，即\n\\[p>\\frac{C_{FP}}{C_{FP}+C_{FN}}.\\]\n这就是决策阈值。当 \\(p\\) 等于该阈值时，两种行动的期望损失相同，选哪个都一样。阈值只由代价比决定，所以不能一律用 50% 作阈值。",
+          "sourcePages": [
+            7
+          ],
+          "sourceQuote": "比较两式，拦截更好当且仅当 p>C_FP/(C_FP+C_FN)；相等时两者期望损失相同。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "method"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**资料例题（同一后验，两种代价）。** 回到第一批报警产品，后验 \\(p=2/13\\)。\n\n情形一：\\(C_{FP}=1\\)，\\(C_{FN}=9\\)。阈值 \\(\\frac{1}{1+9}=\\frac{1}{10}\\)。因为 \\(\\frac{2}{13}>\\frac{1}{10}\\)，应拦截。核对损失：拦截 \\(1\\cdot(1-\\frac{2}{13})=\\frac{11}{13}\\)，放行 \\(9\\cdot\\frac{2}{13}=\\frac{18}{13}\\)，拦截更小。\n\n情形二：\\(C_{FP}=4\\)，\\(C_{FN}=6\\)。阈值 \\(\\frac{4}{4+6}=\\frac{4}{10}\\)。因为 \\(\\frac{2}{13}<\\frac{4}{10}\\)，应放行。核对损失：拦截 \\(4\\cdot\\frac{11}{13}=\\frac{44}{13}\\)，放行 \\(6\\cdot\\frac{2}{13}=\\frac{12}{13}\\)，放行更小。",
+          "sourcePages": [
+            8
+          ],
+          "sourceQuote": "若 C_FP=1、C_FN=9，阈值为 1/10；拦截损失 11/13，放行损失 18/13，所以拦截。若改为 C_FP=4、C_FN=6，阈值为 4/10；拦截损失 44/13，放行损失 12/13，所以放行。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "example"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**变体：只改代价。** 两情形中风险估计 \\(p=2/13\\) 完全相同，行动却从拦截变为放行，原因只是 \\(C_{FP}\\) 相对 \\(C_{FN}\\) 变大，阈值从 \\(1/10\\) 移到 \\(4/10\\)。这正说明阈值随代价移动，不能固定为 50%。",
+          "sourcePages": [
+            8
+          ],
+          "sourceQuote": "风险估计相同，行动仍可不同，因为代价改变。不能一律用 50% 作为决策阈值。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "variant"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**边界与常见错法。** 按期望损失选行动，只保证平均损失最小，不保证每一件都判断正确；最优期望损失不等于零错误。另外，资料只给出单次灵敏度 \\(s\\) 与误报率 \\(f\\)，不能假定重复测量在给定缺陷或非缺陷下条件独立，从而把两次概率直接相乘。",
+          "sourcePages": [
+            9,
+            10
+          ],
+          "sourceQuote": "较低的期望损失不保证每件产品都判断正确。仅有单次 s、f 时，也不能假定重复测量在给定 D 或非D 下条件独立，直接把两次概率相乘。",
+          "learningUnitId": "k3",
+          "learningRoles": [
+            "concept"
+          ]
+        }
+      ],
+      "observedGaps": [
+        {
+          "learningUnitId": "k2",
+          "learningRole": "concept"
+        },
+        {
+          "learningUnitId": "k2",
+          "learningRole": "method"
+        },
+        {
+          "learningUnitId": "k3",
+          "learningRole": "method"
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "call": 7,
+      "sourceRunHash": "4b79a32611aaa67b8b94ada5bb576062c929ff4d4d7c627b0457d944a20c16e8",
+      "synthesis": {
+        "units": [
+          {
+            "id": "k1",
+            "topic": "条件概率：参照总体与分母",
+            "conceptIds": [
+              "t1"
+            ],
+            "exampleIds": [],
+            "concept": "条件概率P(D|+)的参照总体是报警产品，P(+|D)的参照总体是缺陷产品；定义P(D|+)=P(D∩+)/P(+)，要求P(+)>0。交集P(D∩+)对称，但条件概率通常不对称。",
+            "method": [
+              "先问“在哪个总体中取比例”，据此确定分母",
+              "写出交集人数或概率作分子，条件事件总体作分母",
+              "用P(+)>0核对定义可用"
+            ],
+            "sourceEvidenceIds": [
+              "e1-0-4bd3e5e377af",
+              "e3-0-598b2cedba67"
+            ],
+            "examples": [],
+            "variants": []
+          },
+          {
+            "id": "k2",
+            "topic": "用人数表算报警产品的缺陷比例",
+            "conceptIds": [
+              "t1",
+              "t2"
+            ],
+            "exampleIds": [
+              "e1"
+            ],
+            "concept": "在二分类人数表中，P(D|+)等于“缺陷且报警”人数除以报警总人数；本例为90/585=2/13≈15.38%。",
+            "method": [
+              "读表取报警列总数585",
+              "取缺陷且报警的交集90",
+              "作比90/(90+495)=2/13，并说明90/100回答的是缺陷品中报警的比例"
+            ],
+            "sourceEvidenceIds": [
+              "e2-0-49200e8add8b"
+            ],
+            "examples": [
+              {
+                "aim": "首次完整训练从人数表定分母、取交集、算后验，并区分90/585与90/100两个不同问题。",
+                "sourceEvidenceIds": [
+                  "e2-0-49200e8add8b"
+                ]
+              }
+            ],
+            "variants": [
+              {
+                "difference": "把分母从报警总数585换成全体10000或缺陷总数100，得到495/10000=4.95%、495/9900=5%与90/100=90%，数值改变说明条件总体改变。",
+                "sourceEvidenceIds": [
+                  "e2-0-49200e8add8b",
+                  "e3-0-598b2cedba67"
+                ]
+              }
+            ]
+          }
+        ],
+        "merges": [
+          {
+            "sourceEvidenceIds": [
+              "e1-0-4bd3e5e377af",
+              "e3-0-598b2cedba67"
+            ],
+            "intoUnit": "k1",
+            "reason": "两处都在讲条件概率的参照总体与分母，S3补充定义式与P(+)>0条件，合并为一次定义讲解。"
+          },
+          {
+            "sourceEvidenceIds": [
+              "e2-0-49200e8add8b",
+              "e3-0-598b2cedba67"
+            ],
+            "intoUnit": "k2",
+            "reason": "S2给出贯穿例题与2/13，S3的495/9900与495/10000对照服务于同一读表方法，作为变体并入而非另设单元。"
+          }
+        ],
+        "omissions": [
+          {
+            "sourceEvidenceIds": [
+              "e3-0-598b2cedba67"
+            ],
+            "reason": "区间估计、显著性检验、仪器训练属课程明确不讨论的旁支，与本章目标无关，不写入讲义。"
+          }
+        ]
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "条件概率：先定分母，再读人数表",
+          "sourcePages": [
+            1
+          ],
+          "sourceQuote": "条件概率 P(D|+) 的参照总体是报警产品；P(+|D) 的参照总体是缺陷产品，两个分母不同。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "条件概率回答的是“在某个总体里取比例”。记 \\(D\\) 为产品有缺陷，\\(+\\) 为仪器报警。\\(P(D|+)\\) 读作“在报警的条件下产品有缺陷的概率”，它的参照总体是**所有报警产品**；\\(P(+|D)\\) 读作“在缺陷的条件下仪器报警的概率”，参照总体是**所有缺陷产品**。两者分子都来自同一个交集 \\(D\\cap+\\)，但分母不同，所以数值一般不同。交集本身是对称的：\\(D\\cap+\\) 与 \\(+\\cap D\\) 是同一批产品；不对称的是条件概率。",
+          "sourcePages": [
+            1
+          ],
+          "sourceQuote": "交集 P(D∩+) 具有对称性，条件概率通常不具有对称性。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "把上面的读法写成公式：\\[P(D|+)=\\frac{P(D\\cap+)}{P(+)}，\\qquad P(+)>0。\\] 分子是“缺陷且报警”的概率，分母是条件事件“报警”的概率。条件 \\(P(+)>0\\) 不能省：若报警事件概率为零，分母为零，条件概率没有定义。用人数表计算时，概率之比等于人数之比，可以直接用人数作分子分母。",
+          "sourcePages": [
+            3
+          ],
+          "sourceQuote": "把条件概率写成交集除以条件事件概率：P(D|+)=P(D∩+)/P(+)（P(+)>0）。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept",
+            "method"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**判断一个比例回答哪个问题，只看分母。** 分母是报警总数，算的是 \\(P(D|+)\\)；分母是缺陷总数，算的是 \\(P(+|D)\\)；分母是全体产品，算的是联合比例 \\(P(D\\cap+)\\) 一类的量。读表时先问“在哪个总体中取比例”，再去找对应的那一列或那一行的总数。",
+          "sourcePages": [
+            1
+          ],
+          "sourceQuote": "条件概率 P(D|+) 的参照总体是报警产品；P(+|D) 的参照总体是缺陷产品，两个分母不同。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "method"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "代表例题：报警产品中有缺陷的比例",
+          "sourcePages": [
+            2
+          ],
+          "sourceQuote": "贯穿例题：一批 10000 件产品中恰有 100 件缺陷品、9900 件合格品。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "example"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**题干。** 一批 10000 件产品中恰有 100 件缺陷品、9900 件合格品。仪器对缺陷品报警 90 件、不报警 10 件；对合格品报警 495 件、不报警 9405 件。报警总数为 585，不报警总数为 9415。问：随机抽取的报警产品有缺陷的比例是多少？",
+          "sourcePages": [
+            2
+          ],
+          "sourceQuote": "仪器对缺陷品报警 90 件、不报警 10 件；对合格品报警 495 件、不报警 9405 件。两列报警总数为 585、不报警总数为 9415。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "example"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**思路。** 所求是 \\(P(D|+)\\)，条件事件是“报警”，所以分母取报警总数 585，而不是 10000 或 100。分子取“缺陷且报警”的交集人数 90。",
+          "sourcePages": [
+            2
+          ],
+          "sourceQuote": "问：随机抽取的报警产品有缺陷的比例？",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "example",
+            "method"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**计算。** \\[P(D|+)=\\frac{90}{90+495}=\\frac{90}{585}=\\frac{2}{13}\\approx 15.38\\%。\\] 即报警产品中约 15.38% 真的有缺陷。注意 \\(90/100=90\\%\\) 回答的是另一个问题：缺陷品中仪器报警的比例 \\(P(+|D)\\)。它的分母是缺陷总数 100，与 585 不同，所以 90% 不是 2/13 的近似，两者不能互相替代。",
+          "sourcePages": [
+            2
+          ],
+          "sourceQuote": "答案为 90/(90+495)=2/13，约 15.38%；90/100=90% 回答的是另一问题。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "example"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "变体：误报率的两个分母",
+          "sourcePages": [
+            3
+          ],
+          "sourceQuote": "全体产品中误报比例 495/10000=4.95%，而在合格品中误报率 495/9900=5%，二者分母仍不同。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "variant"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "同一批数据里，误报人数都是 495，但换分母就换问题：\\(495/10000=4.95\\%\\) 是全体产品中误报的比例；\\(495/9900=5\\%\\) 是合格品中误报的比例，即 \\(P(+|\\text{非}D)\\)。数值接近只是因为合格品占了绝大多数，含义并不相同。这与上一段 90/100 和 90/585 的对照是同一条规则：**先定条件事件的总体，再取交集作分子**。",
+          "sourcePages": [
+            3
+          ],
+          "sourceQuote": "全体产品中误报比例 495/10000=4.95%，而在合格品中误报率 495/9900=5%，二者分母仍不同。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "variant",
+            "method"
+          ]
+        }
+      ],
+      "observedGaps": [
+        {
+          "learningUnitId": "k2",
+          "learningRole": "concept"
+        }
+      ]
+    },
+    {
+      "arm": "candidate",
+      "call": 13,
+      "sourceRunHash": "4b79a32611aaa67b8b94ada5bb576062c929ff4d4d7c627b0457d944a20c16e8",
+      "synthesis": {
+        "units": [
+          {
+            "id": "k1",
+            "topic": "全概率公式与Bayes形式：把人数计算写成π、s、f",
+            "conceptIds": [
+              "t3"
+            ],
+            "exampleIds": [
+              "e1"
+            ],
+            "concept": "记π=P(D)、s=P(+|D)、f=P(+|非D)。报警事件由缺陷品报警与合格品报警两部分组成，故P(+)=sπ+f(1−π)；再由条件概率定义得P(D|+)=sπ/[sπ+f(1−π)]，要求分母大于零。f(1−π)是合格品中的报警来源，不能漏。",
+            "method": [
+              "写出π、s、f三个比率的含义",
+              "用D与非D分割报警事件，得P(+)=sπ+f(1−π)",
+              "代入P(D|+)=P(D∩+)/P(+)，用P(D∩+)=sπ得后验公式",
+              "检查分母sπ+f(1−π)>0"
+            ],
+            "sourceEvidenceIds": [
+              "e4-0-40980c38c661",
+              "e5-0-00febe711a40"
+            ],
+            "examples": [
+              {
+                "aim": "用第一批数据核对公式sπ/[sπ+f(1−π)]代入后仍得2/13，确认与人数表一致，不重走整套人数计算。",
+                "sourceEvidenceIds": [
+                  "e4-0-40980c38c661",
+                  "e5-0-00febe711a40"
+                ]
+              }
+            ],
+            "variants": []
+          },
+          {
+            "id": "k2",
+            "topic": "基率变化：π改变如何改变后验",
+            "conceptIds": [
+              "t4"
+            ],
+            "exampleIds": [
+              "e2"
+            ],
+            "concept": "在s、f不变时，π变化会改变后验。π小时合格品数量大，即使f较小，f(1−π)仍可能超过sπ，于是高灵敏度s仍对应低后验。相同s、f不保证相同P(D|+)；把仪器性能从一批迁移到另一批是显式假设。",
+            "method": [
+              "固定s、f，只改π",
+              "分别算缺陷报警sπ与合格报警f(1−π)的人数或概率",
+              "后验=sπ/[sπ+f(1−π)]",
+              "说明结果依赖s、f跨批不变的假设"
+            ],
+            "sourceEvidenceIds": [
+              "e5-0-00febe711a40",
+              "e6-0-b2abb0aed1aa"
+            ],
+            "examples": [
+              {
+                "aim": "在s=0.9、f=0.05不变假设下，缺陷率10%时算出900/(900+450)=2/3，落实基率变化对后验的影响并说明迁移假设。",
+                "sourceEvidenceIds": [
+                  "e6-0-b2abb0aed1aa"
+                ]
+              }
+            ],
+            "variants": [
+              {
+                "difference": "相对第一批π=0.01，本变体只把基率改为π=0.1，s、f保持不变，后验由2/13升到2/3；关键新增条件是仪器性能跨批迁移的显式假设。",
+                "sourceEvidenceIds": [
+                  "e6-0-b2abb0aed1aa"
+                ]
+              }
+            ]
+          }
+        ],
+        "merges": [
+          {
+            "sourceEvidenceIds": [
+              "e4-0-40980c38c661",
+              "e5-0-00febe711a40"
+            ],
+            "intoUnit": "k1",
+            "reason": "S1给出公式推导，S2给出同一例题的代入核对与人数解释，属同一方法，合并为一个单元，正文只写一次。"
+          },
+          {
+            "sourceEvidenceIds": [
+              "e5-0-00febe711a40",
+              "e6-0-b2abb0aed1aa"
+            ],
+            "intoUnit": "k2",
+            "reason": "S2的基率解释与S3的10%变体共同说明π变化对后验的影响，合并讲授。"
+          }
+        ],
+        "omissions": [
+          {
+            "sourceEvidenceIds": [
+              "e5-0-00febe711a40"
+            ],
+            "reason": "两份课件为同一例题的重复表述，正文只保留一次核对，不重复计算。"
+          }
+        ]
+      },
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "基率变化：从人数表到全概率与Bayes形式",
+          "sourcePages": [
+            4
+          ],
+          "sourceQuote": "复习：把分母缩小到条件事件。仍用上一课 10000 件产品，100 缺陷，缺陷报警 90，合格报警 495。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "上一章用人数表直接数出报警产品中缺陷品的比例。本章把同一件事写成三个比率，得到可以换基率、换批次直接代入的公式。记 \\(\\pi=P(D)\\) 为缺陷率（基率），\\(s=P(+|D)\\) 为灵敏度（缺陷品被报警的比例），\\(f=P(+|\\text{非}D)\\) 为误报率（合格品被报警的比例）。三个量分别以全体产品、缺陷品、合格品为分母，不能混用。",
+          "sourcePages": [
+            4
+          ],
+          "sourceQuote": "令 π=P(D)、s=P(+|D)、f=P(+|非D)，则 π=0.01、s=0.9、f=0.05。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**推导：报警事件的两条来源。** 报警的产品要么是缺陷品，要么是合格品，这两类互不相交且合起来是全部产品，所以报警事件被分成“缺陷且报警”与“合格且报警”两部分。由乘法关系 \\(P(D\\cap+)=P(D)P(+|D)=s\\pi\\)，以及 \\(P(\\text{非}D\\cap+)=P(\\text{非}D)P(+|\\text{非}D)=f(1-\\pi)\\)，相加得全概率公式\n\\[P(+)=s\\pi+f(1-\\pi).\\]\n再代入条件概率定义 \\(P(D|+)=\\frac{P(D\\cap+)}{P(+)}\\)，分子用 \\(s\\pi\\)，即得 Bayes 形式\n\\[P(D|+)=\\frac{s\\pi}{s\\pi+f(1-\\pi)},\\qquad s\\pi+f(1-\\pi)>0.\\]\n分母大于零是公式成立的条件：若报警事件概率为零，条件概率没有定义。",
+          "sourcePages": [
+            4
+          ],
+          "sourceQuote": "按 D 与非D 分割报警事件，由全概率公式 P(+)=sπ+f(1−π)，得到 P(D|+)=sπ/[sπ+f(1−π)]，要求分母大于零。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept",
+            "method"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**为什么不能漏掉 \\(f(1-\\pi)\\)。** 分母中 \\(s\\pi\\) 是缺陷品贡献的报警，\\(f(1-\\pi)\\) 是合格品贡献的报警。若只保留 \\(s\\pi\\)，后验就退化成 \\(s\\)，等于把“缺陷品中报警的比例”当成“报警品中缺陷的比例”，正是上一章强调过的分母错位。",
+          "sourcePages": [
+            4
+          ],
+          "sourceQuote": "f(1−π)是合格品中的报警来源",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**核对：第一批数据代入公式仍得 \\(2/13\\)。** 取 \\(\\pi=0.01\\)、\\(s=0.9\\)、\\(f=0.05\\)，则 \\(s\\pi=0.009\\)，\\(f(1-\\pi)=0.05\\times0.99=0.0495\\)，于是\n\\[P(D|+)=\\frac{0.009}{0.009+0.0495}=\\frac{0.009}{0.0585}=\\frac{2}{13}\\approx15.38\\%.\\]\n这与上一章人数表算出的 \\(90/585\\) 一致（分子分母同乘 10000 即得人数）。此处只做公式核对，不重走整套人数计算。",
+          "sourcePages": [
+            4,
+            5
+          ],
+          "sourceQuote": "代入得 0.009/(0.009+0.0495)=2/13。",
+          "learningUnitId": "k1",
+          "learningRoles": [
+            "example"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**高灵敏度为何仍可能低后验。** \\(s=0.9\\) 与后验约 \\(15.38\\%\\) 回答的是两个不同问题：前者以缺陷品为总体，后者以报警品为总体。当 \\(\\pi\\) 很小时，合格品数量远多于缺陷品，即使 \\(f\\) 较小，\\(f(1-\\pi)\\) 仍可能超过 \\(s\\pi\\)，于是报警中大部分来自合格品的误报。这是人数（概率质量）的比较，不是灵敏度与后验的混同。",
+          "sourcePages": [
+            5
+          ],
+          "sourceQuote": "π 小时合格品数量大，即使 f 较小，f(1−π) 仍可能超过 sπ。这是人数来源的比较，不是把灵敏度和后验混同。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "基率变化：只改 \\(\\pi\\)，后验怎么变",
+          "sourcePages": [
+            6
+          ],
+          "sourceQuote": "资料例题的变体：换到 10000 件产品、缺陷率 10% 的另一批产品，并假设 s=0.9、f=0.05 仍适用。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**变体例题（资料原题）。** 换到 10000 件产品、缺陷率 10% 的另一批，并假设 \\(s=0.9\\)、\\(f=0.05\\) 仍适用。求报警产品有缺陷的后验概率。\n思路：\\(s\\)、\\(f\\) 不变，只把 \\(\\pi\\) 从 0.01 改为 0.1，分别算两条报警来源的期望人数再相除。\n计算：缺陷报警期望 \\(10000\\times0.1\\times0.9=900\\) 人；合格报警期望 \\(10000\\times0.9\\times0.05=450\\) 人；报警总数 \\(900+450=1350\\) 人，故\n\\[P(D|+)=\\frac{900}{1350}=\\frac{2}{3}\\approx66.7\\%.\\]\n用公式核对：\\(s\\pi=0.09\\)，\\(f(1-\\pi)=0.05\\times0.9=0.045\\)，\\(0.09/(0.09+0.045)=2/3\\)，与人数算法一致。",
+          "sourcePages": [
+            6
+          ],
+          "sourceQuote": "缺陷报警期望人数为 900，合格报警期望人数为 450，后验为 900/1350=2/3。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "example",
+            "variant"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**变体改变了什么。** 与第一批相比，唯一改动是基率 \\(\\pi\\) 由 0.01 升到 0.1，\\(s\\)、\\(f\\) 保持不变，后验便由 \\(2/13\\) 升到 \\(2/3\\)。原因是 \\(s\\pi\\) 随 \\(\\pi\\) 增大而增大，而 \\(f(1-\\pi)\\) 随 \\(\\pi\\) 增大而减小，两条来源的相对大小发生反转。这说明相同的 \\(s\\)、\\(f\\) 不保证相同的后验，后验还依赖基率。",
+          "sourcePages": [
+            6
+          ],
+          "sourceQuote": "相同 s、f 不会保证相同 P(D|+)。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "**成立条件必须写明。** \\(2/3\\) 这个结果依赖“仪器性能从一批迁移到另一批”的显式假设，即新批中 \\(s=0.9\\)、\\(f=0.05\\) 仍然成立。资料并未论证真实仪器总能迁移，因此不能把 \\(2/3\\) 当作任何批次都成立的结论；若新批的 \\(s\\)、\\(f\\) 改变，须重新测定后代入公式。",
+          "sourcePages": [
+            6
+          ],
+          "sourceQuote": "把仪器性能从一批迁移到另一批是此算例的显式假设，不能据此断言真实仪器总能迁移。",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "concept"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "本章得到的两个后验 \\(2/13\\) 与 \\(2/3\\) 将直接作为下一章的输入：把后验 \\(p\\) 与两类误判代价比较，就能决定报警产品该拦截还是放行，不再重算概率。",
+          "sourcePages": [
+            5,
+            6
+          ],
+          "sourceQuote": "相同 s、f 不会保证相同 P(D|+)",
+          "learningUnitId": "k2",
+          "learningRoles": [
+            "concept"
+          ]
+        }
+      ],
+      "observedGaps": [
+        {
+          "learningUnitId": "k2",
+          "learningRole": "method"
+        }
+      ]
+    }
+  ]
+}

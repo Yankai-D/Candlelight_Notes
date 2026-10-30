@@ -17,7 +17,7 @@ export const idealInputSchema = z.object({
 export const idealCommandSchema = z.discriminatedUnion('command', [
   z.object({ action: z.literal('ideal-tree'), command: z.literal('create'), input: idealInputSchema, requestId: z.string().uuid() }).strict(),
   z.object({ action: z.literal('ideal-tree'), command: z.literal('rebuild'), id: z.string().uuid(), revision: z.number().int().nonnegative(),
-    requestId: z.string().uuid(), suggestion: z.string().trim().min(4).max(6000), reason: z.string().trim().min(4).max(3000), includeReview: z.boolean().default(false) }).strict(),
+    requestId: z.string().uuid(), suggestion: z.string().trim().max(6000).default(''), reason: z.string().trim().max(3000).default(''), includeReview: z.boolean().default(false) }).strict(),
   z.object({ action: z.literal('ideal-tree'), command: z.literal('list') }).strict(),
   z.object({ action: z.literal('ideal-tree'), command: z.literal('delete'), id: z.string().uuid(), confirm: z.literal(true) }).strict(),
   ...['get', 'pause', 'resume', 'export'].map(command => z.object({ action: z.literal('ideal-tree'), command: z.literal(command), id: z.string().uuid() }).strict()),

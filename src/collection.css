@@ -27,11 +27,19 @@
 :root .library-home .folder-heading { margin: 37px 12px 10px; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 10px; letter-spacing: .5px; }
 .folder-heading>button { padding: 3px; display: grid; place-items: center; }
 .collection-folders { display: grid; gap: 3px; overflow: auto; scrollbar-width: thin; }
-:root .library-home .collection-folders>button { display: flex; align-items: center; gap: 9px; padding: 10px 13px; border-radius: 6px; color: var(--muted); font-size: 12px; min-width: 0; text-align: left; }
-.collection-folders>button>span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root .library-home .collection-folder-row { display: flex; align-items: center; border-radius: 7px; color: var(--muted); min-width: 0; }
+:root .library-home .collection-folder-link { flex: 1; display: flex; align-items: center; gap: 8px; padding: 11px 10px 11px 4px; border-radius: 6px; color: inherit; font-size: 12px; min-width: 0; text-align: left; }
+.collection-folder-link>span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.collection-folder-link>svg, .collection-folder-link>small { flex-shrink: 0; }
+:root .library-home .folder-disclosure, .folder-disclosure-space { display: grid; place-items: center; width: 24px; height: 32px; flex-shrink: 0; padding: 0; border-radius: 5px; color: inherit; }
+.folder-disclosure>svg { transition: transform .16s ease-out; }
+.folder-disclosure[aria-expanded="true"]>svg { transform: rotate(90deg); }
+:root .library-home .folder-disclosure:hover { background: var(--shelf-hover); color: var(--green); }
+:root .library-home .collection-folders button:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) { .folder-disclosure>svg { transition: none; } }
 .collection-folders small { font-size: 10px; }
-:root .library-home .collection-folders>button.active { background: var(--shelf-inset); color: var(--green); }
-:root .library-home :is(.collection-folders>button:hover, .collection-navigation>button:hover, .collection-row-menu:hover) { background: var(--shelf-inset); }
+:root .library-home .collection-folder-row.active { background: var(--shelf-inset); color: var(--green); }
+:root .library-home :is(.collection-folder-link:hover, .collection-navigation>button:hover, .collection-row-menu:hover) { background: var(--shelf-inset); }
 .collection-sidebar-bottom { margin-top: auto; padding-top: 24px; }
 :root .library-home .roots-entry { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 14px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--green); background: var(--paper); }
 .roots-entry>span { flex: 1; font-size: 12px; }
@@ -101,7 +109,7 @@
 .bundle-source-inventory summary { cursor: pointer; color: var(--green); }
 .bundle-source-inventory>div { display: flex; gap: 10px; align-items: flex-start; margin-top: 15px; }
 .bundle-source-inventory small { display: block; color: var(--muted); font-size: 10px; margin-top: 5px; }
-.bundle-source-reader { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+.bundle-source-reader { display: flex; flex-direction: column; min-height: 0; min-width: 0; max-width: 100%; height: 100%; }
 .bundle-source-reader>label { display: flex; gap: 9px; align-items: center; padding: 8px 0; font-size: 10px; color: var(--muted); }
 .bundle-source-reader select { flex: 1; min-width: 0; padding: 7px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); font-size: 11px; }
 .bundle-source-reader>.source-reader { flex: 1; min-height: 0; }
@@ -227,8 +235,7 @@
   .collection-navigation { margin-top: 12px; grid-template-columns: 1fr 1fr; gap: 5px!important; }
   :root .library-home .collection-navigation>button { padding: 9px 12px; }
   :root .library-home .folder-heading { margin: 10px 5px 5px; }
-  .collection-folders { display: flex; gap: 5px; }
-  :root .library-home .collection-folders>button { padding: 7px; white-space: nowrap; flex-shrink: 0; gap: 5px; }
+  .collection-folders { gap: 5px; }
   .collection-sidebar-bottom { position: absolute; right: 16px; top: 13px; padding: 0; display: flex; align-items: center; gap: 8px; }
   :root .library-home .roots-entry { padding: 6px; border: 0; background: transparent; }
   .roots-entry>span, .roots-entry>svg:last-child { display: none; }

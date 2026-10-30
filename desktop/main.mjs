@@ -4,7 +4,8 @@ import { mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { appOrigin, isAppURL, externalURL, rendererOptions, contentSecurityPolicy } from './policy.mjs';
+import { appOrigin, isAppURL, externalURL, rendererOptions } from './policy.mjs';
+import { createLocalBridge } from './local-bridge.mjs';
 import { renderDesktopPDF } from './pdf.mjs';
 import { brand } from '../shared/brand.mjs';
 import { checkForUpdate, releasesURL } from './updates.mjs';
@@ -121,17 +122,7 @@ async function start() {
   service = await import('../server/index.mjs');
   service.setPDFRenderer(renderDesktopPDF);
   const address = await service.serviceReady;
-  protocol.handle('pangzhu', async request => {
-    if (!isAppURL(request.url) || (request.initiatorOrigin && request.initiatorOrigin !== appOrigin)) return new Response('Forbidden', { status: 403 });
-    const url = new URL(request.url), headers = new Headers();
-    for (const name of ['content-type', 'x-reading-tree-token', 'range']) if (request.headers.has(name)) headers.set(name, request.headers.get(name));
-    try {
-      const response = await fetch(address + url.pathname + url.search, { method: request.method, headers, signal: request.signal,
-        ...(!['GET', 'HEAD'].includes(request.method) ? { body: await request.arrayBuffer() } : {}) });
-      const resultHeaders = new Headers(response.headers); resultHeaders.set('content-security-policy', contentSecurityPolicy);
-      return new Response(response.body, { status: response.status, headers: resultHeaders });
-    } catch { return new Response('Local application unavailable', { status: 503 }); }
-  });
+  protocol.handle('pangzhu', createLocalBridge(address, { report: recordRecovery }));
   session.defaultSession.setPermissionRequestHandler((_contents, _permission, done) => done(false));
   session.defaultSession.setPermissionCheckHandler(() => false);
   session.defaultSession.on('will-download', (_event, item) => {

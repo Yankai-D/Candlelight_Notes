@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { ArrowUpRight, BookOpen, Check, ChevronRight, FileText, Folder, Layers3, Library, MoreHorizontal, NotebookPen, PanelLeftOpen, Plus, Search, Trash2 } from 'lucide-react'
 import type { Collection, CollectionFolder, Knowledge, LearningDocument, StudyStatus } from '../types'
 import { orderLibraryDocuments } from '../../shared/library.mjs'
@@ -33,6 +33,20 @@ type Props = {
 export function LibraryHome(props: Props) {
   const { documents, collection, knowledge, view, onView, onSave, onOpen, onImport, onDelete, onProfile, filter, onFilter } = props
   const { folder, status, query } = filter
+  const ancestorPath = JSON.stringify(folderAncestors(collection, folder).slice(1).map((item: CollectionFolder) => item.id))
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => new Set(JSON.parse(ancestorPath)))
+  // Reveal a destination reached from a card, breadcrumb or import without
+  // opening unrelated branches or undoing a manual collapse of the current path.
+  useEffect(() => {
+    const parents: string[] = JSON.parse(ancestorPath)
+    if (parents.length) setExpandedFolders(current => parents.every(id => current.has(id)) ? current : new Set([...current, ...parents]))
+  }, [folder, ancestorPath])
+  const toggleFolder = (id: string) => setExpandedFolders(current => {
+    const next = new Set(current)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    return next
+  })
   const setFolder = (folder: string) => onFilter({ ...filter, folder })
   const setStatus = (status: LibraryFilter['status']) => onFilter({ ...filter, status })
   const setQuery = (query: string) => onFilter({ ...filter, query })
@@ -54,6 +68,8 @@ export function LibraryHome(props: Props) {
   const selectedFolder = collection.folders.find(item => item.id === folder)
   const path = folderAncestors(collection, folder).reverse() as CollectionFolder[]
   const outline = folderOutline(collection) as (CollectionFolder & { depth: number })[]
+  const folderParents = new Set(collection.folders.map(item => item.parentId).filter(Boolean))
+  const visibleFolders = outline.filter(item => folderAncestors(collection, item.id).slice(1).every((parent: CollectionFolder) => expandedFolders.has(parent.id)))
   const folderCounts = new Map<string, number>()
   for (const document of documents) {
     const id = collection.items[document.id]?.folderId
@@ -79,9 +95,12 @@ export function LibraryHome(props: Props) {
       <div className="collection-context"><span className="eyebrow">我的阅读空间</span><h2>{view === 'tree' ? '让知识相互连接' : '从一份资料开始'}</h2><p>{documents.filter(d => d.entryType !== 'note').length} 份资料 · {documents.filter(d => d.entryType === 'note').length} 份独立笔记</p></div>
       <div className="folder-heading"><span>文件夹与资料包</span><button aria-label="新建文件夹" onClick={newFolder}><Plus size={15} /></button></div>
       <nav className="collection-folders" aria-label="文件夹">
-        {[{ id: 'all', name: '全部资料', depth: 0 }, ...outline, { id: '', name: '未分类', depth: 0 }].map(item => <button key={item.id} title={item.id === 'all' || !item.id ? item.name : folderPath(collection, item.id)} style={{ paddingLeft: 10 + item.depth * 14 }} className={view === 'library' && folder === item.id ? 'active' : ''} onClick={() => { setFolder(item.id); onView('library') }}>
-          {item.id === 'all' ? <Library size={15} /> : collection.folders.find(folder => folder.id === item.id)?.kind === 'bundle' ? <Layers3 size={15} /> : <Folder size={15} />}<span>{item.name}</span><small>{item.id === 'all' ? documents.length : folderCounts.get(item.id) || 0}</small>
-        </button>)}
+        {[{ id: 'all', name: '全部资料', depth: 0 }, ...visibleFolders, { id: '', name: '未分类', depth: 0 }].map(item => <div key={item.id} data-folder-id={item.id} style={{ paddingLeft: 4 + Math.min(item.depth, 5) * 12 }} className={`collection-folder-row ${view === 'library' && folder === item.id ? 'active' : ''}`}>
+          {folderParents.has(item.id) ? <button className="folder-disclosure" aria-label={`${expandedFolders.has(item.id) ? '收起' : '展开'}文件夹 ${item.name}`} aria-expanded={expandedFolders.has(item.id)} onClick={() => toggleFolder(item.id)}><ChevronRight size={14} aria-hidden="true" /></button> : <span className="folder-disclosure-space" aria-hidden="true" />}
+          <button className="collection-folder-link" title={item.id === 'all' || !item.id ? item.name : folderPath(collection, item.id)} aria-current={view === 'library' && folder === item.id ? 'page' : undefined} onClick={() => { setFolder(item.id); onView('library') }}>
+            {item.id === 'all' ? <Library size={15} /> : collection.folders.find(folder => folder.id === item.id)?.kind === 'bundle' ? <Layers3 size={15} /> : <Folder size={15} />}<span>{item.name}</span><small>{item.id === 'all' ? documents.length : folderCounts.get(item.id) || 0}</small>
+          </button>
+        </div>)}
       </nav>
       <div className="collection-sidebar-bottom">
         {currentDocument && <button className="resume-reading" onClick={() => onOpen(currentDocument.id)}><span><BookOpen size={14} />继续阅读<ArrowUpRight size={14} /></span><strong>{currentDocument.library?.label || currentDocument.title}</strong><small>回到当前笔记</small></button>}

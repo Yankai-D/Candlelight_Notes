@@ -17,6 +17,7 @@ import fitz
 sys.stdout.reconfigure(encoding='utf-8')
 workspace = Path(__file__).resolve().parent.parent
 target = workspace / '.local-library'
+source_limits = json.loads((workspace / 'shared/source-limits.json').read_text(encoding='utf-8'))
 
 
 def prepare(manifest):
@@ -33,7 +34,7 @@ def prepare(manifest):
         if not raw.startswith(b'%PDF-') or len(raw) > 50 * 1024 * 1024:
             raise ValueError(f'Not a supported PDF: {source.name}')
         pdf = fitz.open(stream=raw, filetype='pdf')
-        if not 0 < len(pdf) <= 1000:
+        if not 0 < len(pdf) <= source_limits['maxPages']:
             raise ValueError('Page count outside supported range.')
         pages = [{'number': i + 1, 'text': unicodedata.normalize('NFKC', page.get_text()).strip()} for i, page in enumerate(pdf)]
         if not any(len(page['text']) > 30 for page in pages):
@@ -61,8 +62,15 @@ def prepare(manifest):
                     'sourcePages': list(range(page, min(page + 4, last_page) + 1)),
                     'status': 'empty', 'content': {'type': 'doc', 'content': [
                         {'type': 'paragraph', 'attrs': {'id': chapter_id + '-start'}, 'content': []}]}})
-        if len(chapters) > 300:
-            raise ValueError(f'Too many sections: {paper_id}')
+        if len(chapters) > source_limits['maxChapters']:
+            size = (len(chapters) + source_limits['maxChapters'] - 1) // source_limits['maxChapters']
+            grouped = []
+            for start in range(0, len(chapters), size):
+                group = chapters[start:start + size]
+                title = group[0]['title'] if len(group) == 1 else f"{group[0]['title']} — {group[-1]['title']}"
+                grouped.append(group[0] | {'title': title if len(title) <= 400 else title[:399] + '…',
+                    'sourcePages': list(dict.fromkeys(page for chapter in group for page in chapter['sourcePages']))})
+            chapters = grouped
         title = item.get('title') or pdf.metadata.get('title') or source.stem
         documents.append({'id': 'paper-' + paper_id, 'title': title,
             'subtitle': f"{item['authors']} · {item['year']}", 'filename': source.name,

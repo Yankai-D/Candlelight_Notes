@@ -1,6 +1,7 @@
 import { parseMath, mathText } from './math-syntax.mjs';
 import { modelBlocks, resultRendering } from './note-format.mjs';
 import { sourceLabel } from './bundle-context.mjs';
+import { makeTeachingRecord } from './teaching-plan.mjs';
 export const uid = () => globalThis.crypto.randomUUID();
 
 export function textOf(node) {
@@ -57,6 +58,9 @@ export function applyResult(document, request, result) {
   } else if (request.action === 'generate') {
     chapter.content = withIds({ type: 'doc', content: structuredClone(rendering.blocks) });
     chapter.status = 'ready';
+    const record = makeTeachingRecord(document.composition?.plan?.teachingPlan, result.blocks, chapter.content.content, block => modelBlocks([block]));
+    if (record) chapter.teachingRecord = record;
+    else delete chapter.teachingRecord;
   } else if (request.action === 'style') {
     const allowed = editableBlocks(request.scope === 'document' ? document.chapters : [chapter]);
     const ids = new Set(allowed.map(b => b.id));

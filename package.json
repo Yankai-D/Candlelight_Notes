@@ -1,6 +1,6 @@
 {
   "name": "reading-tree",
-  "version": "0.1.32",
+  "version": "0.1.42",
   "private": true,
   "author": {
     "name": "Yankai-D",
@@ -37,6 +37,8 @@
     "eval:recovery": "node scripts/evaluate-recovery.mjs",
     "eval:recovery:agent": "node scripts/evaluate-recovery-agent.mjs",
     "eval:notes": "node scripts/evaluate-notes.mjs",
+    "eval:course": "node scripts/evaluate-course.mjs",
+    "eval:regression": "node scripts/evaluate-note-regression.mjs",
     "eval:templates": "node scripts/evaluate-template-routing.mjs",
     "eval:notes:pdf": "node scripts/export-note-review.mjs",
     "eval:claims": "node scripts/evaluate-claims.mjs",

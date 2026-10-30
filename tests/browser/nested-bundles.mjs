@@ -54,7 +54,8 @@ try {
     throw new Error(`Button not found: ${text}`);
   };
   const folder = async name => {
-    for (const button of await page.$$('.collection-folders>button')) if ((await button.evaluate(el => el.querySelector('span').textContent)) === name) { await button.click(); break; }
+    if (name === '数学') await (await page.$('[aria-label="展开文件夹 期末复习"]'))?.click();
+    for (const button of await page.$$('.collection-folder-link')) if ((await button.evaluate(el => el.querySelector('span').textContent)) === name) { await button.click(); break; }
     await page.waitForFunction(name => document.querySelector('.collection-title h1')?.textContent === name, {}, name);
   };
   const state = () => page.evaluate(async () => {
@@ -68,6 +69,25 @@ try {
     await new Promise(resolve => { const tx = db.transaction('preferences', 'readwrite'); tx.objectStore('preferences').put(collection, 'collection'); tx.oncomplete = resolve; }); db.close();
   }, collection);
   await page.goto(base + '/', { waitUntil: 'networkidle0' }); await completeOnboarding(page);
+  assert.ok(await page.$('[data-folder-id="final"]'));
+  assert.equal(await page.$('[data-folder-id="math"]'), null, 'Nested folders are collapsed by default');
+  assert.equal(await page.$('[data-folder-id="unit"]'), null);
+  const beforeExpand = await page.$eval('.collection-title h1', el => el.textContent);
+  await page.focus('[aria-label="展开文件夹 期末复习"]'); await page.keyboard.press('Enter');
+  await page.waitForSelector('[data-folder-id="math"]');
+  assert.equal(await page.$('[data-folder-id="unit"]'), null, 'Expanding one level does not open its children');
+  assert.equal(await page.$eval('.collection-title h1', el => el.textContent), beforeExpand, 'Disclosure does not navigate');
+  await page.click('[aria-label="展开文件夹 数学"]'); await page.waitForSelector('[data-folder-id="unit"]');
+  await page.click('[aria-label="收起文件夹 数学"]');
+  await page.click('[aria-label="收起文件夹 期末复习"]');
+  assert.equal(await page.$('[data-folder-id="math"]'), null);
+  await page.screenshot({ path: `${output}/folders-collapsed.png` });
+  await folder('期末复习');
+  await page.click('.nested-folders>button[title="期末复习 / 数学"]');
+  await page.waitForSelector('[data-folder-id="math"]');
+  assert.equal(await page.$eval('[data-folder-id="math"] .collection-folder-link', el => el.getAttribute('aria-current')), 'page');
+  assert.equal(await page.$('[data-folder-id="unit"]'), null, 'Card navigation reveals only the destination ancestors');
+  await page.screenshot({ path: `${output}/folders-expanded.png` });
   await folder('期末复习');
   assert.equal((await page.$$('.nested-folders>button:not(.new-nested-folder)')).length, 2);
   await click('新建笔记');

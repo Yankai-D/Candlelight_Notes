@@ -118,7 +118,7 @@ test('provider budgets count retries, clamp actual requests and reserve unknown 
   await assert.rejects(over('https://example.org',options),/CONTEXT_BUDGET/);
 });
 
-test('offline experiment exercises the production harness, keeps every candidate, and never calls a real provider',async()=>{
+test('offline experiment exercises the frozen production writing stage, keeps every candidate, and never calls a real provider',async()=>{
   let external=0;
   const run=await runExperiment(planExperiment(),{fetcher:async()=>{external++;throw new Error('external call');}});
   assert.equal(external,0);assert.equal(run.candidates.length,12);assert.ok(run.candidates.every(c=>c.status==='accepted'));

@@ -47,16 +47,33 @@ test('workspace recovery rejects stale windows and never transfers the saved mod
 
 test('HTTP generation creates frozen evidence, counts actual repair calls and never confuses acceptance with writing', async t => {
   let calls = 0;
-  const upstream = createServer(async (req, res) => { for await (const _chunk of req) {} calls++; res.setHeader('content-type','application/json'); res.end(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(calls === 1 ? {} : { title: 'Fixture explanation', paragraphs: ['Fixture explanation.'], sourcePages: [2], summary: 'Fixture' }) } }], usage: { prompt_tokens: 30, completion_tokens: 15 } })); });
+  const started=Promise.withResolvers(), release=Promise.withResolvers(), sent=[];
+  t.after(()=>release.resolve());
+  const upstream = createServer(async (req, res) => { let raw=''; for await (const chunk of req) raw+=chunk; sent.push(JSON.parse(raw)); calls++; if(calls===2){started.resolve();await release.promise;} res.setHeader('content-type','application/json'); res.end(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify(calls === 1 ? {} : { title: 'Fixture explanation', paragraphs: ['Fixture explanation.'], sourcePages: [2], summary: 'Fixture' }) } }], usage: { prompt_tokens: 30, completion_tokens: 15 } })); });
   upstream.listen(0, '127.0.0.1'); await once(upstream, 'listening'); t.after(() => new Promise(resolve => upstream.close(resolve)));
   const server = await startTestServer({ READING_TREE_FILE_STORAGE: '1', DEEPSEEK_BASE_URL: `http://127.0.0.1:${upstream.address().port}`, DEEPSEEK_MODEL: 'local-fixture' }); t.after(() => server.stop());
   const config = await (await fetch(server.base + '/api/config')).json(), headers = { 'content-type': 'application/json', 'x-reading-tree-token': config.token };
   const post = async (path, body) => { const response = await fetch(server.base + path, { method: 'POST', headers, body: JSON.stringify(path === '/api/config' ? body : { ...body, workspaceToken: config.workspaceToken }) }); const result = await response.json(); assert.equal(response.status, 200, JSON.stringify(result)); return result; };
   const document = { ...createDemo(), id: 'trace-http-fixture', library: undefined }, chapter = document.chapters[1];
-  await post('/api/storage', { action: 'import', document }); await post('/api/config', { apiKey: 'LOCAL_FAKE_KEY_NOT_FOR_RECORDS' });
+  assert.equal(config.generationProgressVersion,1);
+  await post('/api/storage', { action: 'import', document }); assert.equal((await post('/api/config', { apiKey: 'LOCAL_FAKE_KEY_NOT_FOR_RECORDS' })).generationProgressVersion,1);
   const index = JSON.parse(await readFile(join(server.directory, 'profile/library-index.json'))), before = await readFile(index.entries[0].notePath);
-  const reply = await post('/api/edit', { action: 'explain', scope: 'selection', instruction: 'Explain', revision: 0, documentId: document.id, notebookId: 'adaptive', chapterId: chapter.id, anchorId: chapter.content.content[0].attrs.id, document });
+  const progressId=crypto.randomUUID();
+  const running=post('/api/edit', { progressId, action: 'explain', scope: 'selection', instruction: 'Explain', revision: 0, documentId: document.id, notebookId: 'adaptive', chapterId: chapter.id, anchorId: chapter.content.content[0].attrs.id, document });
+  await Promise.race([started.promise,new Promise((_,reject)=>{const timer=setTimeout(()=>reject(new Error('Model fixture did not start repair')),15000);timer.unref();})]);
+  try {
+    const live=await post('/api/generation-progress',{id:progressId});
+    assert.equal(live.state,'running');assert.equal(live.requests,2);assert.equal(live.reportedCalls,1);assert.equal(live.inputTokens,30);
+    const forbidden=await fetch(server.base+'/api/generation-progress',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:progressId})});assert.equal(forbidden.status,403);
+    const stale=await fetch(server.base+'/api/generation-progress',{method:'POST',headers,body:JSON.stringify({id:progressId,workspaceToken:'stale'})});assert.equal(stale.status,409);
+    assert.doesNotMatch(JSON.stringify(live),/Fixture explanation|LOCAL_FAKE_KEY|sourcePages|workspace/);
+    const duplicate=await fetch(server.base+'/api/edit',{method:'POST',headers,body:JSON.stringify({progressId,action:'explain'})});assert.equal(duplicate.status,400);assert.equal(calls,2);
+  } finally {release.resolve();}
+  const reply=await running;
   assert.ok(reply.recordId); assert.equal(calls, 2);
+  assert.equal(reply.progress.state,'complete');assert.equal(reply.progress.requests,2);assert.equal(reply.progress.reportedCalls,2);assert.equal(reply.progress.inputTokens,60);assert.equal(reply.progress.outputTokens,30);
+  assert.deepEqual((await post('/api/generation-progress',{id:progressId})).stages,reply.progress.stages);
+  assert.ok(sent.every(body=>!JSON.stringify(body).includes(progressId)),'Transport progress identifiers must not enter model prompts');
   const summaries = await post('/api/storage', { action: 'records-list', id: document.id }); assert.equal(summaries[0].status, 'accepted'); assert.equal(summaries[0].calls, 2); assert.equal(summaries[0].repairs, 1);
   const record = await post('/api/storage', { action: 'record-read', id: document.id, recordId: reply.recordId }); assert.doesNotMatch(JSON.stringify(record), /LOCAL_FAKE_KEY_NOT_FOR_RECORDS|Authorization/);
   assert.deepEqual(await readFile(index.entries[0].notePath), before);

@@ -31,6 +31,7 @@ type Props = { documents: LearningDocument[]; knowledge: Knowledge; configured: 
 const labels: Record<string, string> = { running: '正在生长', paused: '已暂停', failed: '构建中断', complete: '已完成', review: '已完成' }
 const kinds = { knowledge: '知识与能力', reading: '阅读资料', practice: '项目实践', experience: '情境经验' }
 const iconFor = { knowledge: GitBranch, reading: BookOpen, practice: Wrench, experience: Compass }
+const findingPapers = (job: Job | null) => !!job && Object.values(job.paperResearch || {}).some(branch => Object.values(branch).some(state => state.status === 'running'))
 
 export function IdealTree({ documents, knowledge, configured, onSettings, api, onOpen, onImport }: Props) {
   const [trees, setTrees] = useState<Summary[]>([]), [job, setJob] = useState<Job | null>(null)
@@ -40,7 +41,9 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
   const [loading, setLoading] = useState(true), [searchBranch, setSearchBranch] = useState('')
   const [rebuilding, setRebuilding] = useState<Job | null>(null), [suggestion, setSuggestion] = useState(''), [reason, setReason] = useState(''), [includeReview, setIncludeReview] = useState(false)
   const [deleting, setDeleting] = useState<{id:string;title:string} | null>(null)
-  const rebuildRequest = useRef({ key:'', id:'' })
+  const rebuildRequest = useRef({ key:'', id:'', revision:0 })
+  const [rebuildBusy, setRebuildBusy] = useState('')
+  const rebuildInFlight = useRef(false)
   const organism = useRef<HTMLDivElement>(null)
   const [viewport, setViewport] = useState({ width: 800, height: 450 })
   const [paths, setPaths] = useState<{width:number;height:number;curves:string[]}>({width:0,height:0,curves:[]})
@@ -55,7 +58,7 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
     command({ command: 'list' }).then(data => { if (active) setTrees(data.trees) }).catch(e => { if (active) setError(e.message) }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [configured])
-  const paperRunning = !!job && Object.values(job.paperResearch || {}).some(b=>Object.values(b).some(s=>s.status==='running'))
+  const paperRunning = findingPapers(job)
   useEffect(() => {
     if (!job || deleting || job.status !== 'running' && !paperRunning) return
     let active = true, timer: ReturnType<typeof setTimeout>
@@ -85,20 +88,40 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
     })
   }
   async function rebuild() {
-    if (!rebuilding) return
+    if (!rebuilding || rebuildInFlight.current) return
     if (!configured) { onSettings(); return }
-    const body = { command:'rebuild', id:rebuilding.id, revision:rebuilding.revision, suggestion:suggestion.trim(), reason:reason.trim(), includeReview }
+    const body = { command:'rebuild', id:rebuilding.id, suggestion:suggestion.trim(), reason:reason.trim(), includeReview }
     const key = JSON.stringify(body)
-    if (rebuildRequest.current.key !== key) rebuildRequest.current = { key, id:crypto.randomUUID() }
     const ticket = selection.current
-    await perform('重建', async () => {
-      const data = await command({ ...body, requestId:rebuildRequest.current.id })
+    rebuildInFlight.current = true; setRebuildBusy('核对当前状态'); setError('')
+    try {
+      if (rebuildRequest.current.key !== key) {
+        const latest: Job = (await command({ command:'get', id:rebuilding.id })).job
+        if (!mounted.current || selection.current !== ticket) return
+        setJob(latest)
+        if (findingPapers(latest)) throw new Error('当前正在查找论文。可以等待完成，或先暂停论文查找，再生成新版本。')
+        if (!['complete','review'].includes(latest.status)) throw new Error('当前学习树尚未完成，请先返回继续构建。')
+        rebuildRequest.current = { key, id:crypto.randomUUID(), revision:latest.revision }
+      }
+      setRebuildBusy('开始重建')
+      const data = await command({ ...body, revision:rebuildRequest.current.revision, requestId:rebuildRequest.current.id })
       if (!mounted.current || selection.current !== ticket) return
-      setJob(data.job); setRebuilding(null); resetFocus(); rebuildRequest.current = { key:'', id:'' }
+      setJob(data.job); setRebuilding(null); resetFocus(); rebuildRequest.current = { key:'', id:'', revision:0 }
       setTrees((await command({ command:'list' })).trees)
-    })
+    } catch (e) { if (mounted.current) setError((e as Error).message) }
+    finally { rebuildInFlight.current = false; if (mounted.current) setRebuildBusy('') }
   }
-  function showRebuild() { setRebuilding(job); setSuggestion(''); setReason(''); setIncludeReview(false); setError(''); rebuildRequest.current = {key:'',id:''} }
+  async function pauseRebuildResearch() {
+    if (!rebuilding || rebuildInFlight.current) return
+    const ticket = selection.current
+    rebuildInFlight.current = true; setRebuildBusy('暂停论文查找'); setError('')
+    try {
+      const data = await command({ command:'pause', id:rebuilding.id })
+      if (mounted.current && selection.current === ticket) setJob(data.job)
+    } catch (e) { if (mounted.current) setError((e as Error).message) }
+    finally { rebuildInFlight.current = false; if (mounted.current) setRebuildBusy('') }
+  }
+  function showRebuild() { setRebuilding(job); setSuggestion(''); setReason(''); setIncludeReview(false); setError(''); rebuildRequest.current = {key:'',id:'',revision:0} }
   async function removeTree() {
     if (!deleting) return
     const id = deleting.id
@@ -192,21 +215,22 @@ export function IdealTree({ documents, knowledge, configured, onSettings, api, o
         <div className="ideal-goal-footer"><span>以当前学习画像作为起点<br/>构建进度自动保存</span><button className="primary" disabled={!!busy || configured && goal.trim().length < 4}>{busy ? <LoaderCircle size={15} className="spin" /> : <Sparkles size={15} />}{configured ? '构建理想学习树' : '连接模型'}</button></div>
       </form>
     </Modal>}
-    {rebuilding && <Modal title="重建学习树" subtitle="根据你的建议生成新版本，原版本继续保留。" onClose={() => { if (!busy) setRebuilding(null) }}>
-      <form className="ideal-goal-form ideal-rebuild-form" onSubmit={event => { event.preventDefault(); if (!busy && suggestion.trim().length >= 4 && reason.trim().length >= 4) void rebuild() }}>
+    {rebuilding && <Modal title="重建学习树" subtitle="按原目标或你的调整建议生成新版本，原版本继续保留。" onClose={() => { if (!rebuildInFlight.current) setRebuilding(null) }}>
+      <form className="ideal-goal-form ideal-rebuild-form" onSubmit={event => { event.preventDefault(); void rebuild() }}>
         <p className="ideal-rebuild-context">{rebuilding.contract?.title || rebuilding.goal} · 第 {rebuilding.edition || 1} 版</p>
-        <label htmlFor="ideal-rebuild-suggestion">希望怎样调整？</label><textarea autoFocus id="ideal-rebuild-suggestion" value={suggestion} maxLength={6000} disabled={!!busy} onChange={e => setSuggestion(e.target.value)} rows={3} placeholder="例如：加强检索评估的基础，把部署部分收紧，增加一个贯穿各阶段的实践。" />
-        <label htmlFor="ideal-rebuild-reason">为什么这样调整？</label><textarea id="ideal-rebuild-reason" value={reason} maxLength={3000} disabled={!!busy} onChange={e => setReason(e.target.value)} rows={2} placeholder="例如：目前更需要理解如何判断检索效果，暂时不需要大规模部署。" />
-        {!!rebuilding.issues.length && <label className="ideal-review-choice"><input type="checkbox" checked={includeReview} disabled={!!busy} onChange={e => setIncludeReview(e.target.checked)} />同时参考原版本的审查备注</label>}
+        <label htmlFor="ideal-rebuild-suggestion">希望怎样调整？</label><textarea autoFocus id="ideal-rebuild-suggestion" value={suggestion} maxLength={6000} disabled={!!rebuildBusy} onChange={e => setSuggestion(e.target.value)} rows={3} placeholder="例如：加强检索评估的基础，把部署部分收紧，增加一个贯穿各阶段的实践。" />
+        <label htmlFor="ideal-rebuild-reason">为什么这样调整？</label><textarea id="ideal-rebuild-reason" value={reason} maxLength={3000} disabled={!!rebuildBusy} onChange={e => setReason(e.target.value)} rows={2} placeholder="例如：目前更需要理解如何判断检索效果，暂时不需要大规模部署。" />
+        {!!rebuilding.issues.length && <label className="ideal-review-choice"><input type="checkbox" checked={includeReview} disabled={!!rebuildBusy} onChange={e => setIncludeReview(e.target.checked)} />同时参考原版本的审查备注</label>}
+        {paperRunning && <div className="ideal-notice" role="status">当前正在查找论文，可以等待完成，也可以暂停后重建。已找到的资料会保留。<button type="button" className="text-button" disabled={!!rebuildBusy} onClick={() => void pauseRebuildResearch()}>暂停论文查找</button></div>}
         {error && <p className="inline-error" role="alert">{error}</p>}
-        <div className="ideal-goal-footer"><span>原目标与稳定画像继续作为起点<br/>本次会重新调用模型，生成完整学习树</span><button className="primary" disabled={!!busy || suggestion.trim().length < 4 || reason.trim().length < 4}>{busy ? <LoaderCircle size={15} className="spin" /> : <RotateCcw size={15} />}{configured ? '生成新版本' : '连接模型'}</button></div>
+        <div className="ideal-goal-footer"><span>原目标与稳定画像继续作为起点<br/>本次会重新调用模型，生成完整学习树</span><button className="primary" disabled={!!rebuildBusy}>{rebuildBusy ? <LoaderCircle size={15} className="spin" /> : <RotateCcw size={15} />}{rebuildBusy || (configured ? '生成新版本' : '连接模型')}</button></div>
       </form>
     </Modal>}
     {deleting && <Modal title="删除理想学习树" subtitle={deleting.title} onClose={() => { if (!busy) setDeleting(null) }}><div className="ideal-goal-form"><p>此目标的学习树和构建记录将被删除，正在进行的构建或论文查找会先停止。已导入资料库的资料、笔记以及其他版本会保留。</p><p>删除后无法撤销。</p>{error && <p className="inline-error" role="alert">{error}</p>}<div className="modal-actions"><button className="secondary" disabled={!!busy} onClick={() => setDeleting(null)}>保留目标</button><button className="secondary danger" disabled={!!busy} onClick={() => void removeTree()}>{busy ? <LoaderCircle size={14} className="spin"/> : <Trash2 size={14}/>}确认删除</button></div></div></Modal>}
     {job && <>
       <div className="ideal-toolbar"><div><button className="ideal-back" onClick={() => { ++selection.current; setJob(null); resetFocus(); void command({ command: 'list' }).then(data => setTrees(data.trees)).catch(e => setError(e.message)) }}><ArrowLeft size={14} />全部目标</button><span className={`ideal-status ${job.status}`}>{job.status === 'running' && <LoaderCircle className="spin" size={12} />}{['complete','review'].includes(job.status) ? '学习路径构建完成' : job.stage}</span></div><div>
         {job.status === 'running' ? <button className="secondary" disabled={!!busy} onClick={() => void perform('暂停', async () => { setJob((await command({ command: 'pause', id: job.id })).job) })}><Pause size={13} />暂停</button> : ['paused','failed'].includes(job.status) && <button className="primary" disabled={!!busy} onClick={() => void perform('继续', async () => { setJob((await command({ command: 'resume', id: job.id })).job) })}><Play size={13} />继续构建</button>}
-        {['complete','review'].includes(job.status) && <button className="secondary" aria-label="重建学习树" disabled={!!busy || paperRunning} onClick={showRebuild}><RotateCcw size={13}/>重建</button>}
+        {['complete','review'].includes(job.status) && <button className="secondary" aria-label="重建学习树" onClick={showRebuild}><RotateCcw size={13}/>重建</button>}
         <button className="icon-button" title="导出学习树与构建记录" aria-label="导出理想学习树" onClick={() => void perform('导出', async () => { const { artifact } = await command({ command: 'export', id: job.id }); const url = URL.createObjectURL(new Blob([JSON.stringify(artifact,null,2)], { type: 'application/json' })); const a = document.createElement('a'); a.href = url; a.download = `${job.contract?.title || '理想学习树'}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url),1000) })}><ArrowDownToLine size={16} /></button>
         <button className="secondary" aria-expanded={diagnostics} onClick={() => { setDiagnostics(!diagnostics); setSelectedId('') }}>构建记录</button>
         <button className="icon-button" aria-label="删除理想学习树" title="删除此目标" disabled={!!busy} onClick={() => { setError(''); setDeleting({id:job.id,title:job.contract?.title || job.goal}) }}><Trash2 size={16}/></button>

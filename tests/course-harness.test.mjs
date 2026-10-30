@@ -20,7 +20,7 @@ test('new multi-source course jobs use the same structured snapshot while legacy
   for (const options of [{}, { plan: referencePlan, sectionId: 'summary' }]) {
     const messages = buildCourseMessages(input, options), context = JSON.parse(messages[1].content);
     assert.deepEqual(context.writingTemplate, snapshot); assert.equal(context.writingStyle, undefined);
-    assert.match(messages[0].content, /每个知识单元可独立回查/); assert.doesNotMatch(messages[0].content, /不拆成教学栏目/);
+    assert.match(messages[0].content, /lecture-synthesis-v3/); assert.doesNotMatch(messages[0].content, /不拆成教学栏目/);
   }
   const body = clone(reference); body.blocks[0].text = '## 中心与离散\n\n' + body.blocks[0].text;
   assert.equal(validateCourseSection(input, referencePlan, 'summary', body).rendering.blocks[0].type, 'heading');

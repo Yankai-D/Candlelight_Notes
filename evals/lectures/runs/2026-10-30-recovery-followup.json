@@ -1,0 +1,144 @@
+{
+  "schema": "course-recovery-followup-v1",
+  "date": "2026-10-30",
+  "caseId": "inspection-probability-v1",
+  "mode": "live",
+  "model": "deepseek-flash",
+  "status": "failed",
+  "completedChapters": 2,
+  "plannedChapters": 3,
+  "calls": 20,
+  "usage": {
+    "calls": 20,
+    "successfulResponses": 20,
+    "promptTokens": 182115,
+    "completionTokens": 21091,
+    "cacheHitTokens": 60032,
+    "cacheMissTokens": 122083,
+    "elapsedMs": 121464,
+    "promptCharacters": 432109,
+    "stages": [
+      {
+        "stage": "bundle-intent",
+        "calls": 2,
+        "successfulResponses": 2,
+        "promptTokens": 2131,
+        "completionTokens": 1113,
+        "cacheHitTokens": 768,
+        "cacheMissTokens": 1363,
+        "elapsedMs": 5825,
+        "promptCharacters": 5940
+      },
+      {
+        "stage": "bundle-materials-1",
+        "calls": 1,
+        "successfulResponses": 1,
+        "promptTokens": 3466,
+        "completionTokens": 677,
+        "cacheHitTokens": 1536,
+        "cacheMissTokens": 1930,
+        "elapsedMs": 5696,
+        "promptCharacters": 7178
+      },
+      {
+        "stage": "bundle-plan",
+        "calls": 2,
+        "successfulResponses": 2,
+        "promptTokens": 13273,
+        "completionTokens": 3780,
+        "cacheHitTokens": 7424,
+        "cacheMissTokens": 5849,
+        "elapsedMs": 18618,
+        "promptCharacters": 30612
+      },
+      {
+        "stage": "recovery-plan",
+        "calls": 4,
+        "successfulResponses": 4,
+        "promptTokens": 52740,
+        "completionTokens": 1314,
+        "cacheHitTokens": 9216,
+        "cacheMissTokens": 43524,
+        "elapsedMs": 12005,
+        "promptCharacters": 136955
+      },
+      {
+        "stage": "bundle-plan-review",
+        "calls": 1,
+        "successfulResponses": 1,
+        "promptTokens": 10978,
+        "completionTokens": 255,
+        "cacheHitTokens": 1280,
+        "cacheMissTokens": 9698,
+        "elapsedMs": 2523,
+        "promptCharacters": 25671
+      },
+      {
+        "stage": "chapter-analysis",
+        "calls": 5,
+        "successfulResponses": 5,
+        "promptTokens": 37496,
+        "completionTokens": 7986,
+        "cacheHitTokens": 22912,
+        "cacheMissTokens": 14584,
+        "elapsedMs": 42465,
+        "promptCharacters": 88383
+      },
+      {
+        "stage": "generate",
+        "calls": 3,
+        "successfulResponses": 3,
+        "promptTokens": 37733,
+        "completionTokens": 5608,
+        "cacheHitTokens": 13696,
+        "cacheMissTokens": 24037,
+        "elapsedMs": 29656,
+        "promptCharacters": 82366
+      },
+      {
+        "stage": "note-review",
+        "calls": 2,
+        "successfulResponses": 2,
+        "promptTokens": 24298,
+        "completionTokens": 358,
+        "cacheHitTokens": 3200,
+        "cacheMissTokens": 21098,
+        "elapsedMs": 4676,
+        "promptCharacters": 55004
+      }
+    ],
+    "currencyCost": null,
+    "note": "Only provider-reported tokens. Missing fields remain unknown. No price or cache-miss inference."
+  },
+  "elapsedMs": 122318,
+  "runtimeFingerprint": "f8c4014b8b38c01760ceda3b1d39d4d1026e89707c0eeba8a1f5856d49ae8d51",
+  "runtimeUnchanged": true,
+  "stop": "EVAL_CALL_BUDGET",
+  "committedTextCharacters": [
+    1295,
+    1856
+  ],
+  "offlineReplays": [
+    {
+      "case": "course-json-observed-v1",
+      "method": "deterministic grammar punctuation",
+      "edits": 9,
+      "additionalModelCalls": 0
+    },
+    {
+      "case": "course-escapes-observed-v1",
+      "method": "scripted controller selects six literal sequences; original validator",
+      "edits": 112,
+      "simulatedControllerCalls": 1,
+      "liveToolSelectionVerified": false
+    }
+  ],
+  "qualityConclusion": null,
+  "limitations": [
+    "Development case; not unseen.",
+    "20-call boundary differs from previous 14-call pilot; complete-delivery cost remains unknown.",
+    "Escape tool added after this live run; its selection is only verified by scripted replay.",
+    "Assistant review found an incorrect causal explanation despite live review accepting it."
+  ],
+  "resultHash": "1b85fa21d5f68e15e2eb7398f795af4757e1d36adbf5de4530a1fcc1c1dfc051"
+}

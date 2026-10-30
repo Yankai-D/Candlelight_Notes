@@ -186,19 +186,25 @@ test('existing sectioned notebooks stay saved and resume consistently; explicit 
   assert.deepEqual(doc, saved, 'Upgrading the template must not mutate the saved notebook');
 });
 
-test('invalid JSON math escapes receive the precise parser error and a correctly escaped example before retry', async () => {
+test('invalid JSON math escapes receive the precise parser error and example before an executable local repair', async () => {
   const doc = fixture();
   const request = { action: 'generate', scope: 'chapter', revision: 0, chapterId: doc.chapters[0].id, instruction: '整理', learning: templateSettings('adaptive'), knowledge: defaultKnowledge, document: doc };
   let calls = 0;
   const malformed = String.raw`{"blocks":[{"type":"paragraph","text":"\(\eta_t\)"}]}`;
-  const valid = output(String.raw`学习率为 \(\eta_t\)。`);
+  const valid = output(String.raw`\(\eta_t\)`);
   const raw = await runModel({ baseUrl: 'https://api.deepseek.com', model: 'deepseek-flash', apiKey: 'test-only' }, buildMessages(request), undefined, async (_url, options) => {
     const messages = JSON.parse(options.body).messages;
+    let content=malformed;
     if (++calls === 2) {
       assert.match(messages.at(-1).content, /Bad escaped character/);
       assert.ok(JSON.parse(messages.at(-1).content).failure.details.includes(JSON.stringify({ text: String.raw`\(m_t = \beta_1 m_{t-1} + (1-\beta_1)g_t\)` })));
+      const context=JSON.parse(messages[1].content);
+      assert.match(messages[0].content,/execution-recovery-plan-v1/);
+      content=JSON.stringify({failureId:context.failureId,strategy:'patch',targetDigest:context.toolState.targetDigest,
+        operations:[{op:'json-escape',sequences:[String.raw`\(`,String.raw`\eta`,String.raw`\)`]}]});
     }
-    return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: calls === 1 ? malformed : JSON.stringify(valid) } }] }));
+    assert.ok(calls<=2,'An exact escaping repair must not regenerate the paragraph.');
+    return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content } }] }));
   }, { action: 'generate' });
   assert.equal(calls, 2);
   assert.equal(JSON.parse(raw).blocks[0].text, valid.blocks[0].text);

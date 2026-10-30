@@ -25,6 +25,8 @@ import { SettingsModal } from './components/SettingsModal'
 import { DiscoverNotesModal } from './components/DiscoverNotesModal'
 import { MaintenanceModal } from './components/MaintenanceModal'
 import { GenerationRecordsModal } from './components/GenerationRecordsModal'
+import { GenerationProgress, type GenerationProgressValue } from './components/GenerationProgress'
+import { generationSession, observedGeneration } from '../shared/generation-progress.mjs'
 import { ConflictModal } from './components/ConflictModal'
 import { SourceRepair } from './components/SourceRepair'
 import { StorageLocation } from './components/StorageLocation'
@@ -42,7 +44,8 @@ import { defaultEditInstruction, defaultGenerationInstruction } from '../shared/
 import { defaultLearningIntent, normalizeLearningIntent } from '../shared/learning-intent.mjs'
 import { commitNotebook, ensureNotebooks, selectNotebook, reviseNotebook, restoreNotebookVersion, notebookSettings, notebookLabel, notebookKey, notebookStatus } from '../shared/notebooks.mjs'
 import { prepareDocument, remainingChapters } from '../shared/preparation.mjs'
-import { noteFailureMetadata, preparationErrors } from '../shared/note-recovery.mjs'
+import { preparationErrors } from '../shared/note-recovery.mjs'
+import { localFetch, readLocalJSON } from '../shared/local-api.mjs'
 import { applyBundlePlan, bundlePlanRequest, bundleMaterials, captureBundleContext, contextForMaterial, createBundleNote } from '../shared/bundle-context.mjs'
 import { repairFormulaDocument } from '../shared/formula-layout.mjs'
 import { upgradeMathDocument } from '../shared/math-references.mjs'
@@ -93,6 +96,7 @@ export default function App() {
   const [action, setAction] = useState<EditRequest['action']>('explain')
   const [scope, setScope] = useState<EditRequest['scope']>('selection')
   const [busy, setBusy] = useState('')
+  const [generationProgress, setGenerationProgress] = useState<{ key: string; value: GenerationProgressValue } | null>(null)
   const [error, setError] = useState('')
   const [pending, setPending] = useState<Pending | null>(null)
   const [focused, setFocused] = useState(false)
@@ -146,7 +150,7 @@ export default function App() {
           if (repaired !== document) await storage.saveDocument(repaired)
           return repaired
         }))
-        const catalog = await fetch('/api/library').then(response => response.ok ? response.json() : null).catch(() => null)
+        const catalog = await localFetch('/api/library').then(readLocalJSON).catch(() => null)
         const removed = await storage.getPreference('removed-library-papers') || []
         const merged = mergeLibrary(stored, Array.isArray(catalog?.documents) ? catalog.documents : [], removed)
         await Promise.all(merged.added.map((paper: LearningDocument) => storage.saveDocument(ensureNotebooks(paper) as LearningDocument)))
@@ -165,7 +169,7 @@ export default function App() {
       } catch (error) { setLoadError(`无法打开本机资料库：${(error as Error).message}。原数据已保留，请检查保存位置后重新打开。`) }
       finally { setLoading(false) }
     })()
-    fetch('/api/config').then(r => r.json()).then(setConfig).catch(() => notify(window.pangzhuDesktop ? '应用连接暂时不可用，请保存笔记后重新打开。' : '模型服务未连接。阅读与编辑仍可使用，请检查本地服务。')).finally(()=>setConfigReady(true))
+    localFetch('/api/config').then(readLocalJSON).then(setConfig).catch(() => notify(window.pangzhuDesktop ? '应用连接暂时不可用，请保存笔记后重新打开。' : '模型服务未连接。阅读与编辑仍可使用，请检查本地服务。')).finally(()=>setConfigReady(true))
   }, [notify])
   useEffect(() => {
     if (loading || !doc) return
@@ -306,11 +310,13 @@ export default function App() {
       mutate(d => ({ ...d, currentChapter: id, currentPage: source.page, readingAnchor: { chapterId: id, blockId: selection?.anchorId || '', fraction: 0 } }))
     }
   }
-  async function api(path: string, body: unknown, signal?: AbortSignal) {
-    const response = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Reading-Tree-Token': configRef.current.token }, body: JSON.stringify(path === '/api/edit' ? { ...(body as object), workspaceToken: configRef.current.workspaceToken } : body), signal })
-    const data = await response.json()
-    if (!response.ok) throw Object.assign(new Error(data.error || '请求失败，请重试。'), noteFailureMetadata(data))
-    return data
+  async function api(path: string, body: unknown, signal?: AbortSignal, observe?: (value: any) => void) {
+    const post = async (target: string, input: unknown, requestSignal?: AbortSignal) => {
+      const response = await localFetch(target, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Reading-Tree-Token': configRef.current.token }, body: JSON.stringify(['/api/edit', '/api/generation-progress'].includes(target) ? { ...(input as object), workspaceToken: configRef.current.workspaceToken } : input), signal: requestSignal })
+      return readLocalJSON(response)
+    }
+    return path === '/api/edit' && observe && configRef.current.generationProgressVersion === 1
+      ? observedGeneration(post, body, signal, observe) : post(path, body, signal)
   }
   async function saveCollection(value: Collection) {
     const next = collectionSchema.parse(value) as Collection
@@ -553,11 +559,15 @@ export default function App() {
     clearSelection()
     setBusy('正在结合原文思考…'); setError(''); setPending(null)
     abort.current = new AbortController()
+    const signal = abort.current.signal
+    const session = generationSession((value: GenerationProgressValue) => setGenerationProgress({ key: notebookKey(doc), value }))
+    let completed = false
     try {
-      const data = await api('/api/edit', request, abort.current.signal)
+      const data = await api('/api/edit', request, signal, session.observe)
       setPending({ request, result: data.result, selection: submittedSelection, model: data.model })
+      completed = true
     } catch (e) { if ((e as Error).name !== 'AbortError') setError((e as Error).message) }
-    finally { setBusy(''); abort.current = null }
+    finally { session.finish(signal.aborted ? 'paused' : completed ? 'complete' : 'failed'); setBusy(''); abort.current = null }
   }
   function clearSelection() {
     const editor = doc && editors.current.get(notebookKey(doc, contextChapter.current))
@@ -599,6 +609,9 @@ export default function App() {
     preparationJob.current = true; setPreparing(true)
     abort.current = new AbortController(); setError(''); setPending(null); setBusy(`正在生成${notebookLabel(current)}笔记…`)
     const signal = abort.current.signal
+    const progressKey = notebookKey(current)
+    const session = generationSession((value: GenerationProgressValue) => setGenerationProgress({ key: progressKey, value }))
+    let outcome = 'failed'
     try {
       if (current.entryType !== 'note' && !current.preparation) {
         const folder = bundleForDocument(collectionRef.current, current.id)
@@ -621,7 +634,7 @@ export default function App() {
         const before = current
         try {
           setBusy('正在按整理要求规划章节与资料覆盖…')
-          const data = await api('/api/edit', bundlePlanRequest(before), signal)
+          const data = await api('/api/edit', bundlePlanRequest(before), signal, session.observe)
           signal.throwIfAborted()
           const latest = docRef.current!
           if (latest.revision !== before.revision || latest.intent !== before.intent) throw new Error('规划期间笔记发生编辑，请重新继续。')
@@ -639,21 +652,23 @@ export default function App() {
         selectTemplate: async (source: LearningDocument, requestSignal: AbortSignal) => {
           setBusy('正在根据资料内容与学习目标选择模板…')
           const library = await storage.readTemplates()
-          const data = await api('/api/edit', templateRoutingRequest(source, library), requestSignal)
+          const data = await api('/api/edit', templateRoutingRequest(source, library), requestSignal, session.observe)
           return selectedTemplate(library, data.result)
         },
         getLatest: () => docRef.current || current,
         save: persist, signal,
-        onProgress: ({ chapter, done, total }: { chapter: { title: string }; done: number; total: number }) => setBusy(`${notebookLabel(current)} · 已完成 ${done}/${total} · 正在生成与审查 ${chapter.title}`),
+        onProgress: ({ chapter, done, total }: { chapter: { title: string }; done: number; total: number }) => { session.chapter({ title: chapter.title, done, total }); setBusy(`${notebookLabel(current)} · 已完成 ${done}/${total} · 正在生成与审查 ${chapter.title}`) },
         request: async (latest: LearningDocument, chapterId: string, settings: LearningSettings, background: LearnerProfile, requestSignal: AbortSignal, workflow: WorkflowReview) => {
           const request = { ...makeRequest(latest, 'generate', 'chapter', defaultGenerationInstruction(settings, latest.entryType === 'note'), chapterId, settings, background), workflow }
-          return api('/api/edit', request, requestSignal)
+          return api('/api/edit', request, requestSignal, session.observe)
         },
       })
+      outcome = result.preparation.status === 'complete' ? 'complete' : 'failed'
+      session.chapter({ title: result.title, done: result.preparation.completedIds.length, total: result.chapters.length })
       if (result.preparation.status === 'complete') notify('全文笔记已就绪。之后的追问与修改会留在这份笔记里。')
       else if (!signal.aborted) notify(result.preparation.interruption?.message || (result.preparation.completedIds.length ? '已保存完成章节，未完成部分可继续生成。' : '尚未生成完成章节，请查看本次停止原因。'))
     } catch (e) { if ((e as Error).name !== 'AbortError') setError(`${(e as Error).message} 已完成章节已保留。`) }
-    finally { setBusy(''); setPreparing(false); preparationJob.current = false; abort.current = null }
+    finally { session.finish(signal.aborted ? 'paused' : outcome); setBusy(''); setPreparing(false); preparationJob.current = false; abort.current = null }
   }
   async function saveKnowledge(value: Knowledge) { setKnowledge(await storage.saveLearner(value, 'complete')) }
   async function resetKnowledge() {
@@ -677,7 +692,7 @@ export default function App() {
         const articleWidth = Math.max(280, Math.min(1920, article.current?.querySelector('.learning-article')?.getBoundingClientRect().width || 920))
         const viewportWidth = Math.max(320, Math.min(7680, window.innerWidth))
         const response = await fetch('/api/export/pdf', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Reading-Tree-Token': configRef.current.token }, body: JSON.stringify({ document: currentNotes, fontSize, articleWidth, viewportWidth, theme }) })
-        if (!response.ok) throw new Error((await response.json()).error || 'PDF 导出失败')
+        if (!response.ok) await readLocalJSON(response)
         const url = URL.createObjectURL(await response.blob())
         const link = document.createElement('a'); link.href = url; link.download = `${name}.pdf`; link.click()
         setTimeout(() => URL.revokeObjectURL(url), 1000)
@@ -752,6 +767,7 @@ export default function App() {
           onSource={id => { setSourceOverride(doc.chapters.find(c => c.id === id)!.sourcePages[0]); setModal('source') }} />
       </section>
       <div className="composer-dock">
+        {generationProgress?.key === notebookKey(doc) && <GenerationProgress value={generationProgress.value} />}
         {context.text && !pending && !busy && <div className="selection-bar"><span>“{context.text.slice(0, 42)}{context.text.length > 42 ? '…' : ''}”</span><button onClick={() => { setAction('explain'); void requestEdit('explain', defaultEditInstruction(notebookSettings(doc), 'explain')) }}><LightbulbIcon /> 人话讲解</button><button onClick={() => { setAction('rewrite'); promptInput.current?.focus() }}>改写这句</button><button aria-label="清除选区" onClick={clearSelection}><X size={13} /></button></div>}
         {pending && <div className="suggestion-panel"><div className="suggestion-heading"><span><Sparkles size={15} /> {pending.request.action === 'explain' ? '一张新的讲解纸条' : pending.request.action === 'generate' ? '本章笔记已整理' : '修改建议已就绪'}</span><button aria-label="放弃建议" onClick={() => setPending(null)}><X size={16} /></button></div><p className="suggestion-summary">{doc.chapters.find(c => c.id === pending.request.chapterId)?.title} · {pending.result.summary}</p><div className="suggestion-preview">{pending.result.title && <strong>{pending.result.title}</strong>}<Suspense fallback={<span>...</span>}><NotePreview action={pending.request.action} result={pending.result} /></Suspense></div><div className="suggestion-footer"><span>{pending.request.action === 'generate' && doc.chapters.find(c => c.id === pending.request.chapterId)?.status === 'ready' ? '应用后替换本章 · 原版本会保留' : pending.request.action === 'explain' ? '将插入所选段落之后' : '修改可通过历史记录恢复'}</span><button className="quiet-button" onClick={() => setPending(null)}>放弃</button><button className="primary" onClick={applyPending}><Check size={14} /> 写入笔记</button></div></div>}
         <div className={`ai-composer ${busy ? 'is-busy' : ''}`}>

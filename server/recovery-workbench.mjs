@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
+import { escapeJSONSequences } from './json-escape-patch.mjs';
 
 // This workbench owns only a returned candidate. It has no filesystem, fetch,
 // executable-code or validator-edit capability. The caller owns acceptance.
@@ -12,6 +13,7 @@ const base = { failureId: z.string().length(64), cause: z.string().min(1).max(16
 // must not prevent an otherwise valid read or patch; rewrites still require it.
 const toolBase = { ...base, cause: base.cause.default('执行结构化检查或局部修正，依据工具结果继续判断。'), instruction: base.instruction.default('执行结构化操作，并以原校验器验证结果。') };
 const operation = z.discriminatedUnion('op', [
+  z.object({ op:z.literal('json-escape'), sequences:z.array(z.string().min(2).max(160)).min(1).max(32) }).strict(),
   z.object({ op: z.literal('set'), path: pathSchema, expected: z.unknown(), value: z.unknown() }).strict(),
   z.object({ op: z.literal('add'), path: pathSchema, value: z.unknown() }).strict(),
   z.object({ op: z.literal('insert'), path: pathSchema, index: z.number().int().nonnegative(), expected: z.unknown(), value: z.unknown() }).strict(),
@@ -138,7 +140,9 @@ export function applyRecoveryPatch(raw, plan) {
   // All edits are provisional. A failed later operation discards this entire
   // transaction; the input candidate and source context are never mutated.
   for (const [index, edit] of plan.operations.entries()) {
-    if (edit.op === 'text') {
+    if(edit.op==='json-escape'){
+      try{text=escapeJSONSequences(text,edit.sequences);}catch(error){fail(error.message);}
+    } else if (edit.op === 'text') {
       text = patchText(text, edit);
     } else {
       safePath(edit.path);
@@ -183,6 +187,8 @@ export function applyRecoveryPatch(raw, plan) {
 }
 
 export const workbenchPrompt = `恢复工作区 recovery-workbench-v1：修复无需总是重写整个结果。优先定位并修补有证据支持的字段；不要改动正确内容。你的操作仅作用于当前返回值，不能编辑软件、源资料、原任务或验收规则。每个候选都将交给同一个真实校验器试验；失败会带回新的诊断，继续据此修正，不能声称未经执行的修复已通过。
+repair/reframe 会重新调用原步骤并返回完整内容，不是执行你的文字补丁说明。若判断只需改标点、转义或字段，请选择 patch 并提交可执行 operations；只有确实需要重新推导内容时才选择完整重写。
+toolState.stringEscapes 是程序扫描当前原始字符串得到的转义清单，包含序列、匹配数和上下文。若确认其中某些反斜杠本来应为字面字符，可用 patch 的 {"op":"json-escape","sequences":[清单中的精确 sequence]} 一次转义其所有未正确编码的出现位置；已双写的反斜杠、Unicode 转义、未选中的序列和其他字符不变。不必逐段复制正文或数偏移。validJSONPrefix=true 的项有歧义（例如制表符与公式命令），必须据实际上下文判断，不能全部勾选。该操作不是正确性证明，修后仍检查内容与来源。纯标点修补由程序先行处理；没有适用项时用原始文本精确补丁或进一步 inspect。
 remove 可删除数组内已证实多出的项目：path 指向实际索引，expected 必须是该项完整当前值，整个候选摘要必须匹配。后续索引会前移，多项删除应从后往前；任何预期不符则整批拒绝。此能力不能用于删除有效问题来假装通过；原任务与审查覆盖仍由业务校验器约束。
 候选版本以 toolState.targetDigest 为准；当前 failure 是本版本的真实失败，历史错误不代表现在仍存在。读取根对象前先看 toolState.parsed 与 kind：不可解析的候选只能按原始字符读取/精确文本补丁，不能按 blocks 等对象路径操作。不要为 metadata 标注缺口整章重写；先核对是否已有实际内容，只有真实缺失才局部补写。
 可以选择以下 strategy（均保留 failureId、cause、instruction；另外必须输出各操作要求的字段，只有自然语言 instruction 不是可执行补丁）：

@@ -60,7 +60,7 @@ export const recoveryScenarios = [
           return conversation.at(-1).content.includes('previousResult') ? good : bad(++revisions);
         }) }));
     },
-    verify(r) { accepted(r); assert.deepEqual(r.strategies, ['repair', 'repair', 'reframe']); assert.equal(r.calls, 7); },
+    verify(r) { accepted(r); assert.deepEqual(r.strategies, ['repair', 'reframe']); assert.equal(r.calls, 5); },
   },
   {
     id: 'last-call-for-action', title: '仅余一次调用时优先执行修复', expectation: 'recover',

@@ -1,5 +1,7 @@
 import { brand } from './brand.mjs';
+import sourceLimits from './source-limits.json' with { type: 'json' };
 import { z } from 'zod';
+import { teachingRecordSchema } from './teaching-plan.mjs';
 import { uid, withIds } from './document.mjs';
 import { preparationSchema, learningSettingsSchema } from './learning.mjs';
 import { commitNotebook } from './notebooks.mjs';
@@ -13,7 +15,7 @@ const node = z.lazy(() => z.object({
   marks: z.array(z.object({ type: z.enum(['bold', 'italic', 'strike', 'code', 'underline', 'link']), attrs: z.object({ href: z.string().refine(s => /^(https?:|mailto:)/i.test(s)).optional(), target: z.string().optional(), rel: z.string().optional(), class: z.string().optional() }).optional() })).optional(),
   content: z.array(node).max(3000).optional(),
 }));
-const chapter = z.object({ id: z.string(), title: z.string().max(400), subtitle: z.string().optional(), sourcePages: z.array(z.number().int().positive()).min(1), content: node, status: z.enum(['empty', 'ready']) });
+const chapter = z.object({ id: z.string(), title: z.string().max(400), subtitle: z.string().optional(), sourcePages: z.array(z.number().int().positive()).min(1), content: node, status: z.enum(['empty', 'ready']), teachingRecord: teachingRecordSchema.optional() });
 const notebookState = {
   updatedAt: z.number(), revision: z.number().int().nonnegative(),
   chapters: z.array(chapter).min(1).max(300), currentChapter: z.string(), currentPage: z.number().int().positive(),
@@ -32,7 +34,7 @@ const schema = z.object({ format: z.literal('reading-tree-v1'), document: z.obje
   intentSource: z.enum(['default', 'user']).optional(),
   entryType: z.literal('note').optional(), sourceContext: bundleContextSchema.optional(), composition: compositionSchema.optional(),
   createdAt: z.number(), ...notebookState,
-  pages: z.array(sourcePageSchema).min(1).max(1000),
+  pages: z.array(sourcePageSchema).min(1).max(sourceLimits.maxPages),
   demo: z.boolean().optional(),
   library: z.object({ id: z.string().regex(/^[a-z0-9-]+$/), label: z.string().max(200), year: z.string().max(30), authors: z.string().max(300), group: z.string().max(100), order: z.number().int().nonnegative(), placement: libraryPlacementSchema.optional() }).optional(),
   activeNotebookId: z.string().max(80).optional(),

@@ -16,18 +16,24 @@ export const planReviewSchema = z.object({ candidateDigest: z.string().length(64
 // whitespace, never words, punctuation, numbers or mathematical operators.
 export const quoteText = text => text.replace(/\s+/gu, ' ').trim();
 
-export function planReviewContext(request, candidate) {
+export function planReviewContext(request, candidate, task=candidate.analysis?.task) {
   return {
     sectionIndex: candidate.sections.map((section, index) => ({ number: index + 1, title: section.title })),
     evidence: [
       { id: 'goal-intent', kind: 'goal', text: request.intent },
+      ...(candidate.sourceSelection?.omissions.map((item,i)=>({id:`source-omission-${i+1}`,kind:'plan',section:0,text:JSON.stringify(item)}))||[]),
+      ...(task?.requirements?.some(r=>r.scope) ? task.requirements.map(r=>({id:`requirement-${r.id}`,kind:'goal',scope:r.scope||'section',text:JSON.stringify(r)})) : []),
       ...(request.feedback ? [{ id: 'goal-feedback', kind: 'goal', text: request.feedback }] : []),
       ...request.units.flatMap(unit => [ { id: `${unit.id}-title`, kind: 'source', unitId: unit.id, text: unit.title },
         ...unit.excerpts.map((excerpt, index) => ({ id: `${unit.id}-excerpt-${index + 1}`, kind: 'source', unitId: unit.id, text: excerpt.text })) ]),
       ...candidate.sections.flatMap((section, index) => ['title', 'purpose', 'handoff'].filter(field => section[field])
         .map(field => ({ id: `section-${index + 1}-${field}`, kind: 'plan', section: index + 1, text: section[field] }))),
-      ...candidate.sections.flatMap((section, index) => ['unitIds', 'requirementIds', 'dependsOn'].filter(field => section[field])
+      ...candidate.sections.flatMap((section, index) => ['unitIds', 'requirementIds', 'dependsOn', 'teaching'].filter(field => section[field])
         .map(field => ({ id: `section-${index + 1}-${field}`, kind: 'plan', section: index + 1, text: JSON.stringify(section[field]) }))),
+      ...(candidate.teachingPlan ? [{ id: 'teaching-throughline', kind: 'plan', section: 0, text: candidate.teachingPlan.throughline },
+        ...candidate.teachingPlan.concepts.map(c => ({ id: `teaching-${c.id}`, kind: 'plan', section: 0, text: JSON.stringify(c) })),
+        ...candidate.teachingPlan.concepts.flatMap(c => c.placements.map(p => ({ id: `teaching-${c.id}-section-${p.section}`, kind: 'plan', section: p.section, text: JSON.stringify({ concept:c.id, ...p }) }))),
+        ...candidate.teachingPlan.examples.map(e => ({ id: `teaching-${e.id}`, kind: 'plan', section: 0, text: JSON.stringify(e) }))] : []),
     ],
   };
 }
@@ -110,6 +116,12 @@ export function planChangeContext(previous, candidate) {
       const fields = [...new Set([...Object.keys(before || {}), ...Object.keys(after || {})])].filter(field => JSON.stringify(before?.[field]) !== JSON.stringify(after?.[field]));
       changedFields.push({ section: index + 1, fields });
     }
+  }
+  // A change in shared teaching duties can affect prose even when the section
+  // titles and source assignments are unchanged. Recheck affected global ties.
+  if (JSON.stringify(previous.teachingPlan) !== JSON.stringify(candidate.teachingPlan)||JSON.stringify(previous.sourceSelection)!==JSON.stringify(candidate.sourceSelection)) {
+    for (let i = 1; i <= candidate.sections.length; i++) if (!changedSections.includes(i)) changedSections.push(i);
+    changedFields.push({ section: 0, fields: ['teachingPlan','sourceSelection'].filter(key=>JSON.stringify(previous[key])!==JSON.stringify(candidate[key])) });
   }
   return { before: previous, changedSections, changedFields };
 }

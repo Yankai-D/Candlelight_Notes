@@ -10,7 +10,7 @@ const exists = async path => { try { await access(path); return true; } catch(er
 const hash = async path => { const value=createHash('sha256'); for await(const chunk of createReadStream(path))value.update(chunk); return value.digest('hex'); };
 const same = (a,b) => isDeepStrictEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)));
 const entries = index => [...index.entries,...(index.retired||[]).map(item=>item.entry)];
-const safeSystem = path => /^(ideal-trees\/[a-f0-9-]{36}\.json|ideal-trees\/assets\/S[a-f0-9]{22}\.(pdf|txt)|generation-records\/[a-zA-Z0-9_-]{1,100}\/[a-f0-9-]{36}\.json)$/.test(path);
+const safeSystem = path => /^(ideal-trees\/[a-f0-9-]{36}\.json|ideal-trees\/assets\/S[a-f0-9]{22}\.(pdf|txt)|generation-records\/[a-zA-Z0-9_-]{1,100}\/[a-f0-9-]{36}\.json|source-knowledge\/[a-f0-9]{64}\.json)$/.test(path);
 async function regular(path) {
   const info=await lstat(path);
   if(!info.isFile()||info.isSymbolicLink()||await realpath(path)!==resolve(path))throw new Error('迁移路径包含链接或非普通文件，原文件已保留。');
@@ -47,7 +47,7 @@ export async function previewWorkspaceMove(store,directory) {
     if(!info.isDirectory()||info.isSymbolicLink()||await realpath(folder)!==resolve(folder))throw new Error('学习树目录已被重定向，迁移已停止。');
     for(const item of await readdir(folder,{withFileTypes:true})) {
       const name=prefix+item.name,source=join(folder,item.name);
-      if(item.isDirectory()&&(/^(ideal-trees|generation-records|ideal-trees\/assets)$/.test(name)||/^generation-records\/[a-zA-Z0-9_-]{1,100}$/.test(name)))await system(source,name+'/');
+      if(item.isDirectory()&&(/^(ideal-trees|generation-records|source-knowledge|ideal-trees\/assets)$/.test(name)||/^generation-records\/[a-zA-Z0-9_-]{1,100}$/.test(name)))await system(source,name+'/');
       else if(item.isFile()&&safeSystem(name))await add(source,`.candlelight/${name}`);
       else throw new Error('学习树目录有未完成写入或未知文件，请关闭其他版本后重试。');
     }

@@ -14,6 +14,8 @@ export const templateRoutingCases = [
   item('course-last-question', '只逐题解答最后的练习，前面知识按需引用', course+'\n'+exercises, 'exercise', ['solve']),
   item('incidental-example', '解释作者的推理主线和实验边界', paper+'\nFor example, the toy values 2,4,6 have mean 4. This is only an illustration, not an exercise.', 'narrative', ['understand']),
   item('create-quiz', '生成两道练习题，并给出解答', course, 'exercise', ['create-exercises']),
+  item('lecture-no-exam', '整理一份精简讲义，不额外出一份试卷', course, 'lecture', ['review']),
+  item('lecture-no-translation', '整理知识点和例题，不要只翻译全部课件', course, 'lecture', ['review']),
   item('missing-questions', '给我每道题的手写过程和答案', 'Contents: 1 Introduction. 2 Exercises. The actual question pages are missing.', 'exercise', ['solve'], { fit: 'adapted' }),
   item('unsupported-deliverable', '根据这段资料写一份企业法律合同', 'The arithmetic mean of 2,4,6 is 4.', null, ['other'], { fit: 'adapted' }),
 ];

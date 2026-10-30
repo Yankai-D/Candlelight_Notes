@@ -33,7 +33,7 @@ export function createReview(run) {
   records.sort((a,b)=>a.id.localeCompare(b.id));
   const packet={version:'note-review-v1',runId:run.id,artifactHash:run.artifactHash,mode:run.mode,rubric,anchors,limitations:experimentLimitations(run.plan),
     cases:run.plan.cases.map(({id,materialId,profileId,material,request})=>({id,materialId,profileId,material,profile:request.knowledge,organization:request.learning.writingTemplate.organization})),records};
-  const review={version:packet.version,runId:run.id,artifactHash:run.artifactHash,reviewer:'',reviewedAt:'',
+  const review={version:packet.version,runId:run.id,artifactHash:run.artifactHash,rubricHash:hash(rubric),reviewer:'',reviewedAt:'',
     records:records.filter(record=>record.status==='accepted').map(record=>({id:record.id,criticalReview:null,criticalErrors:[],ratings:Object.fromEntries(rubric.map(d=>[d.id,{score:null,quote:'',reason:''}]))})),
     profilePairs:[]};
   for(const materialId of new Set(records.map(record=>record.materialId))) for(let repeat=1;repeat<=run.plan.repeats;repeat++) for(const label of new Set(records.map(record=>record.label))) {
@@ -46,6 +46,7 @@ export function createReview(run) {
 export function summarizeReview(run, review) {
   const {packet,mapping}=createReview(run);
   if(review.runId!==run.id||review.artifactHash!==run.artifactHash||review.version!==packet.version) throw new Error('Review belongs to a different run');
+  if(review.rubricHash && review.rubricHash!==hash(rubric)) throw new Error('Review rubric changed; review the frozen outputs again');
   const base={runId:run.id,mode:run.mode,candidateCount:run.candidates.length,failedCount:run.candidates.filter(c=>c.status==='failed').length,
     mechanical:run.candidates.map(({id,status,usage,evidence})=>({id,status,usage,evidence})),limitations:experimentLimitations(run.plan)};
   if(run.mode!=='live') return {...base,status:'simulation-only',qualityConclusion:null,notice:'模拟数据只验证工具链，不产生质量分数、胜率或优势结论。'};

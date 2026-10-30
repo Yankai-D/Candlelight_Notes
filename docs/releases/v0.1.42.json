@@ -1,0 +1,198 @@
+{
+  "schema": "clean-desktop-release-v1",
+  "version": "0.1.42",
+  "status": "verified-local-candidate",
+  "codeRevision": "54099a9d412ad483abd2d99a85fa7c81717d5fd9",
+  "sourceFingerprint": "8028865411d21e2681ebf6f7bf0205c481d4a84405dca3c0cda51d2e0b51436e",
+  "changes": [
+    "Goal-driven lecture selection before whole-chapter drafting",
+    "Source volume changes reading batches, not prose-fragment counts",
+    "Extractive evidence packets with on-demand original-page expansion",
+    "Explicit source exclusions remain subject to reading checks",
+    "Deterministic JSON punctuation repair and controller-selected local escape repair",
+    "Separate frozen-prompt evaluation from whole-handout system evaluation"
+  ],
+  "validation": {
+    "tests": 615,
+    "stages": [
+      {
+        "name": "types",
+        "status": "pass"
+      },
+      {
+        "name": "build",
+        "status": "pass"
+      },
+      {
+        "name": "tests",
+        "status": "pass"
+      },
+      {
+        "name": "browser",
+        "status": "pass"
+      },
+      {
+        "name": "harness-demo",
+        "status": "pass"
+      },
+      {
+        "name": "recovery-faults",
+        "status": "pass"
+      },
+      {
+        "name": "note-eval-demo",
+        "status": "pass"
+      },
+      {
+        "name": "note-calibration",
+        "status": "pass"
+      },
+      {
+        "name": "note-regression-demo",
+        "status": "pass"
+      },
+      {
+        "name": "claim-eval-demo",
+        "status": "pass"
+      },
+      {
+        "name": "claim-comparison-demo",
+        "status": "pass"
+      },
+      {
+        "name": "claim-focused-demo",
+        "status": "pass"
+      },
+      {
+        "name": "claim-meaning-demo",
+        "status": "pass"
+      },
+      {
+        "name": "claim-calculation-demo",
+        "status": "pass"
+      },
+      {
+        "name": "field-review-demo",
+        "status": "pass"
+      },
+      {
+        "name": "product-evidence",
+        "status": "pass"
+      }
+    ],
+    "actualModelCalls": 0,
+    "checkReportSha256": "b847bb9163de2709677b875b645008e0306cc041bfa38e1bcc9bfcb0f4506b7d",
+    "desktop": {
+      "status": "pass",
+      "checks": [
+        "First entry offers a blank user-authored profile and skippable model setup",
+        "Packaged application uses the canonical candle mark",
+        "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+        "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+        "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+        "Repeated launch returns to the same application window",
+        "Embedded reader and Chinese/math PDF export work without an external browser",
+        "Window close flushes a pending edit and stops the internal service",
+        "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+      ],
+      "targetBuild": {
+        "version": "0.1.42",
+        "asarSha256": "5e7ff73ee82c08d30b98795719a3eac769fa282b5e662c189f214be5446d5bb2"
+      }
+    },
+    "applicationDataUpgrades": [
+      {
+        "status": "pass",
+        "from": "0.1.41",
+        "to": "0.1.42",
+        "checks": [
+          "First entry offers a blank user-authored profile and skippable model setup",
+          "Packaged application uses the canonical candle mark",
+          "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+          "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+          "Repeated launch returns to the same application window",
+          "Embedded reader and Chinese/math PDF export work without an external browser",
+          "Window close flushes a pending edit and stops the internal service",
+          "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+          "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+          "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+        ],
+        "modelCalls": 0,
+        "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+      },
+      {
+        "status": "pass",
+        "from": "0.1.32",
+        "to": "0.1.42",
+        "checks": [
+          "First entry offers a blank user-authored profile and skippable model setup",
+          "Packaged application uses the canonical candle mark",
+          "Project introduction, author link and expandable acknowledgements are present in the packaged application",
+          "Native window, private application origin, isolated settings, three public materials and sandboxed renderer",
+          "Repeated launch returns to the same application window",
+          "Embedded reader and Chinese/math PDF export work without an external browser",
+          "Window close flushes a pending edit and stops the internal service",
+          "New packaged application opens the previous version’s profile and preserves the edited note and saved model settings",
+          "Packaged worker parses DOCX, PPTX and HTML without a model key or external resources",
+          "Notes and model settings survive repeated restarts; the parent configuration remains untouched"
+        ],
+        "modelCalls": 0,
+        "scope": "First-version native smoke, then target-version data/settings persistence across two restarts; excludes NSIS installation, shortcuts and uninstall"
+      }
+    ],
+    "installerLifecycle": {
+      "status": "pass",
+      "checks": [
+        "Fresh installation: every runtime file matches the prepackaged payload",
+        "Upgrade succeeds even with a deliberately failing legacy uninstaller; legacy code is never executed and credentials survive",
+        "A real locked app.asar stops replacement, names the file, restores all original runtime bytes, and preserves credentials",
+        "Reinstall succeeds after the lock is released, without nested installation paths",
+        "Setup launched inside the installation directory hands off and finishes the full upgrade",
+        "Real uninstall removes application and credentials while retaining external papers and notes"
+      ],
+      "scope": "Full electron-builder NSIS install/upgrade/rollback/uninstall transactions with the supplied runtime, isolated identity and disabled shortcuts/launch",
+      "limitations": [
+        "Native interactive wizard appearance is not automated",
+        "The user installation is not modified; the original reported environment-specific failure is not directly reproduced"
+      ]
+    },
+    "installerProcess": {
+      "status": "pass",
+      "checks": [
+        "Setup inside the application directory does not detect itself",
+        "Unrelated executable in the exact installation directory is ignored",
+        "Same executable name in a prefix-sharing sibling directory is ignored",
+        "Another independent installation is ignored",
+        "Exact target process is identified by PID, including Unicode, spaces, quotes and dollar signs",
+        "Silent install fails boundedly when the app is running and never force-kills it or unrelated processes",
+        "Closing the target clears the check while unrelated processes remain alive",
+        "Uninstaller uses the same native exact-path guard",
+        "Setup below the legacy install prefix relaunches from isolated cache, waits for its parent and preserves /S and /D",
+        "The legacy directory-prefix predicate is clear after handoff"
+      ]
+    },
+    "installerFilesVerified": 36,
+    "payloadFilesVerified": 12119
+  },
+  "distribution": {
+    "installer": {
+      "file": "Candlelight-Notes-0.1.42-Setup-x64.exe",
+      "bytes": 138174704,
+      "sha256": "4b5d019779fffba93fb7fab9aca82b6f0f0ffc788a057885e984ae14784f6d38"
+    },
+    "personalDataIncluded": false,
+    "credentialsIncluded": false,
+    "includedMaterialIds": [
+      "descriptive-statistics-textbook",
+      "descriptive-statistics-numerical",
+      "descriptive-statistics-categorical"
+    ],
+    "signed": false
+  },
+  "limitations": [
+    "No live-model quality or cost validation for the planning reset",
+    "Offline orchestration tests do not certify correct teaching or source selection",
+    "Installer tests use isolated local identities, not a clean Windows VM",
+    "Remote CI is recorded separately on GitHub"
+  ]
+}

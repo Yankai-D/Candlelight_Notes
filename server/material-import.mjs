@@ -2,6 +2,7 @@ import { JSDOM } from 'jsdom';
 import yauzl from 'yauzl';
 import { posix } from 'node:path';
 import { materialFormat } from '../shared/material-formats.mjs';
+import sourceLimits from '../shared/source-limits.json' with { type: 'json' };
 
 const MAX_XML = 16 * 1024 ** 2, MAX_TEXT = 4 * 1024 ** 2;
 const elements = (node, name) => [...node.getElementsByTagNameNS('*', name)];
@@ -112,7 +113,7 @@ function slides(files, warnings) {
     if (!/^ppt\/slides\/[^/]+\.xml$/.test(path)) throw new Error('课件幻灯片路径异常。');
     return path;
   }));
-  if (!paths.length || paths.length > 1000) throw new Error('课件为空或超过 1000 页，请拆分后导入。');
+  if (!paths.length || paths.length > sourceLimits.maxPages) throw new Error(`课件为空或超过 ${sourceLimits.maxPages} 页，请拆分后导入。`);
   warnings.add('课件按幻灯片顺序提取文字；图片、图表、动画与演讲者备注未转换。');
   let readable = false;
   const sections = paths.map((path, index) => xml(files, path, doc => {
@@ -178,6 +179,6 @@ export async function parseMaterial({ name, data }) {
   catch (error) { if (/[\u4e00-\u9fff]/.test(error.message)) throw error; throw new Error('无法读取文件结构，请确认文件未损坏、未加密，并另存为标准 DOCX、PPTX 或 HTML 后重试。'); }
   const length = sections.reduce((sum, section) => sum + section.text.length, 0);
   if (!length) throw new Error('没有可提取的正文，请使用包含文字的文件；扫描件暂不支持 OCR。');
-  if (length > MAX_TEXT || sections.length > 1000) throw new Error('提取内容过长，请按章节拆分后导入。');
+  if (length > MAX_TEXT || sections.length > sourceLimits.maxPages) throw new Error('提取内容过长，请按章节拆分后导入。');
   return { sections, warnings: [...warnings] };
 }

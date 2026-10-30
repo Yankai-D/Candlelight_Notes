@@ -1,7 +1,7 @@
 import { meteredFetcher } from '../../server/model-budget.mjs';
 export { meteredFetcher } from '../../server/model-budget.mjs';
 import { createHash, randomUUID } from 'node:crypto';
-import { buildMessages, runModel, validateResult } from '../../server/harness.mjs';
+import { buildMessages, runFrozenWritingStage, validateResult } from '../../server/harness.mjs';
 import { caseFromMaterial, materials, profileIds, smokeOutput } from './cases.mjs';
 import { operationMaterials, operationOracles, operationPolicy } from './operation-consistency.mjs';
 import { productMaterials, productCase } from './product-scenarios.mjs';
@@ -13,17 +13,20 @@ export const arms = ['direct', 'harness', 'no-sample', 'operation-check', 'previ
 export const defaultBudget = { maxCalls: 2, maxCompletionTokens: 2048, totalCompletionTokens: 4096, maxPromptCharacters: 80000, timeoutMs: 180000, temperature: 0 };
 
 export function experimentLimitations(plan) {
+  const stageScope='本工具固定正文请求与修复阶段，保留历史组名；不运行当前生产版的资料分析、交付规划与按需取证，完整讲义流程另由 eval:course 评测。';
   if (plan.experiment?.suite === 'evidence-boundary') return [
-    '改动前后完整 harness 对照：两组只差一个证据约束 system 后缀，原文、画像、样稿、目标、修复和输出预算均相同。',
+    stageScope,
+    '冻结写作阶段对照：两组只差一个证据约束 system 后缀，原文、画像、样稿、目标、修复和输出预算均相同。',
     '复用三个已见产品场景、两个来源，只评一个开发改动；不把本轮作为独立留出集或统计优势证据。',
     '事实可靠性、解释充分性和阅读体验须分别审阅。没有独立人工评分，不用结构通过或关键词出现自动判断教学质量。',
   ];
   if (plan.experiment?.suite === 'product-scenarios') return [
+    stageScope,
     '三个公开开发场景、同一稳定画像、每组一次生成；论文和小纸条共享来源，不是三个独立知识样本，也不是保密留出集。',
     '固定短章节与模板；不评测自动路由、全文衔接、多文件合成、跨画像稳定性或用户学习成效。小纸条使用预先固定的已有笔记。',
     '相同原文、目标、画像、局部追问与输出预算上限；harness 使用生产模板样稿及修复。实际用量可能不同，结构通过不等于内容达标。',
   ];
-  return ['公开小样本，不是保密留出集；单章固定模板，不评测模板路由、全文衔接、检索或用户学习成效。',
+  return [stageScope,'公开小样本，不是保密留出集；单章固定模板，不评测模板路由、全文衔接、检索或用户学习成效。',
     plan.experiment?.suite==='operation-consistency'
       ? '两组使用完全相同的完整样稿、画像和来源，仅实验组多一个 system 后缀；本轮不比较跨画像适应性。实际用量另行记录。'
       : '相同输入原文与输出预算上限；harness 的样稿增加输入 token。两组真实调用量和费用不会被假定相同。'];
@@ -128,8 +131,10 @@ export async function runExperiment(plan, {mode='simulation', config, fetcher=fe
       run.candidates.push(candidate);
       const provider=mode==='simulation'?async()=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(smokeOutput(testCase.request))}}]}),{status:200}):fetcher;
       const bounded=meteredFetcher(provider,plan.budget,trace), started=performance.now();
+      let currentStage;
+      const tracked = async (url, options) => { const index = trace.length, stage = currentStage; try { return await bounded(url, options); } finally { if (trace[index]) trace[index].stage = stage; } };
       try {
-        const raw=await runModel(selectedConfig,messages,AbortSignal.timeout(plan.budget.timeoutMs),bounded,{action:testCase.request.action,onCompletion:info=>events.push(info)});
+        const raw=await runFrozenWritingStage(selectedConfig,messages,AbortSignal.timeout(plan.budget.timeoutMs),tracked,{action:testCase.request.action,onRequest:info=>{currentStage=info.stage;},onCompletion:info=>events.push(info)});
         candidate.result=validateResult(testCase.request,raw);candidate.status='accepted';
         // Inspect raw provider output, before the harness clears bad anchors.
         candidate.evidence=evidenceDiagnostics(trace.at(-1).response.choices[0].message.content,candidate.result);

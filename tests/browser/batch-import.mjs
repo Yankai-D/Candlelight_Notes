@@ -25,7 +25,7 @@ try{
  const click=async text=>{for(const button of await page.$$('button'))if(await button.evaluate((e,t)=>e.textContent.trim()===t,text)){await button.click();return}throw new Error('Button not found: '+text)};
  const index=async()=>JSON.parse(await readFile(join(server.directory,'profile/library-index.json'),'utf8'));
  const documents=async()=>Promise.all((await index()).entries.map(async entry=>JSON.parse(await readFile(entry.notePath,'utf8'))));
- const folder=async name=>{for(const button of await page.$$('.collection-folders>button'))if(await button.evaluate((e,n)=>e.querySelector('span')?.textContent===n,name)){await button.click();break}await page.waitForFunction(name=>document.querySelector('.collection-title h1')?.textContent===name,{},name)};
+ const folder=async name=>{if(name==='数学')await(await page.$('[aria-label="展开文件夹 期末复习"]'))?.click();for(const button of await page.$$('.collection-folder-link'))if(await button.evaluate((e,n)=>e.querySelector('span')?.textContent===n,name)){await button.click();break}await page.waitForFunction(name=>document.querySelector('.collection-title h1')?.textContent===name,{},name)};
  await page.goto(server.base);await completeOnboarding(page);
  const root=join(server.directory,'期末复习'),math=join(root,'数学');
  for(let i=0;i<30;i++){

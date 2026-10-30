@@ -12,7 +12,7 @@ import { materialFormat, richMaterial } from '../shared/material-formats.mjs';
 
 const manifestName = 'candlelight-workspace.json';
 const preferenceKeys = ['knowledge', 'learner-setup-v1', 'writing-templates-v1', 'course-style-v1', 'collection', 'active-document', 'font-size', 'removed-library-papers', 'ideal-source-links', 'visual-theme'];
-const safePath = value => /^(notes\/\d{1,5}\/(note\.candlelight\.json|source\.(pdf|txt|md|html|docx|pptx|json))|system\/ideal-trees\/[a-f0-9-]{36}\.json|system\/ideal-trees\/assets\/S[a-f0-9]{22}\.(pdf|txt)|system\/generation-records\/[a-zA-Z0-9_-]{1,100}\/[a-f0-9-]{36}\.json)$/.test(value);
+const safePath = value => /^(notes\/\d{1,5}\/(note\.candlelight\.json|source\.(pdf|txt|md|html|docx|pptx|json))|system\/ideal-trees\/[a-f0-9-]{36}\.json|system\/ideal-trees\/assets\/S[a-f0-9]{22}\.(pdf|txt)|system\/generation-records\/[a-zA-Z0-9_-]{1,100}\/[a-f0-9-]{36}\.json|system\/source-knowledge\/[a-f0-9]{64}\.json)$/.test(value);
 const fileSchema = z.object({ path: z.string().refine(safePath), bytes: z.number().int().nonnegative().max(128 * 1024 * 1024), sha256: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const entrySchema = z.object({ id: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), title: z.string().max(400), filename: z.string(), kind: z.enum(['pdf', 'text']), createdAt: z.number(), entryType: z.literal('note').optional(), note: z.string().refine(safePath).optional(), source: z.string().refine(safePath).optional(), sourceType: z.string(), retired: z.object({ mode: z.enum(['record','trash']), time: z.number(), placement: z.unknown().optional() }).optional() }).strict();
 const manifestSchema = z.object({ format: z.literal('candlelight-workspace-v1'), createdAt: z.number(), credentialsIncluded: z.literal(false), preferences: z.record(z.string(), z.unknown()), entries: z.array(entrySchema).max(2000), files: z.array(fileSchema).max(10000), warnings: z.array(z.string()).max(4000) }).strict();
@@ -68,7 +68,7 @@ export async function createWorkspaceBackup(store, directory) {
     }
     manifest.entries.push(output);
   }
-  for (const name of ['ideal-trees', 'generation-records']) await walkSystem(join(store.index.systemDirectory, name), `system/${name}`, add);
+  for (const name of ['ideal-trees', 'generation-records', 'source-knowledge']) await walkSystem(join(store.index.systemDirectory, name), `system/${name}`, add);
   await atomicJSON(join(target, manifestName), manifestSchema.parse(manifest));
   await unlink(join(target, '.candlelight-incomplete'));
   return { directory: target, documents: store.index.entries.length, files: manifest.files.length, bytes: total, warnings: manifest.warnings, credentialsIncluded: false };

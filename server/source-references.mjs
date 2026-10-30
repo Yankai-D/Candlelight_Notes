@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import sourceLimits from '../shared/source-limits.json' with { type: 'json' };
 import { sourceEvidenceIndex } from './source-evidence-index.mjs';
 
 const normalize = text => text.replace(/\s+/g, '').toLowerCase();
@@ -64,8 +65,8 @@ export function referenceRepairMessages(request, candidate) {
     blocks: issues.map(({ index }) => ({ index, ...candidate.blocks[index] })) }) }];
 }
 
-const legacyEdit = z.object({ index: z.number().int().nonnegative(), sourcePages: z.array(z.number().int().positive()).min(1).max(1000), sourceQuote: z.string().min(12).max(2000) }).strict();
-const evidenceEdit = z.object({ index: z.number().int().nonnegative(), sourceEvidenceIds: z.array(z.string().max(100)).min(1).max(1000) }).strict();
+const legacyEdit = z.object({ index: z.number().int().nonnegative(), sourcePages: z.array(z.number().int().positive()).min(1).max(sourceLimits.maxPages), sourceQuote: z.string().min(12).max(2000) }).strict();
+const evidenceEdit = z.object({ index: z.number().int().nonnegative(), sourceEvidenceIds: z.array(z.string().max(100)).min(1).max(sourceLimits.maxPages) }).strict();
 const patchSchema = z.object({ edits: z.array(z.union([evidenceEdit, legacyEdit])).max(3000) }).strict();
 export function applyReferenceRepair(request, candidate, raw) {
   const patch = patchSchema.parse(JSON.parse(raw)), source = referenceSource(request), evidence = sourceEvidenceIndex(source);

@@ -1,0 +1,268 @@
+{
+  "schema": "course-pilot-public-v1",
+  "date": "2026-10-30",
+  "caseId": "inspection-probability-v1",
+  "caseHash": "d21ca31d43201c102b1a61cba58f11e788511005d0511848403cf6e39fcf83d3",
+  "planHash": "66d3b34eec0b85450453d65ed12a75759acd3ac04f46fc743acfba4a75f55726",
+  "model": "deepseek-flash",
+  "mode": "live",
+  "scope": "full planning and sequential chapter generation; lecture template fixed; anomaly review enabled",
+  "budgetPerArm": {
+    "maxCalls": 14,
+    "maxCompletionTokens": 8192,
+    "totalCompletionTokens": 49152,
+    "maxPromptCharacters": 180000,
+    "timeoutMs": 480000,
+    "temperature": 0
+  },
+  "executionOrder": [
+    "baseline",
+    "candidate"
+  ],
+  "candidates": [
+    {
+      "arm": "baseline",
+      "version": "0.1.40",
+      "runtimeFingerprint": "b9f5cf4b8052689b60b1e362f80846ac4d14396830daacf774c079fbccb90dd8",
+      "resultHash": "a6e8a09fe5e9e3f387a024ad873c473f13866d037c9f957d4de70dcae51fda70",
+      "status": "failed",
+      "plannedChapters": 3,
+      "completedChapters": 2,
+      "calls": 14,
+      "usage": {
+        "calls": 14,
+        "successfulResponses": 14,
+        "promptTokens": 105272,
+        "completionTokens": 12787,
+        "cacheHitTokens": 20224,
+        "cacheMissTokens": 85048,
+        "elapsedMs": 84403,
+        "promptCharacters": 238179,
+        "stages": [
+          {
+            "stage": "bundle-intent",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 539,
+            "completionTokens": 398,
+            "cacheHitTokens": 256,
+            "cacheMissTokens": 283,
+            "elapsedMs": 2987,
+            "promptCharacters": 1639
+          },
+          {
+            "stage": "bundle-materials-1",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 3277,
+            "completionTokens": 1051,
+            "cacheHitTokens": 0,
+            "cacheMissTokens": 3277,
+            "elapsedMs": 7865,
+            "promptCharacters": 6744
+          },
+          {
+            "stage": "bundle-plan",
+            "calls": 2,
+            "successfulResponses": 2,
+            "promptTokens": 10521,
+            "completionTokens": 2304,
+            "cacheHitTokens": 5760,
+            "cacheMissTokens": 4761,
+            "elapsedMs": 12473,
+            "promptCharacters": 21650
+          },
+          {
+            "stage": "bundle-plan-review",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 7251,
+            "completionTokens": 251,
+            "cacheHitTokens": 128,
+            "cacheMissTokens": 7123,
+            "elapsedMs": 2874,
+            "promptCharacters": 15866
+          },
+          {
+            "stage": "chapter-analysis",
+            "calls": 3,
+            "successfulResponses": 3,
+            "promptTokens": 16052,
+            "completionTokens": 3937,
+            "cacheHitTokens": 4608,
+            "cacheMissTokens": 11444,
+            "elapsedMs": 26856,
+            "promptCharacters": 37645
+          },
+          {
+            "stage": "generate",
+            "calls": 3,
+            "successfulResponses": 3,
+            "promptTokens": 32684,
+            "completionTokens": 4385,
+            "cacheHitTokens": 3584,
+            "cacheMissTokens": 29100,
+            "elapsedMs": 24538,
+            "promptCharacters": 69633
+          },
+          {
+            "stage": "note-review",
+            "calls": 2,
+            "successfulResponses": 2,
+            "promptTokens": 20962,
+            "completionTokens": 385,
+            "cacheHitTokens": 3584,
+            "cacheMissTokens": 17378,
+            "elapsedMs": 4811,
+            "promptCharacters": 47015
+          },
+          {
+            "stage": "recovery-plan",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 13986,
+            "completionTokens": 76,
+            "cacheHitTokens": 2304,
+            "cacheMissTokens": 11682,
+            "elapsedMs": 1999,
+            "promptCharacters": 37987
+          }
+        ],
+        "currencyCost": null,
+        "note": "Only provider-reported tokens. Missing fields remain unknown. No price or cache-miss inference."
+      },
+      "elapsedMs": 85032,
+      "stopCode": "EVAL_CALL_BUDGET",
+      "stoppedChapter": 3
+    },
+    {
+      "arm": "candidate",
+      "version": "0.1.41",
+      "runtimeFingerprint": "56e0ae6ff1ec1af030a33f63e69548d6437b7823284a4ff94c9736cfdae56e78",
+      "resultHash": "4b79a32611aaa67b8b94ada5bb576062c929ff4d4d7c627b0457d944a20c16e8",
+      "status": "failed",
+      "plannedChapters": 3,
+      "completedChapters": 1,
+      "calls": 14,
+      "usage": {
+        "calls": 14,
+        "successfulResponses": 14,
+        "promptTokens": 135453,
+        "completionTokens": 15712,
+        "cacheHitTokens": 34432,
+        "cacheMissTokens": 101021,
+        "elapsedMs": 93201,
+        "promptCharacters": 327331,
+        "stages": [
+          {
+            "stage": "bundle-intent",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 539,
+            "completionTokens": 375,
+            "cacheHitTokens": 384,
+            "cacheMissTokens": 155,
+            "elapsedMs": 2576,
+            "promptCharacters": 1639
+          },
+          {
+            "stage": "bundle-materials-1",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 3294,
+            "completionTokens": 737,
+            "cacheHitTokens": 256,
+            "cacheMissTokens": 3038,
+            "elapsedMs": 6276,
+            "promptCharacters": 6788
+          },
+          {
+            "stage": "bundle-plan",
+            "calls": 2,
+            "successfulResponses": 2,
+            "promptTokens": 13253,
+            "completionTokens": 4864,
+            "cacheHitTokens": 7808,
+            "cacheMissTokens": 5445,
+            "elapsedMs": 23982,
+            "promptCharacters": 30769
+          },
+          {
+            "stage": "bundle-plan-review",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 11390,
+            "completionTokens": 276,
+            "cacheHitTokens": 384,
+            "cacheMissTokens": 11006,
+            "elapsedMs": 2259,
+            "promptCharacters": 26245
+          },
+          {
+            "stage": "chapter-analysis",
+            "calls": 2,
+            "successfulResponses": 2,
+            "promptTokens": 12431,
+            "completionTokens": 2689,
+            "cacheHitTokens": 2560,
+            "cacheMissTokens": 9871,
+            "elapsedMs": 17169,
+            "promptCharacters": 29682
+          },
+          {
+            "stage": "generate",
+            "calls": 3,
+            "successfulResponses": 3,
+            "promptTokens": 40022,
+            "completionTokens": 5730,
+            "cacheHitTokens": 15232,
+            "cacheMissTokens": 24790,
+            "elapsedMs": 28978,
+            "promptCharacters": 88033
+          },
+          {
+            "stage": "recovery-plan",
+            "calls": 3,
+            "successfulResponses": 3,
+            "promptTokens": 43784,
+            "completionTokens": 868,
+            "cacheHitTokens": 6912,
+            "cacheMissTokens": 36872,
+            "elapsedMs": 9254,
+            "promptCharacters": 119239
+          },
+          {
+            "stage": "note-review",
+            "calls": 1,
+            "successfulResponses": 1,
+            "promptTokens": 10740,
+            "completionTokens": 173,
+            "cacheHitTokens": 896,
+            "cacheMissTokens": 9844,
+            "elapsedMs": 2707,
+            "promptCharacters": 24936
+          }
+        ],
+        "currencyCost": null,
+        "note": "Only provider-reported tokens. Missing fields remain unknown. No price or cache-miss inference."
+      },
+      "elapsedMs": 93938,
+      "stopCode": "EVAL_CALL_BUDGET",
+      "stoppedChapter": 2
+    }
+  ],
+  "reviewerKind": "assistant",
+  "blinded": false,
+  "humanReviewStatus": "pending",
+  "fullQualityComparison": "not-assessable-incomplete",
+  "currencyCost": null,
+  "fixesLiveRetested": false,
+  "liveModelCalls": 28,
+  "personalFilesUsed": false,
+  "limitations": [
+    "One authored development case, one run per version; no statistical superiority or unseen generalization claim.",
+    "Model configuration, sources, learner and goal are shared; runtime versions differ in more than one rule.",
+    "Randomized arm order cannot remove provider cache and latency effects in a single pair.",
+    "Structure, length and metadata are not teaching-quality scores. Independent human review remains pending."
+  ]
+}

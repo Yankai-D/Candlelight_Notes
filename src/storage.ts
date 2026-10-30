@@ -9,16 +9,17 @@ import type { TemplateLibrary } from './types'
 import type { Knowledge } from './types'
 import { readLearnerSetup, commitLearnerSetup, resetLearnerSetup } from '../shared/learner-setup.mjs'
 import { readTemplateLibrary, commitTemplateLibrary } from '../shared/template-library-store.mjs'
+import { localFetch, readLocalJSON } from '../shared/local-api.mjs'
 
 const database = openDB('reading-tree', 1, { upgrade(db) { db.createObjectStore('documents', { keyPath: 'id' }); db.createObjectStore('files'); db.createObjectStore('preferences') } })
 let initialization: Promise<boolean> | undefined, token = '', workspaceToken = ''
 async function request(command: object, binary = false, retry = true, path = '/api/storage'): Promise<any> {
-  if (!token) { const response = await fetch('/api/config'); if (!response.ok) throw new Error('无法连接本机存储服务。'); const config = await response.json(); token = config.token; workspaceToken = config.workspaceToken || '' }
-  const response = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-reading-tree-token': token }, body: JSON.stringify({ ...command, workspaceToken }) })
+  if (!token) { const config = await readLocalJSON(await localFetch('/api/config')); token = config.token; workspaceToken = config.workspaceToken || '' }
+  const response = await localFetch(path, { method: 'POST', headers: { 'content-type': 'application/json', 'x-reading-tree-token': token }, body: JSON.stringify({ ...command, workspaceToken }) })
   if (response.status === 403 && retry) { token = ''; return request(command, binary, false, path) }
-  if (!response.ok) { const error = new Error((await response.json().catch(() => ({}))).error || '本机资料无法保存。') as Error & { status?: number }; error.status = response.status; throw error }
+  if (!response.ok) return readLocalJSON(response)
   if (binary && !response.headers.get('content-type')?.includes('application/json')) return response.blob()
-  return response.json()
+  return readLocalJSON(response)
 }
 async function encoded(file: Blob, name?: string) {
   return { name: name || (file instanceof File ? file.name : 'source.pdf'), data: await new Promise<string>((resolve, reject) => {
@@ -29,9 +30,7 @@ export async function parseRichMaterial(file: File): Promise<{sections: {title: 
   return request(await encoded(file), false, true, '/api/import/material')
 }
 async function initialize() {
-  const configResponse = await fetch('/api/config')
-  if (!configResponse.ok) throw new Error('无法连接本机存储服务。')
-  const config = await configResponse.json(); token = config.token; workspaceToken = config.workspaceToken || ''
+  const config = await readLocalJSON(await localFetch('/api/config')); token = config.token; workspaceToken = config.workspaceToken || ''
   if (config.fileStorage !== true) return false
   try { const status = await request({ action: 'status' }); if (!status?.enabled) return false }
   catch (error) { if ((error as Error & {status?: number}).status === 404) return false; throw error }

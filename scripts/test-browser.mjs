@@ -6,7 +6,7 @@ await access(new URL('../dist/index.html', import.meta.url)).catch(()=>{throw ne
 await mkdir(join(root,'artifacts/browser'),{recursive:true});
 const server=await startTestServer();
 try {
-  for(const suite of ['onboarding','bundles','nested-bundles','ideal-tree','settings','calibration','field-review']) await runNode([`tests/browser/${suite}.mjs`],{
+  for(const suite of ['onboarding','bundles','nested-bundles','reader-sidebar','generation-progress','ideal-tree','settings','calibration','field-review']) await runNode([`tests/browser/${suite}.mjs`],{
     env:{...process.env,PANGZHU_TEST_URL:server.base,PANGZHU_TEST_OUTPUT:join(root,'artifacts/browser',suite)},
   });
 } finally { await server.stop(); }

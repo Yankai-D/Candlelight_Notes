@@ -132,12 +132,12 @@ test('generation and local cooperation use one snapshot; structured and narrativ
   const structured = { ...base, learning: { ...templateSettings('adaptive'), writingTemplate: snapshot } };
   for (const action of ['generate', 'explain', 'rewrite', 'style']) {
     const messages = buildMessages({ ...structured, action }), data = JSON.parse(messages[1].content);
-    assert.deepEqual(data.writingTemplate, snapshot); assert.match(messages[0].content, /每个知识单元可独立回查/);
+    assert.deepEqual(data.writingTemplate, snapshot); assert.match(messages[0].content, /lecture-synthesis-v3/);
     assert.doesNotMatch(messages[0].content, /不拆成教学栏目/);
   }
   const blocks = [{ type: 'heading', text: '均值的定义', sourcePages: [] }, { type: 'paragraph', text: '知识解释。', sourcePages: [] }];
   assert.equal(validateResult(structured, { blocks }).rendering.blocks[0].type, 'heading');
-  assert.throws(() => validateResult(structured, { blocks: [1, 2, 3].map(i => ({ type: 'paragraph', text: `仅一段${i}`, sourcePages: [] })) }), /标题层级/);
+  assert.equal(validateResult(structured, { blocks: [1, 2, 3].map(i => ({ type: 'paragraph', text: `当前主题的第${i}段说明。`, sourcePages: [] })) }).blocks.length, 3);
   const narrative = { ...structured, learning: { ...structured.learning, writingTemplate: templateSnapshot(library(), 'narrative') } };
   assert.match(buildMessages(narrative)[0].content, /局部计算|关键数学推导/);
   assert.throws(() => validateResult(narrative, { blocks: [{ type: 'heading', text: '必要背景' }, ...blocks] }), /教学栏目/);
@@ -150,20 +150,20 @@ test('generation and local cooperation use one snapshot; structured and narrativ
 test('sample edits preserve formulas, accept structured headings, and reject fabricated IDs and sixth template before calling a model', async () => {
   const value = library(), snapshot = templateSnapshot(value, 'lecture');
   const request = { action: 'template-style', revision: 0, instruction: '标题更清楚', template: snapshot };
-  const data = JSON.parse(buildMessages(request)[1].content), paragraph = data.paragraphs.find(p => p.id === 'mean');
-  const reply = { rules: ['标题表达具体问题。'], edits: [{ id: 'mean', text: paragraph.text.replace('计算方法', '怎样计算均值和方差') }] };
+  const data = JSON.parse(buildMessages(request)[1].content), paragraph = data.paragraphs.find(p => p.id === 'question');
+  const reply = { rules: ['标题表达具体问题。'], edits: [{ id: 'question', text: '### 为什么要平方偏差\n\n' + paragraph.text }] };
   assert.notEqual(reply.edits[0].text, paragraph.text);
   const result = validateResult(request, reply);
   assert.equal(result.rendering.format, 'reading-tree-note-v1'); assert.ok(result.rendering.blocks.some(n => n.type === 'heading'));
   const math = text => parseMath(text).filter(n => n.type === 'math');
-  assert.deepEqual(math(result.sample.paragraphs.find(p => p.id === 'mean').text), math(snapshot.sample.paragraphs.find(p => p.id === 'mean').text));
-  assert.throws(() => validateResult(request, { ...reply, edits: [{ id: 'mean', text: '公式已丢失' }] }), /数学/);
+  assert.deepEqual(math(result.sample.paragraphs.find(p => p.id === 'question').text), math(snapshot.sample.paragraphs.find(p => p.id === 'question').text));
+  assert.throws(() => validateResult(request, { ...reply, edits: [{ id: 'question', text: '公式已丢失' }] }), /数学/);
   assert.throws(() => validateResult(request, { ...reply, edits: [{ id: 'new-id', text: '伪造单元' }] }), /ID/);
   const wrapped = structuredClone(reply);
   wrapped.edits[0].text = wrapped.edits[0].text.replace(/⟦math:[^⟧]+⟧/g, token => `\\(${token}\\)`);
   assert.deepEqual(validateResult(request, wrapped).sample, result.sample, 'Exact redundant wrappers must not corrupt protected formulas');
   const malformed = structuredClone(reply); malformed.edits[0].text += String.raw`\(unclosed`;
-  assert.throws(() => validateResult(request, malformed), /单元 mean 排版失败/);
+  assert.throws(() => validateResult(request, malformed), /单元 question 排版失败/);
   let full = value; for (let i = 0; i < 2; i++) full = custom(full, i);
   assert.throws(() => buildMessages({ action: 'create-template', revision: full.revision, definition: definition(4), catalog: templateCatalog(full) }), /五套/);
   const input = { action: 'create-template', revision: 1, definition: definition(9), catalog: templateCatalog(value) };
@@ -175,5 +175,5 @@ test('sample edits preserve formulas, accept structured headings, and reject fab
   assert.throws(() => validateResult(request, { ...reply, rules: ['数学占位符由编译器恢复。'] }), /混入/);
   const reordered = { ...reply, order: snapshot.sample.paragraphs.map(p => p.id).reverse() };
   assert.deepEqual(validateResult(request, reordered).sample.paragraphs.map(p => p.id), reordered.order);
-  assert.throws(() => validateResult(request, { ...reply, order: ['mean'] }), /完整列出/);
+  assert.throws(() => validateResult(request, { ...reply, order: ['question'] }), /完整列出/);
 });

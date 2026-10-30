@@ -6,6 +6,7 @@ import { requestSchema, buildMessages } from './harness.mjs';
 import { optionalRecord } from './recovery.mjs';
 import { executionBinding } from './execution.mjs';
 import { bundlePlanInputSchema } from '../shared/bundle-context.mjs';
+import { generationUsage } from '../shared/generation-usage.mjs';
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const documentId = value => { if (!/^[a-zA-Z0-9_-]{1,100}$/.test(value || '')) throw new Error('无效的资料编号。'); return value; };
 const recordId = value => { if (!/^[a-f0-9-]{36}$/.test(value || '')) throw new Error('无效的生成记录编号。'); return value; };
@@ -20,7 +21,8 @@ const summary = record => ({ id: record.id, documentId: record.documentId, actio
   calls: record.calls.length, repairs: record.events.filter(event => event.repair).length,
   inputTokens: record.events.filter(event => Number.isFinite(event.promptTokens)).reduce((total, event) => total + event.promptTokens, 0),
   outputTokens: record.events.filter(event => Number.isFinite(event.completionTokens)).reduce((total, event) => total + event.completionTokens, 0),
-  usageReported: record.events.some(event => Number.isFinite(event.completionTokens)), errorCode: record.errorCode, compacted: !!record.compacted });
+  usageReported: record.events.some(event => Number.isFinite(event.completionTokens)), stageUsage: generationUsage(record.events),
+  errorCode: record.errorCode, compacted: !!record.compacted });
 export async function readGenerationRecords(system, id, selected) {
   const path = await directory(system, id).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
   if (!path) return selected ? null : [];

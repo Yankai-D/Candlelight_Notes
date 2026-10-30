@@ -18,6 +18,7 @@ try {
     ['tests',['scripts/test.mjs']],['browser',['scripts/test-browser.mjs']],['harness-demo',['scripts/demo-harness.mjs']],
     ['recovery-faults',['scripts/evaluate-recovery.mjs','--out',join(directory,'recovery-faults')]],
     ['note-eval-demo',['scripts/evaluate-notes.mjs','--demo']],['note-calibration',['scripts/calibrate-notes.mjs']],
+    ['note-regression-demo',['scripts/evaluate-note-regression.mjs','--demo','--out',join(directory,'note-regression')]],
     ['claim-eval-demo',['scripts/evaluate-claims.mjs','--demo']],['claim-comparison-demo',['scripts/evaluate-claims.mjs','--compare','--demo']],
     ['claim-focused-demo',['scripts/evaluate-claims.mjs','--focused','--demo']],['claim-meaning-demo',['scripts/evaluate-claims.mjs','--meaning','--demo']],
     ['claim-calculation-demo',['scripts/evaluate-claims.mjs','--calculation','--demo']],['field-review-demo',['scripts/evaluate-field.mjs','--demo']],

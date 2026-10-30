@@ -12,6 +12,7 @@ import { openSettingsStore, settingsPath, connectionPatchSchema } from './settin
 import { idealTreeActivity, pauseIdealTrees } from './ideal-tree/adapter.mjs';
 import { FileLibrary } from './file-library.mjs';
 import { createGenerationRecord } from './generation-records.mjs';
+import { generationProgressStore, progressIdSchema } from './generation-progress.mjs';
 import { parseMaterialInWorker } from './material-worker.mjs';
 
 const envFile=settingsPath();
@@ -36,6 +37,7 @@ async function fileCommand(command) {
   return result;
 }
 const controllers = new Set();
+const generationProgress = generationProgressStore();
 let desktopPDFRenderer, closing = false;
 export const setPDFRenderer = renderer => { desktopPDFRenderer = renderer; };
 export const serviceActivity = () => controllers.size + idealTreeActivity();
@@ -121,12 +123,16 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/pdf', 'Content-Disposition': "attachment; filename*=UTF-8''" + encodeURIComponent(document.title.toWellFormed() + '.pdf'), 'Cache-Control': 'no-store' });
         res.end(buffer); return;
       }
-      if (path === '/api/config' && req.method === 'GET') return send(res, 200, { ...settings.publicConfig(), token, workspaceToken, fileStorage: process.env.READING_TREE_FILE_STORAGE !== '0' });
+      if (path === '/api/config' && req.method === 'GET') return send(res, 200, { ...settings.publicConfig(), token, workspaceToken, generationProgressVersion: 1, fileStorage: process.env.READING_TREE_FILE_STORAGE !== '0' });
+      if (path === '/api/generation-progress' && req.method === 'POST') {
+        const input = z.object({ id: progressIdSchema, workspaceToken: z.string().optional() }).strict().parse(await body(req, 2048));
+        if (input.workspaceToken && input.workspaceToken !== workspaceToken) return send(res, 409, { error: '学习空间已切换，请刷新窗口。' });
+        return send(res, 200, generationProgress.get(input.id, workspaceToken));
+      }
       if (path === '/api/organize' && req.method === 'POST') {
         if (!config.apiKey) return send(res, 400, { error: '请先连接模型，再自动整理学习树。' });
         const controller = new AbortController();
         controllers.add(controller);
-        const timer = setTimeout(() => controller.abort(), 180000);
         res.on('close', () => { if (!res.writableEnded) controller.abort(); });
         try {
           const { organizeTree } = await import('./organization-harness.mjs');
@@ -137,26 +143,32 @@ const server = http.createServer(async (req, res) => {
             await writeFile(resolve(directory, 'organization-last.json'), JSON.stringify(diagnostic, null, 2));
           } });
           return send(res, 200, { result, model: activeConfig.model });
-        } finally { clearTimeout(timer); controllers.delete(controller); }
+        } finally { controllers.delete(controller); }
       }
       if (path === '/api/config' && req.method === 'POST') {
-        return send(res, 200, await settings.save(await body(req)));
+        return send(res, 200, { ...await settings.save(await body(req)), generationProgressVersion: 1 });
       }
-      if(path==='/api/config/reset'&&req.method==='POST')return send(res,200,await settings.reset());
+      if(path==='/api/config/reset'&&req.method==='POST')return send(res,200,{ ...await settings.reset(), generationProgressVersion: 1 });
       if (['/api/edit', '/api/test'].includes(path) && req.method === 'POST') {
         const input = await body(req);
         if (input.workspaceToken && input.workspaceToken !== workspaceToken) return send(res, 409, { error: '学习空间已切换，请刷新窗口后再操作。未调用模型。' });
         // Workspace identity is transport metadata. Consume it here so strict
         // tree/template commands receive only their domain fields.
         delete input.workspaceToken;
+        const progressId = input.progressId; delete input.progressId;
         if (input?.action === 'ideal-tree' && process.env.READING_TREE_FILE_STORAGE !== '0') await fileCommand({ action: 'status' });
         if (maintaining) return send(res, 409, { error: '资料库正在备份或恢复，请等待完成。' });
         const activeConfig=path==='/api/test'?{...config,...connectionPatchSchema.parse(input)}:{...config};
         const localIdealCommand = input?.action === 'ideal-tree' && ['list', 'get', 'pause', 'export', 'resource', 'delete'].includes(input.command);
         if (!activeConfig.apiKey && !localIdealCommand) return send(res, 400, { error: '请先在模型设置中填写 DeepSeek API Key。' });
+        const progress = path === '/api/edit' && progressId !== undefined ? generationProgress.start(progressId, workspaceToken,
+          ['generate', 'explain', 'rewrite', 'style', 'bundle-plan', 'select-template'].includes(input.action) ? input.action : 'preparing') : undefined;
         const controller = new AbortController();
         controllers.add(controller);
-        const timer = setTimeout(() => controller.abort(), path === '/api/test' ? 45000 : input.action === 'bundle-plan' ? 900000 : 360000);
+        // Generation spans analysis, writing, review and repair. A whole-task
+        // wall-clock cap cancels healthy progress; lifecycle/user cancellation
+        // remains authoritative. Only the connection probe has a short deadline.
+        const timer = path === '/api/test' ? setTimeout(() => controller.abort(), 45000) : undefined;
         res.on('close', () => { if (!res.writableEnded) controller.abort(); });
         try {
           if (path === '/api/test') {
@@ -171,18 +183,21 @@ const server = http.createServer(async (req, res) => {
           }
           try {
             const raw = await runModel(activeConfig, messages, controller.signal, record?.fetch || fetch, { action: input.action,
+              knowledgeDirectory: process.env.READING_TREE_FILE_STORAGE !== '0' && input.action === 'generate' && input.documentId ? files.index.systemDirectory : undefined,
               checkpoint: record?.checkpoint, saveCheckpoint: record?.saveCheckpoint,
-              onCompletion: info => { generation.push(info); record?.event(info); }, onWorkflowReport: value => { workflow = value; if (value) record?.event({ phase: 'workflow-summary', workflow: value }); } });
+              onRequest: info => progress?.request(info),
+              onCompletion: info => { generation.push(info); record?.event(info); progress?.event(info); }, onWorkflowReport: value => { workflow = value; if (value) record?.event({ phase: 'workflow-summary', workflow: value }); } });
             const result = validateResult(input, raw);
             await record?.finish('accepted', result);
-            return send(res, 200, { result, model: activeConfig.model, generation, recordId: record?.id, workflow });
+            return send(res, 200, { result, model: activeConfig.model, generation, recordId: record?.id, workflow, ...(progress ? { progress: progress.finish('complete') } : {}) });
           } catch (error) { await record?.finish(controller.signal.aborted ? 'cancelled' : 'failed', undefined, error); throw error; }
+        } catch (error) { if (progress) error.progress = progress.finish(controller.signal.aborted ? 'cancelled' : 'failed'); throw error;
         } finally { clearTimeout(timer); controllers.delete(controller); }
       }
       return send(res, 404, { error: '接口不存在。' });
     } catch (error) {
       const message = error.name === 'AbortError' ? '请求已取消或超时，笔记未被修改。' : error instanceof z.ZodError ? '输入格式不正确，请检查模型设置或重新选择内容。' : error.message === 'fetch failed' ? '无法连接模型服务，请检查网络与 API 地址。' : error.message;
-      if (!res.destroyed) send(res, 400, { error: message, ...noteFailureMetadata(error) });
+      if (!res.destroyed) send(res, 400, { error: message, ...noteFailureMetadata(error), ...(error.progress ? { progress: error.progress } : {}) });
     }
     return;
   }

@@ -44,6 +44,15 @@ test('split generation and bounded format repair retain the full goal contract i
   const raw = await runModel({ baseUrl: 'https://api.deepseek.com', model: 'test', apiKey: 'test-only' }, buildMessages(input), undefined, async (_url, options) => {
     const body = JSON.parse(options.body), context = JSON.parse(body.messages[1].content);
     calls.push(body);
+    if (body.messages[0].content.startsWith('execution-recovery-plan-v1')) {
+      assert.equal(context.taskContext[0].fields.learningIntent, input.document.intent);
+      assert.ok(context.originalContract.includes(learningGoalPrompt(input.learning, input.action)));
+      assert.equal(context.taskContext[0].fields.segment.index, 1);
+      return new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({
+        failureId: context.failureId, strategy: 'patch', targetDigest: context.candidateDigest,
+        operations: [{ op: 'set', path: ['blocks'], expected: [], value: [{ type: 'paragraph', text: '片段 1 的解释。', sourcePages: [1] }] }],
+      }) } }] }));
+    }
     assert.equal(context.learningIntent, input.document.intent);
     assert.ok(body.messages[0].content.includes(learningGoalPrompt(input.learning, input.action)));
     const segment = context.segment.index;
@@ -53,7 +62,7 @@ test('split generation and bounded format repair retain the full goal contract i
   }, { action: 'generate' });
   assert.equal(calls.length, segments.length + 1);
   assert.equal(JSON.parse(raw).blocks.length, segments.length);
-  assert.equal(JSON.parse(calls[1].messages.at(-1).content).execution, 'stage-recovery-v1');
+  assert.ok(calls[1].messages[0].content.startsWith('execution-recovery-plan-v1'));
 });
 
 test('HTML exercise task reaches routing and generation; new derivations render with question anchors without requiring an original answer',async()=>{

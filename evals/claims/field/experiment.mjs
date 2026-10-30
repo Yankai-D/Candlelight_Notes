@@ -1,5 +1,5 @@
 import { evaluationCase, smokeOutput } from '../../notes/cases.mjs';
-import { buildMessages, runModel, validateResult } from '../../../server/harness.mjs';
+import { buildMessages, runFrozenWritingStage, validateResult } from '../../../server/harness.mjs';
 import { fingerprint, normalizeSnapshot } from '../../../server/claim-review.mjs';
 import { auditUnits } from '../../../server/claim-audit.mjs';
 import { conditionPrompt, buildConditionMessages, validateConditions } from '../../../server/condition-review.mjs';
@@ -15,7 +15,7 @@ export function planField() {
   const c=evaluationCase('openintro-mean','foundation');
   return {version:fieldVersion,material:c.material,request:c.request,generationMessages:buildMessages(c.request),reviewPrompt:conditionPrompt,
     generationBudget,diagnosticBudget,windowPolicy,maxCalls:10,maxCompletionTokens:24576,
-    scope:'One new model-generated chapter from an already used public textbook; not an unseen holdout or a complete textbook.',
+    scope:'One frozen writing stage from an already used public textbook, followed by claim review; not the production planning/selection pipeline, an unseen holdout or a complete textbook.',
     evidencePolicy:'Reviewers receive all supplied chapter pages; generated citations are retained in the original result but do not restrict the evidence search.'};
 }
 const blockText=block=>block.type==='bulletList'?block.items.join('\n'):block.text;
@@ -48,7 +48,7 @@ export async function runField(plan,{mode='simulation',config,fetcher=fetch,onSt
   const active=signal?AbortSignal.any([signal,AbortSignal.timeout(generationBudget.timeoutMs)]):AbortSignal.timeout(generationBudget.timeoutMs);
   try {
     active.throwIfAborted();
-    const raw=await runModel(selected,buildMessages(plan.request),active,bounded,{action:'generate',onCompletion:e=>run.generation.events.push(e)});
+    const raw=await runFrozenWritingStage(selected,buildMessages(plan.request),active,bounded,{action:'generate',onCompletion:e=>run.generation.events.push(e)});
     active.throwIfAborted();run.generation.result=validateResult(plan.request,raw);run.generation.status='accepted';
   }catch(error){run.generation.status='failed';run.generation.error={code:bounded.blockedReason||error.code||error.name};run.status='generation-failed';}
   await onStage(run);

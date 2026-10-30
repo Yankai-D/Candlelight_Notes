@@ -27,6 +27,7 @@ export type Collection = { version: 1; folders: CollectionFolder[]; items: Recor
 export type Chapter = {
   id: string; title: string; subtitle?: string; sourcePages: number[];
   content: JSONContent; status: 'empty' | 'ready';
+  teachingRecord?: import('zod').infer<typeof import('../shared/teaching-plan.mjs').teachingRecordSchema>;
 }
 export type Version = { id: string; time: number; label: string; chapters: Chapter[] }
 export type LearningDocument = {
@@ -54,7 +55,7 @@ export type StudyTreeEntry = Pick<LearningDocument, 'id' | 'title' | 'subtitle' 
   kind: 'pdf' | 'text' | 'bundle'; bundleFolderId?: string; members?: { id: string; title: string; pageCount: number }[];
 }
 export type ReaderStartupMode = 'manual' | 'translation' | 'adaptive'
-export type ModelConfig = { baseUrl: string; model: string; configured: boolean; token: string; workspaceToken?: string; startupMode?: ReaderStartupMode; storage?: 'env'; fileStorage?: boolean }
+export type ModelConfig = { baseUrl: string; model: string; configured: boolean; token: string; workspaceToken?: string; startupMode?: ReaderStartupMode; storage?: 'env'; fileStorage?: boolean; generationProgressVersion?: number }
 export type SelectionContext = { from: number; to: number; text: string; anchorId: string; label: string }
 export type SourcePosition = { page: number; fraction: number; quote: string; approximate: boolean; readingOffset?: number }
 export type EditRequest = {

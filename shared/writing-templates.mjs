@@ -4,6 +4,8 @@ import { editorialPolicy } from './editorial-policy.mjs';
 import { exerciseTemplate, exerciseWritingPrompt } from './exercise-template.mjs';
 import { templateDecisionSchema } from './template-decision.mjs';
 import { lectureSample as conciseLectureSample, lectureOrganization, lectureSynthesisPrompt } from './lecture-synthesis.mjs';
+import previousLecture from './lecture-legacy-v1.json' with { type: 'json' };
+import priorTextbookLecture from './lecture-legacy-v2.json' with { type: 'json' };
 
 export const TEMPLATE_LIBRARY_KEY = 'writing-templates-v1';
 export const MAX_TEMPLATES = 5;
@@ -58,18 +60,19 @@ export const writingTemplateSchema = templateDefinitionSchema.extend({
 }).strict();
 const libraryShape = z.object({ version: z.union([z.literal(1), z.literal(2)]), revision: z.number().int().nonnegative(), templates: z.array(writingTemplateSchema).min(2).max(MAX_TEMPLATES + 1) }).strict();
 const legacyLectureSample = templateSampleSchema.parse(lectureSample);
-const isLegacyLectureSample = value => {
-  const parsed = templateSampleSchema.safeParse(value);
-  return parsed.success && JSON.stringify(parsed.data) === JSON.stringify(legacyLectureSample);
+const sameSample = (value, expected) => {
+  const parsed = templateSampleSchema.safeParse(value), canonical = templateSampleSchema.safeParse(expected);
+  return parsed.success && canonical.success && JSON.stringify(parsed.data) === JSON.stringify(canonical.data);
 };
 function migrateLectureDefault(value) {
   if (!value || typeof value !== 'object' || !Array.isArray(value.templates)) return value;
   const entry = value.templates.find(template => template.id === 'lecture'), builtin = builtInTemplates.find(template => template.id === 'lecture');
-  if (!entry || entry.organization !== legacyLectureOrganization || !isLegacyLectureSample(entry.defaultSample)
-    || ['name', 'layout', 'audience'].some(field => entry[field] !== builtin[field])) return value;
+  const legacy = [{ organization: legacyLectureOrganization, defaultSample: legacyLectureSample }, previousLecture, priorTextbookLecture]
+    .find(prior => entry?.organization === prior.organization && sameSample(entry.defaultSample, prior.defaultSample));
+  if (!legacy || ['name', 'layout', 'audience'].some(field => entry[field] !== builtin[field])) return value;
   const next = structuredClone(value), target = next.templates.find(template => template.id === 'lecture');
   target.organization = builtin.organization; target.defaultSample = structuredClone(builtin.defaultSample);
-  if (!target.editCount && isLegacyLectureSample(target.personalSample)) target.personalSample = structuredClone(builtin.defaultSample);
+  if (!target.editCount && sameSample(target.personalSample, legacy.defaultSample)) target.personalSample = structuredClone(builtin.defaultSample);
   return next; // Preserve personal edits, undo, selection and CAS revision.
 }
 const checkedLibrary = z.preprocess(migrateLectureDefault, libraryShape.superRefine((value, ctx) => {

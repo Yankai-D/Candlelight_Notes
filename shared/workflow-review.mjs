@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const workflowDiagnoses = ['ORIGINAL_PAGE_AS_ID', 'OUTSIDE_EVIDENCE', 'EDIT_FORMAT', 'GOAL_MISMATCH', 'COVERAGE_GAP', 'UNSUPPORTED_CLAIM', 'UNCLEAR_REASONING', 'REVIEW_PROTOCOL', 'REVIEW_UNRESOLVED'];
-export const workflowTriggers = ['SOURCE_REPAIR', 'FORMAT_REPAIR', 'SHORT_RESPONSE', 'MISSING_SOLUTION', 'NO_SOURCE_ANCHORS', 'SOURCE_QUOTE_MISMATCH', 'ANALYSIS_RISK'];
+export const workflowTriggers = ['SOURCE_REPAIR', 'FORMAT_REPAIR', 'SHORT_RESPONSE', 'MISSING_SOLUTION', 'NO_SOURCE_ANCHORS', 'SOURCE_QUOTE_MISMATCH', 'ANALYSIS_RISK', 'LECTURE_REDUNDANCY', 'LECTURE_EXPANSION', 'LECTURE_COVERAGE'];
 const diagnoses = z.array(z.enum(workflowDiagnoses)).max(workflowDiagnoses.length);
 export const workflowRequestSchema = z.object({
   version: z.literal(1), id: z.string().uuid(), attempt: z.number().int().positive(), chapterId: z.string().min(1).max(100),

@@ -113,6 +113,20 @@ Original page numbers are display metadata; flattened source IDs identify eviden
 
 Adaptive bundle synthesis keeps chapters together up to 48,000 source characters; other reading uses 18,000-character segments without silently dropping source text. Later segments receive accepted writing context for continuity, not as new source evidence. Review respects chapter and segment responsibilities.
 
+## 进展与增量上下文 / Progress and incremental context
+
+执行器以失败字段的实际值和实际工具观察为进展依据。改变修订指令的措辞或候选中的无关字段不能重新启用同一方法；新的来源读取或局部修补仍可推动任务继续。候选指纹和方法状态写入原有检查点，跨续接保留；这不是固定调用额度。相同错误文本并不自动代表相同状态，反之不同指令文本也不自动代表有进展。
+
+The runner measures progress through actual failed-field values and tool observations. Reworded instructions or unrelated candidate edits do not reopen the same method; new source inspection or a local patch can still advance the task. Candidate fingerprints and method state persist in existing checkpoints across resumes. This is not a fixed call quota. Identical error wording need not mean an identical state, and different instruction wording does not establish progress.
+
+首次正文审查使用完整章节。后续局部复查和意见复核保留原编号，只发送相关正文、邻段、同一知识单元和原文；覆盖问题保留全部来源。审查模型可用绑定当前正文的 `needsContext` 申请完整上下文，程序继续当前任务，不把扩展当作正文失败或额外诊断。省略正文的提纲只提供导航，不能作为事实证据，也不能据此断言知识缺失。
+
+Initial prose review uses the complete chapter. Local follow-up reviews and finding audits preserve original indices while sending related prose, neighbours, the same learning unit and source pages; coverage findings retain all sources. A reviewer may request full context with a candidate-bound `needsContext` response. The runner continues the current task without treating expansion as a draft failure or launching extra diagnosis. Outlines of omitted prose provide navigation, not factual evidence or proof of missing knowledge.
+
+需要章前分析的适应性生成可在资料库内复用 `source-knowledge-v1` 原文索引。它只提取来源中的概念、方法、例题、条件和变体，按完整原页内容、模型身份和索引契约绑定。新目标与画像仍独立分析，写作始终接收完整原文；索引不取代证据或教学质量审查。缓存属于资料库，可迁移和备份；校验失败重新提取，无法推进的索引恢复回退到直接读原文。首次提取有额外成本，跨笔记复用收益需要实际使用测量，不能直接从字符缩减推算账单。
+
+Adaptive tasks requiring chapter analysis can reuse workspace-local `source-knowledge-v1` indexes. These extract concepts, methods, examples, conditions and variations from sources and bind them to full original-page content, model identity and the index contract. New goals and profiles are analyzed independently, and writing always receives full source text. Indexes do not replace evidence or teaching-quality review. The workspace cache supports migration and backup; invalid entries are re-extracted, and stalled index recovery falls back to reading original sources. First extraction has additional cost, and real cross-notebook savings require measurement rather than extrapolation from character counts.
+
 ## 运行环境错误 / Runtime failures
 
 确定性的运行环境问题仍由专用层处理：原子文件写入对短暂 Windows/OneDrive 锁重试同一份快照，绝不先删旧文件；暂时连接故障按退避与共享传输额度重试。认证失败、磁盘已满或用户取消不能靠模型编造解决。日志保存失败不会使有效正文重新调用模型；关键数据持续无法保存时仍需明确暂停。
@@ -177,6 +191,22 @@ The 18 scenarios are offline mechanism evidence. A separate [live workbench asse
 
 ## 格式误报与定位 / Format false positives and diagnostics
 
+通用执行层先尝试 `json-syntax-v1` 局部语法修补，再进入模型诊断。它按 JSON 语法识别属性引号、成员间逗号和尾逗号，不按某个业务字段或报错文字打补丁；不修改字符串值、数字或公式，不补写缺失正文，不猜测被截断的内容。无法确定的输入仍交给既有恢复流程。每个补丁记录原始偏移和前后摘要，保存后重新通过原步骤的完整校验；取消、来源定位和检查点约束不变。只修结构标点且没有其他异常时，不因此单独增加一次正文模型审查。
+
+The shared runner attempts `json-syntax-v1` repair before model diagnosis. It parses property quotes, member separators and trailing commas using JSON grammar rather than matching business fields or error messages. It preserves string values, numbers and formulas, never fills missing prose and does not guess truncated content. Ambiguous inputs continue through the existing recovery flow. Patches record original offsets and before/after digests, then pass the original complete validator after checkpointing. Cancellation, source binding and checkpoint rules remain intact. Punctuation-only recovery does not independently trigger a semantic model review when no other anomaly is present.
+
+有歧义的字符串转义交给模型判断，不由上述纯标点修补猜测。工作区提供当前候选的转义清单与上下文；模型可提交 `json-escape` 补丁，明确选择哪些序列应作为字面反斜杠编码。程序批量处理这些位置，保留已正确编码的反斜杠、Unicode 转义、未选择的序列和其余字符。该操作绑定当前候选摘要，仍需原校验与内容审查；不允许把合法的换行或制表符一律双写。`repair/reframe` 在工具说明中明确表示完整重写，文字上要求“局部修补”不能代替可执行的 `patch.operations`。
+
+Ambiguous string escapes require a model decision rather than punctuation-only guessing. The workbench exposes a current-candidate inventory with context; a `json-escape` patch explicitly selects sequences intended as literal backslashes. The program handles those positions while preserving already encoded backslashes, Unicode escapes, unselected sequences and other characters. The operation is digest-bound and still requires original validation and content review; valid newlines or tabs must not be blindly doubled. Tool instructions distinguish full `repair/reframe` rewrites from executable `patch.operations`; prose instructions alone are not local patches.
+
+资料包需求分为 `global` 和 `section`：前者约束整份交付，例如章节数量、组织方式与精简程度；后者是具体章节必须完成的知识任务。全局要求仍进入规划审查、正文生成和审查上下文，不要求为了通过覆盖检查在某章额外挂标签。具体任务遗漏、未知编号、伪造目标引文仍拒绝。规划审查对照用户原话检查作用域分类及全局约束，不能凭标签宣布满足。旧规划没有作用域时保留原有章节分配语义，不自动改写已有笔记。
+
+Bundle requirements distinguish `global` delivery constraints, such as chapter count, organization and concision, from `section` knowledge tasks assigned to specific chapters. Global constraints remain in planning review, writing and review context without requiring redundant chapter tags. Missing concrete tasks, unknown IDs and fabricated goal quotes still fail. Plan review checks both the scope classification and global compliance against the user's original instructions; labels alone prove neither. Legacy unscoped plans retain their previous assignment semantics without rewriting existing notes.
+
+开发回放 `tests/json-syntax-repair.test.mjs` 使用一份真实模型返回：一次修复九处属性开头引号，逐字保留其余内容，并通过原笔记校验，额外模型调用为零。`tests/requirement-scope.test.mjs` 在关闭恢复时验证四步规划可接受未逐章标注的全局要求，也验证具体任务遗漏仍失败、全局章节数错误仍能被语义审查拒绝。回放与模拟证明的是这些编排规则，不是通用语义正确率。
+
+The development replay in `tests/json-syntax-repair.test.mjs` repairs nine missing property-opening quotes in an actual model response while preserving every other character and passing original note validation, with zero additional model calls. With recovery disabled, `tests/requirement-scope.test.mjs` checks four-stage planning without redundant global tags, rejection of missing concrete tasks and semantic rejection of an incorrect whole-document chapter count. Replays and simulations establish these orchestration rules, not general semantic accuracy.
+
 讲义正文允许 `learningRoles` 多用途标注；旧 `learningRole` 仍兼容。覆盖缺口先核对正文与标注，不等同于知识缺失。生成与审查的局部恢复使用当前候选的索引、字段预览和诊断，历史观察必须匹配当前摘要。数组插入由程序原子执行并验证完整锚点，模型不手动移动后续段落。同一段落的独立审查意见分别复核，只在写作时归并目标，所有原意见都保留复查映射。
 
 Lecture prose supports multiple `learningRoles` while retaining legacy `learningRole`. A coverage gap prompts inspection of prose and metadata; it does not establish missing knowledge. Local generation and review recovery use current-candidate indices, previews and diagnostics; prior observations must match its digest. Array insertion is atomic and verifies the complete anchor rather than making the model shift later paragraphs. Independent findings on one paragraph are audited separately, grouped only for writing, and retain all recheck mappings.
@@ -188,3 +218,17 @@ Writing receives only findings retained after audit and an explicit target contr
 统一解析器将 `data$column`、`summary(model)$statistic` 等成员访问表达式中的美元符号视为代码文字，避免错误进入公式恢复；显式数学定界符仍须配对。生成、讲解、改写和风格编辑的格式诊断包含结果字段路径、字符位置和局部上下文，恢复层将这些证据交给模型，不再只返回笼统的公式报错。该修改通过合成回归及旧响应离线回放验证，没有新增真实模型调用。
 
 The shared parser treats dollars embedded in member-access expressions such as `data$column` and `summary(model)$statistic` as literal text, avoiding false math recovery. Explicit math delimiters must still match. Format diagnostics for generation, explanation, rewriting, and style editing include the result-field path, character offset, and local context. The recovery layer forwards this evidence rather than only a generic math error. Synthetic regression and saved-response replay verified this change without new live model calls.
+
+## 讲义规划与来源长度解耦 / Separating handout planning from source length
+
+讲义生成采用“读取资料 → 从目标重置交付规划 → 整章写作”的固定阶段边界。阅读批次按来源容量安排，正文任务按学习职责安排；来源分批不再自动变成一组待拼接的正文。每章的最终知识单元声明应理解的概念、应能执行的方法、代表题和实质变体，完成这些任务即可结束。原文页数和字数不决定展开份额，也不设压缩比来替代教学判断。详细契约见 [讲义风格](lecture-style.md)。
+
+Handout generation separates source reading, goal-driven deliverable selection and whole-chapter writing. Input size determines reading batches; learning responsibilities determine writing tasks. Source batches no longer become prose fragments to concatenate. Final knowledge units define concepts, executable methods, representative problems and substantive variants. Completion depends on those duties rather than source length or a compression ratio. See the [handout contract](lecture-style.md).
+
+重复及无关来源可以说明理由后不进入正文，但仍保留原件并进入阅读核对；不能仅凭索引摘录判定全文无用。写作者只先收到所选的逐字证据，可请求完整原页核对，原页展开不改变教学任务。空行政批次不强造知识点，若全部资料不支持目标则报告资料不足。正常恢复、取消、检查点和内容审查仍适用；没有添加新的恢复配额或固定重写轮数。
+
+Repeated or irrelevant sources may be excluded from prose with reasons, while originals remain available for reading checks. Preview-only judgments do not establish full-text irrelevance. Writers initially receive selected verbatim evidence and may request full pages without changing their teaching duties. Administrative batches create no artificial learning units; unsupported goals produce a source-insufficiency result. Recovery, cancellation, checkpoints and content review remain active, with no new recovery quota or fixed rewrite count.
+
+规划重置有离线变形测试：同一知识材料重复 40 倍只增加阅读批次，模拟的写作任务及选定证据保持不变；新增方法可以扩大交付。完整生成流程由 `eval:course` 测试；旧的笔记提示对照和逐句审阅实验通过显式 `runFrozenWritingStage` 固定正文阶段，保留校验与恢复，并在报告中注明不评测完整规划。生产入口继续使用 `runModel`。这区分了提示实验与系统评测，历史费用和真实返回不改写。
+
+Offline metamorphic tests multiply equivalent material forty-fold, increasing reading batches while preserving scripted writing duties and selected evidence; new methods may expand delivery. `eval:course` exercises the full workflow. Legacy note-prompt and claim-review experiments explicitly use `runFrozenWritingStage`, retaining validation and recovery while disclosing their narrower scope. Production continues through `runModel`. Prompt experiments and system evaluations remain distinct, without rewriting historical costs or responses.

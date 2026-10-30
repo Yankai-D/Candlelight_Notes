@@ -14,12 +14,19 @@ export function currentMessagesFromV010(messages) {
   if (originalContext.writingTemplate?.layout === 'structured') {
     // The reviewed lecture replacement changes the sample and organization,
     // not only wording. Pin both sides instead of normalizing future changes.
-    const raw = readFileSync(new URL('../fixtures/lecture-prompt-migration-v030.json', import.meta.url), 'utf8');
-    assert.equal(createHash('sha256').update(raw).digest('hex'), '1c01e50ec640f641a2f743115c7329ced96951856c15e41297d90389404025b1');
+    const raw = readFileSync(new URL('../fixtures/lecture-prompt-migration-v041.json', import.meta.url), 'utf8');
+    assert.equal(createHash('sha256').update(raw).digest('hex'), '0bc46efd4f2ae50af721a911f825b1ac308c4e8a2d290d40fd567304a3baf826');
     const originalHash = createHash('sha256').update(JSON.stringify(messages)).digest('hex');
     const migration = JSON.parse(raw).find(item => item.originalHash === originalHash);
     assert.ok(migration, 'No reviewed lecture migration for this historical prompt');
-    return structuredClone(migration.messages);
+    // Planning reset changes this explicit writing contract; preserve the
+    // historical fixture and fail on any unrelated prompt drift.
+    const next=structuredClone(migration.messages);
+    const anchor='交付的是可独立复习、可以照着完成代表题的短讲义。';
+    const reset='篇幅由目标所需的知识与任务复杂度决定，不与源文本字数、页数、文件数或阅读分批数量成比例。相同知识换成十份重复课件，仍只讲一次；新增实质方法或用户明确扩大目标，才增加相应讲解。完成本章所选能力目标即结束，不逐段扩写，不把原段落改写后按主题堆叠。';
+    assert.equal(next[0].content.split(anchor).length,2);
+    next[0].content=next[0].content.replace(anchor,anchor+reset);
+    return next;
   }
   const oldName = '你是旁烛笔记的学习笔记编辑器。';
   const profile = '用户画像约束 stable-profile-v1：learner 仅包含用户明确维护的稳定背景与基础知识。资料库状态、已读记录、学习树的分类和概念均不代表用户画像，不据此推断掌握程度或省略必要解释。';
@@ -52,7 +59,19 @@ export function currentMessagesFromV010(messages) {
   // Pin this explicit migration without changing any historical experiment.
   const contracts = readFileSync(new URL('../fixtures/note-output-contract-v1.json', import.meta.url), 'utf8');
   assert.equal(hash(contracts), '00d606e1e55c6f0c47769f0ecdc1c420d07412151574fc3ea3e1ef378f9fdc5a');
-  const outputRule = '\n输出必须满足以下 JSON Schema；包括字段类型、必需字段和数组上限。语义要求仍以任务与来源为准。\n' + JSON.stringify(JSON.parse(contracts)[action]);
+  const contract = JSON.parse(contracts)[action];
+  // v0.1.33 raises only source-page references from 1,000 to 2,000. The
+  // archived fixture remains immutable; unrelated schema changes still fail.
+  const migratePageLimit = node => {
+    if (!node || typeof node !== 'object') return;
+    if (node.properties?.sourcePages) {
+      assert.ok([30, 1000].includes(node.properties.sourcePages.maxItems));
+      if (node.properties.sourcePages.maxItems === 1000) node.properties.sourcePages.maxItems = 2000;
+    }
+    Object.values(node).forEach(migratePageLimit);
+  };
+  migratePageLimit(contract);
+  const outputRule = '\n输出必须满足以下 JSON Schema；包括字段类型、必需字段和数组上限。语义要求仍以任务与来源为准。\n' + JSON.stringify(contract);
   return messages.map((message, index) => index === 1 ? { ...message, content: JSON.stringify(nextContext) } : index ? structuredClone(message) : {
     ...message, content: message.content.replace(oldName, '你是烛光笔记的学习笔记编辑器。').replace(profile + '\n', profile + unknown + '\n').replace(oldGoal, nextGoal).replace(oldOrganization, nextOrganization)
       .replaceAll('"sourcePages":[1]', `"sourcePages":${JSON.stringify(context.source.length ? [context.source[0].number] : [])}`) + referenceRule + contentRules + outputRule,

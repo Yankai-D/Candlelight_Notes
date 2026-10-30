@@ -106,7 +106,7 @@
 :root .application-shell .collection-context p { margin: 0; font: 11px/1.8 var(--sans); color: var(--shell-muted); }
 :root .application-shell .folder-heading { margin: 32px 0 12px; font-size: 11px; color: var(--shell-muted); }
 :root .application-shell .collection-folders { display: grid; gap: 4px; margin: 0 -8px; overflow: auto; }
-:root .application-shell .collection-folders>button { padding: 11px 10px; border-radius: 7px; color: var(--shell-muted); }
+:root .application-shell .collection-folder-row { color: var(--shell-muted); }
 :root .application-shell .collection-sidebar-bottom { position: static; display: block; margin-top: auto; padding-top: 24px; }
 :root .application-shell .resume-reading { display: block; width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 9px; text-align: left; background: var(--paper); }
 :root .application-shell .resume-reading>span { display: flex; align-items: center; gap: 7px; color: var(--shell-muted); font-size: 10px; }
@@ -185,7 +185,7 @@
   :root .application-shell .mobile-shade { position: fixed; inset: 0 0 0 var(--rail-width); z-index: 30; background: var(--shade, #25332235); }
   :root .application-shell .knowledge-garden { overflow-y: auto; min-height: 0; flex: 1; }
   :root .application-shell .garden-shell { flex-shrink: 0; }
-  :root .application-shell .collection-folders>button { flex-shrink: 0; }
+  :root .application-shell .collection-folder-row { flex-shrink: 0; }
 }
 @media (max-width: 600px) {
   .application-shell { --rail-width: 0px; --header-height: 54px; grid-template-columns: minmax(0, 1fr); padding-bottom: 62px; }

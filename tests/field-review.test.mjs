@@ -111,7 +111,9 @@ test('real trial retains exact historical prompts/cost; current lecture plan has
   // and output schema. Keep both complete plans pinned, not normalized as an
   // equivalent historical trial or used to claim a current model-quality score.
   assert.equal(fingerprint(run.plan),'2fc9ac6354a879b81a3fd6ff204cf2dbe501b5d51e693522bc2e551930a7c10c');
-  assert.equal(fingerprint(planField()),'830d9c712afb68879003cebb98ecc24f750cc2e399c0f1216767afcf9d0c44fe');
+  // Planning reset changes the writing contract and explicitly scopes this
+  // experiment to a frozen writing stage. Source/goal/review stay unchanged.
+  assert.equal(fingerprint(planField()),'63ddf1603f10c38a8c30c7dc16fde55edafda02d43d8ed3a6398156d01f082f2');
   assert.notEqual(fingerprint(run.plan),fingerprint(planField()), 'Do not rewrite historical evidence to look like current production');
   assert.equal(report.calls,7);assert.equal(report.promptTokens,21383);assert.equal(report.completionTokens,2226);
   assert.equal(run.generation.result.blocks.length,11);assert.equal(report.windows,6);assert.equal(report.coverage.length,39);assert.equal(report.failedWindows,0);

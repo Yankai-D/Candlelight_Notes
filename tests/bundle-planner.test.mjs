@@ -41,12 +41,13 @@ test('lecture planning groups repeated source units by knowledge, and all planni
   const seen=[];
   const mock=provider(request,{
     'bundle-intent-v1':()=>({kind:'lecture',requirements:[{id:'r1',text:request.intent,evidenceQuote:request.intent}],organization:'按知识点和方法合并资料。',limitations:[]}),
-    'bundle-materials-v1':({messages})=>{assert.match(messages[0].content,/lecture-synthesis-v1/);seen.push('materials');},
+    'bundle-materials-v1':({messages})=>{assert.match(messages[0].content,/lecture-synthesis-v3/);seen.push('materials');},
     'bundle-outline-v2':({messages,context})=>{
-      assert.match(messages[0].content,/重复资料可共同支撑同一个知识单元/);seen.push('outline');
-      return {sections:[{title:'均值：条件、计算与变体',purpose:'说明概念和步骤，用代表原题展示计算，再比较不同条件。',unitIds:context.units.map(u=>u.id),requirementIds:['r1'],dependsOn:[],handoff:'用已学方法处理不同权重。'}]};
+      assert.match(messages[0].content,/sourceSelection/);assert.match(messages[0].content,/不能决定章节数/);seen.push('outline');
+      return {sections:[{title:'均值：条件、计算与变体',purpose:'说明概念和步骤，用代表原题展示计算，再比较不同条件。',unitIds:context.units.map(u=>u.id),requirementIds:['r1'],dependsOn:[],handoff:'用已学方法处理不同权重。'}],
+        teachingPlan:{version:1,throughline:'从平均水平到权重条件。',concepts:[{id:'t1',title:'均值',objective:'独立计算并判断权重差异',prerequisites:[],unitIds:context.units.map(u=>u.id),placements:[{section:1,role:'introduce',advance:'定义、计算与权重变体',difficultPoint:'辨认分母',check:'能复算原题并解释分母'}]}],examples:[]}};
     },
-    'bundle-plan-review-v1':({messages})=>{assert.match(messages[0].content,/lecture-synthesis-v1/);seen.push('review');},
+    'bundle-plan-review-v1':({messages})=>{assert.match(messages[0].content,/lecture-synthesis-v3/);seen.push('review');},
   });
   const raw=await executionScope({binding:'lecture-planning-first-pass',limits:{calls:4,recoveries:0,perStage:0}},()=>runModel(config,buildMessages(request),undefined,mock.fetch));
   const plan=validateResult(request,raw);

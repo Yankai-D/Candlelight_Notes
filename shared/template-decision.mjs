@@ -13,6 +13,11 @@ export function explicitTask(intent) {
   const text = intent.trim();
   // Negated exclusivity and combined deliverables need semantic interpretation.
   if (/不(?:要|是)?只|不仅|并非只|not (?:just|only)/i.test(text)) return null;
+  // A negative instruction is not an affirmative deliverable. This guard is
+  // intentionally conservative: leave the whole goal to semantic routing when
+  // a task verb is negated, rather than force a genre from the embedded noun.
+  // Keep "生成练习题，不要答案" intact: its negation concerns answers, not creation.
+  if (/(?:不(?:要|用|必|需|再|额外)?|无需|禁止|别|do not|don't|without|no need to)\s*(?:(?![，。；;!?\n]).){0,24}(?:生成|编写|出|设计|create|generate|翻译|translate|逐题(?:解答|求解|讲解)|solve)/i.test(text)) return null;
   if (/(?:复习讲义|梳理知识|知识体系)/.test(text) && /(?:生成|编写|出|设计).{0,12}(?:题|试卷)/.test(text)) return null;
   if (/(?:生成|编写|出|设计).{0,12}(?:新题|练习题|试卷|模拟题)|(?:create|generate).{0,20}(?:exercises|quiz|exam)/i.test(text)) return 'create-exercises';
   if (/只(?:给|要|需|提供)?(?:一点|一些|解题)?提示(?:$|[，。；;,\s])|(?:不要(?:给出|直接给|给)?答案|不给答案)(?:$|[，。；;,\s])|hints? only|without (?:the )?answers?/i.test(text)) return 'hints';

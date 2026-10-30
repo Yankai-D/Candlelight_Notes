@@ -104,7 +104,7 @@ function SingleSourceReader({ document, position, expanded = false, onExpand, ch
   const pages = document.pages
   return <div className={`source-reader following-source ${expanded ? 'expanded' : ''}`}>
     <div className="source-heading"><span><FileText size={14} /> 原文对照</span>{!expanded && <button title="展开当前原文上下文" aria-label="展开原文" onClick={onExpand}><Maximize2 size={14} /></button>}</div>
-    <div className="source-follow-label"><span><span className="tiny-dot" /> {manualPage === null ? '跟随笔记' : '自由查看'}{chapterTitle && ` · ${chapterTitle}`}</span>{manualPage !== null && <button onClick={() => setManualPage(null)} title="回到笔记对应原文"><LocateFixed size={13} /></button>}</div>
+    <div className="source-follow-label"><span title={chapterTitle}><span className="tiny-dot" /> {manualPage === null ? '跟随笔记' : '自由查看'}{chapterTitle && ` · ${chapterTitle}`}</span>{manualPage !== null && <button onClick={() => setManualPage(null)} title="回到笔记对应原文"><LocateFixed size={13} /></button>}</div>
     <div className="source-context-viewport" ref={viewport} aria-label="原文上下文" data-follow-page={page} data-follow-fraction={fraction.toFixed(3)}>
       {error && <p className="inline-error">{error}</p>}
       {pages.map(p => <div className={`source-context-page ${p.number === page ? 'current-source-page' : ''}`} data-source-page={p.number} key={`${document.id}:${p.number}`}>

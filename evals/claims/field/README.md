@@ -1,6 +1,8 @@
 # 从真实生成的讲义到逐句审阅
 
-本轮固定上一轮的 `condition-review-v1`，不继续改提示。先通过应用实际使用的生成 harness，整理已导入的 OpenIntro 均值选段，再按固定规则复核全部生成内容，包括标题、正文和列表。公开教材已参与项目样稿开发，因此这是实际资料上的开发试验，不是未见材料测试。
+本工具固定 `condition-review-v1`。先通过冻结的正文请求及生产校验/恢复阶段，整理 OpenIntro 均值选段，再按固定规则复核全部生成内容，包括标题、正文和列表。它不运行当前生产版新增的资料分析、交付规划和按需取证；完整讲义流程使用 `eval:course` 评测。公开教材已参与项目样稿开发，因此这是实际资料上的开发试验，不是未见材料测试。历史真实记录保留当时的完整请求与统计。
+
+This tool fixes `condition-review-v1`, generating an OpenIntro mean excerpt through a frozen writing request and production validation/recovery before reviewing all resulting text. It does not run the current source-analysis, deliverable-selection or evidence-expansion pipeline; use `eval:course` for whole-handout evaluation. The public textbook is development material, not a holdout. Historical live records retain their original requests and measurements.
 
 ## 执行与边界
 

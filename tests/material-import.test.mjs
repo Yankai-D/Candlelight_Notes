@@ -10,6 +10,13 @@ import { FileLibrary } from '../server/file-library.mjs';
 import { createDemo } from '../src/demo.ts';
 import { startTestServer } from './support/server.mjs';
 const input=(name,bytes)=>({name,data:bytes.toString('base64')});
+
+test('rich material accepts 2000 source sections and rejects 2001',async()=>{
+  const html=count=>Buffer.from('<main>'+Array.from({length:count},(_,i)=>`<h2>Topic ${i+1}</h2><p>Original lesson ${i+1}.</p>`).join('')+'</main>');
+  const result=await parseMaterial(input('long-course.html',html(2000)));
+  assert.equal(result.sections.length,2000);assert.match(result.sections.at(-1).text,/2000/);
+  await assert.rejects(parseMaterial(input('too-many.html',html(2001))),/提取内容过长/);
+});
 test('Word preserves authored headings, Chinese, table cells and common Office math',async()=>{
   const result=await parseMaterial(input('讲义.docx',docxFixture()));
   assert.equal(result.sections.length,2);assert.equal(result.sections[0].title,'中文概率讲义');assert.equal(result.sections[1].title,'方差');

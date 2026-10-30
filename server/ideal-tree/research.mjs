@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Agent } from 'undici';
 import { JSDOM } from 'jsdom';
+import sourceLimits from '../../shared/source-limits.json' with { type: 'json' };
 const { createArxivSearch, arxivId } = await import(new URL(`./arxiv.mjs${new URL(import.meta.url).search}`, import.meta.url));
 
 export const sourceId = value => 'S' + createHash('sha256').update(value).digest('hex').slice(0, 22);
@@ -107,7 +108,7 @@ export function createResearchTools(directory, { read = publicFetch } = {}) {
       const task = getDocument({ data: new Uint8Array(response.bytes), useSystemFonts: true, isEvalSupported: false });
       try {
         const document = await task.promise;
-        if (document.numPages > 1000) throw new Error('这份来源页数超过导入范围');
+        if (document.numPages > sourceLimits.maxPages) throw new Error(`这份来源超过 ${sourceLimits.maxPages} 页，请拆分后导入。`);
         const pages = [...new Set([...Array.from({ length: Math.min(8, document.numPages) }, (_, i) => i + 1), ...Array.from({ length: 8 }, (_, i) => Math.max(1, Math.round(document.numPages * (i + 1) / 8)))])];
         const parts = [];
         for (const number of pages.sort((a,b) => a-b)) {

@@ -1,5 +1,13 @@
 # 学习笔记效果评测
 
+当前工具的边界是冻结正文请求、生产校验与恢复；`harness` 等历史组名保留，不代表正在评测当前完整生成系统。资料分析、目标驱动的交付规划和按需展开证据由整份讲义工具 `eval:course` 覆盖。历史真实响应和费用记录保持原样，新模拟不补造真实效果。
+
+This tool now explicitly evaluates frozen writing requests with production validation and recovery. Historical arm names such as `harness` remain labels, not claims to evaluate the complete current generation system. Use `eval:course` for source analysis, goal-driven deliverable selection and evidence expansion. Historical responses and costs remain unchanged; new simulations do not establish live performance.
+
+跨版本质量—成本回归入口为 `npm run eval:regression`：读取冻结运行与人工评分，不调用模型；默认离线演示用 `--demo`。配对约束、金额估算、退出状态和范围见 [生成观察与回归说明](../../docs/generation-observability.md)。
+
+Use `npm run eval:regression` for cross-version quality–cost comparisons. It reads frozen runs and human ratings without model calls; `--demo` exercises the offline path. See [observability and regression documentation](../../docs/generation-observability.md) for pairing constraints, cost estimates, exit states and scope.
+
 当前重点回到 [主产品三场景对照](runs/2026-10-18-product-plan.md)：ResNet 长文、OpenIntro 课件、小纸条追问。使用 `--suite product-scenarios`，固定一份画像、两种方法、每组一次，复用本工具与人工审阅页。数学复核实验暂时冻结，历史记录保留。此轮不改生产提示词，先检查实际笔记质量；无人工审阅就不宣布优势。
 
 [真实运行已归档](runs/2026-10-18-product/README.md)：7 次请求，harness 交付 3/3、直接调用 2/3；有一次格式修复，无截断。解释中的证据强度与背景假设仍有待核对的问题，独立人工评分为空。

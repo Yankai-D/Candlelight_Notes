@@ -23,14 +23,15 @@ for(let i=1;i<=6;i++){
   job.research[`B${i}`]={selections:[{nodeId:'N2',sourceIds:['Slocal','Sweb'],explanation:'主资料帮助理解问题，公开课程提供补充视角。',evidence:[{sourceId:'Slocal',quote:'真实资料摘录示例，内容仅用于界面测试。'},{sourceId:'Sweb',quote:'A verified excerpt supporting the recommendation.'}]}],problems:[]};
 }
 let exists=false,reads=0,requests=[],errorMode=false,savedCopies=1,paperReads=0;
-let rebuildSource=null, rebuilt=null, loseRebuildResponse=true;
+let rebuildSource=null, rebuilt=null, loseRebuildResponse=true, configured=true;
+let holdPapers=false, holdExport=false, finishExport;
 const errors=[],unexpected=[];
 try{
 const page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));await page.setViewport({width:1440,height:1000});await page.setRequestInterception(true);
 await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
 page.on('request',req=>{const url=req.url(),json=(v,status=200)=>void req.respond({status,contentType:'application/json',body:JSON.stringify(v)}).catch(()=>{});
  if(url.startsWith('https://fonts.googleapis.com/'))return void req.respond({status:200,contentType:'text/css',body:''});
- if(url.endsWith('/api/config'))return json({baseUrl:'https://example.test',model:'QA',configured:true,token:'qa'});
+ if(url.endsWith('/api/config'))return json({baseUrl:'https://example.test',model:'QA',configured,token:'qa'});
  if(url.endsWith('/api/library'))return json({documents:[fixture]});
  if(url.endsWith('/api/edit')){const input=JSON.parse(req.postData());requests.push(input);
    if(input.action==='select-template')return json({result:{templateId:'lecture',reason:'测试讲义'}});
@@ -44,18 +45,24 @@ page.on('request',req=>{const url=req.url(),json=(v,status=200)=>void req.respon
      if(loseRebuildResponse){loseRebuildResponse=false;return json({error:'模拟首次响应中断，请重试。'},400);}
      job=rebuilt;return json({result:{job:rebuilt}});
    }
-   if(input.command==='pause'){job={...job,status:'paused',stage:'已暂停'};return json({result:{job}});}
+   if(input.command==='pause'){
+     if(['complete','review'].includes(job.status)){
+       for(const branch of Object.values(job.paperResearch||{}))for(const state of Object.values(branch))if(state.status==='running')state.status='failed';
+       job.revision++;
+     } else job={...job,status:'paused',stage:'已暂停'};
+     return json({result:{job}});
+   }
    if(input.command==='resume'){job={...job,status:'running',stage:'内容审查'};reads=0;return json({result:{job}});}
    if(input.command==='papers'){job.paperResearch={B1:{N1:{status:'running',stage:'查找 arXiv 并核实摘要'}}};paperReads=0;return json({result:{job}});}
    if(input.command==='get'){
      if(rebuildSource && input.id===rebuildSource.id)return json({result:{job:rebuildSource}});
      if(job.status==='running'&&++reads>2)job={...job,status:'complete',stage:'构建完成'};
-     if(job.paperResearch?.B1?.N1?.status==='running'&&++paperReads>1){
+     if(!holdPapers&&job.paperResearch?.B1?.N1?.status==='running'&&++paperReads>1){
        job.paperResearch.B1.N1={status:'complete',stage:'论文已找到',selection:{nodeId:'N1',sourceIds:['Sppo'],explanation:'论文研究策略优化，适合当前节点。',evidence:[{sourceId:'Sppo',quote:'Actual abstract excerpt for a UI test.'}]}};
        job.sources.push({id:'Sppo',arxivId:'1707.06347v2',title:'Proximal Policy Optimization Algorithms',url:'https://arxiv.org/abs/1707.06347v2',level:'abstract',extent:'arXiv 官方摘要 · 全文在导入时下载'});job.revision++;
      }return json({result:{job}});
    }
-   if(input.command==='export')return json({result:{artifact:job}});
+   if(input.command==='export'){if(holdExport){finishExport=()=>json({result:{artifact:job}});return;}return json({result:{artifact:job}});}
    if(input.command==='resource')return json({result:input.sourceId==='Sppo'?{filename:'PPO.pdf',data:paperData,url:'https://arxiv.org/pdf/1707.06347v2'}:{filename:'公开检索课程.txt',data:Buffer.from('来源：https://example.org/course\n\nA retrieval system ranks documents for a query. This is synthetic teaching material for a UI import test.').toString('base64'),url:'https://example.org/course'}});
  }
  if(url.includes('/api/')||!url.startsWith(base+'/')){unexpected.push(url);return void req.abort();}void req.continue();
@@ -130,7 +137,7 @@ job.pathReport={status:'checked',errors:[],branchOrder:['B1','B2'],requirements:
 await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved-open');
 assert.ok(!(await page.$eval('.ideal-saved',el=>el.textContent)).includes('改进建议'));await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');
 assert.equal(await page.$eval('.ideal-status',el=>el.textContent),'学习路径构建完成');await page.click('[aria-label="重建学习树"]');
-assert.equal(await page.$eval('.ideal-rebuild-form .primary',el=>el.disabled),true);assert.equal(await page.$eval('.ideal-review-choice input',el=>el.checked),false);
+assert.equal(await page.$eval('.ideal-rebuild-form .primary',el=>el.disabled),false);assert.equal(await page.$eval('.ideal-review-choice input',el=>el.checked),false);
 await page.type('#ideal-rebuild-suggestion','加强检索评估，并增加贯穿各阶段的项目。');await page.type('#ideal-rebuild-reason','我需要通过具体成果检验理解。');await page.click('.ideal-review-choice input');
 await page.screenshot({path:output+'/rebuild-desktop.png'});await page.setViewport({width:390,height:844});await page.screenshot({path:output+'/rebuild-mobile.png'});
 assert.equal(await page.$eval('dialog',el=>el.scrollWidth>el.clientWidth),false);await page.setViewport({width:1440,height:1000});
@@ -139,6 +146,37 @@ await page.waitForFunction(()=>!document.querySelector('.ideal-rebuild-form') &&
 const rebuildCalls=requests.filter(r=>r.command==='rebuild');assert.equal(rebuildCalls.length,2);assert.equal(rebuildCalls[0].requestId,rebuildCalls[1].requestId);assert.equal(rebuildCalls[0].includeReview,true);assert.ok(rebuildCalls[0].reason.includes('检验理解'));
 await click('构建记录');await page.waitForSelector('.ideal-path-check');await page.click('.ideal-path-check summary');await page.screenshot({path:output+'/path-check.png'});
 await click('查看原版本');await page.waitForFunction(()=>document.querySelector('.ideal-map-title span')?.textContent.includes('第 1 版'));await click('全部目标');await page.waitForFunction(()=>document.querySelectorAll('.ideal-saved-open').length===2);
+// Missing optional feedback must not block connecting a model or submitting a rebuild.
+configured=false;
+await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved-open');await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');
+await page.click('[aria-label="重建学习树"]');
+assert.equal(await page.$eval('.ideal-rebuild-form .primary',el=>el.disabled),false);
+const callsBeforeConnection=requests.filter(r=>r.command==='rebuild').length;
+await click('连接模型');await page.waitForSelector('.provider-card');
+assert.equal(requests.filter(r=>r.command==='rebuild').length,callsBeforeConnection);
+configured=true;job=structuredClone(rebuildSource);rebuilt=null;rebuildSource=null;
+// Paper lookup and unrelated pending exports must not lock the rebuild entry.
+job.paperResearch={B1:{N1:{status:'running',stage:'正在核对论文'}}};holdPapers=true;
+await page.reload({waitUntil:'networkidle0'});await page.click('button[aria-label="学习树"]');await click('理想学习树');await page.waitForSelector('.ideal-saved-open');await page.click('.ideal-saved-open');await page.waitForSelector('.ideal-bough');
+assert.equal(await page.$eval('[aria-label="重建学习树"]',el=>el.disabled),false);
+await page.click('[aria-label="重建学习树"]');await page.waitForSelector('.ideal-rebuild-form .ideal-notice');
+await page.type('#ideal-rebuild-suggestion','精简');await click('生成新版本');await page.waitForSelector('.ideal-rebuild-form [role="alert"]');
+assert.equal(requests.filter(r=>r.command==='rebuild').length,callsBeforeConnection);
+await click('暂停论文查找');await page.waitForFunction(()=>!document.querySelector('.ideal-rebuild-form .ideal-notice') && !document.querySelector('.ideal-rebuild-form .primary').disabled);
+assert.equal(await page.$eval('#ideal-rebuild-suggestion',el=>el.value),'精简');
+await page.click('dialog [aria-label="关闭弹窗"]');
+holdExport=true;await page.click('[aria-label="导出理想学习树"]');await page.waitForFunction(()=>document.querySelector('[aria-label="删除理想学习树"]').disabled);
+assert.equal(await page.$eval('[aria-label="重建学习树"]',el=>el.disabled),false);
+await page.click('[aria-label="重建学习树"]');assert.equal(await page.$eval('.ideal-rebuild-form .primary',el=>el.disabled),false);
+// A source revision that changed after opening the dialog is refreshed before submission.
+job.revision+=5;const latestSourceRevision=job.revision;
+await click('生成新版本');
+await page.waitForFunction(()=>!document.querySelector('.ideal-rebuild-form') && document.querySelector('.ideal-map-title span')?.textContent.includes('第 2 版'));
+const directRebuild=requests.filter(r=>r.command==='rebuild').at(-1);
+assert.equal(directRebuild.suggestion,'');assert.equal(directRebuild.reason,'');assert.equal(directRebuild.includeReview,false);
+assert.equal(directRebuild.revision,latestSourceRevision);assert.ok(finishExport);finishExport();
+await page.waitForFunction(()=>!document.querySelector('[aria-label="删除理想学习树"]').disabled);
+assert.equal(requests.filter(r=>r.command==='rebuild').length,callsBeforeConnection+1);
 assert.deepEqual(await read(),beforeRebuildDocs);assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[]);
 console.log(JSON.stringify({passed:true,mockedRequests:requests.length,screenshots:output,actualModelCalls:0}));
 }finally{await browser.close();}

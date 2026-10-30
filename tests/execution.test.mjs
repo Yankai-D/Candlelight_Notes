@@ -115,17 +115,21 @@ test('failed repair and reframe do not disable inspection and a subsequent local
   assert.equal(calls, 6);
 });
 
-test('a concrete new hypothesis may reuse a method; identical instructions receive feedback instead of another rewrite', async () => {
+test('a method may be reused after new evidence, while a different caption alone cannot reopen it', async () => {
   let generated = 0, planners = 0;
   const result = await runStage({ stage: 'parcel', messages, validate, complete: async (conversation, action) => {
     await reserveExecutionCall();
     if (action !== 'recovery-plan') return JSON.stringify(++generated === 4 ? valid : { ...valid, labels: ['amber','amber','jade'] });
     const context = JSON.parse(conversation[1].content); planners++;
     if (planners <= 2) return plan(conversation, 'reframe');
-    assert.match(conversation.at(-1).content, /RECOVERY_NO_NEW_ACTION/);
+    if (planners === 3) {
+      assert.match(conversation.at(-1).content, /RECOVERY_NO_NEW_ACTION/);
+      return JSON.stringify({ failureId: context.failureId, strategy: 'inspect', target: 'context', path: [0, 'content', 'labels'] });
+    }
+    assert.match(conversation.at(-1).content, /indigo/);
     return JSON.stringify({ failureId: context.failureId, strategy: 'reframe', cause: 'The previous reconstruction retained the repeated middle label.', instruction: 'Bind each output label by its position to the three distinct labels in the user context; do not copy the candidate label array.' });
   } });
-  assert.deepEqual(result.value, valid); assert.equal(generated, 4); assert.equal(planners, 3);
+  assert.deepEqual(result.value, valid); assert.equal(generated, 4); assert.equal(planners, 4);
 });
 
 test('actual call budget covers diagnostic calls and children without changing acceptance rules', async () => {

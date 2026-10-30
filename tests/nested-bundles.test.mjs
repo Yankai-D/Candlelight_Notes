@@ -76,7 +76,8 @@ test('plan validates complete provenance coverage across analysis and repair, an
     if (system.startsWith('bundle-intent-v1')) result = { kind: 'lecture', requirements: [{ id: 'r1', text: input.intent, evidenceQuote: input.intent }], organization: '按概念依赖整理。', limitations: [] };
     else if (system.startsWith('bundle-materials-v1')) result = { units: context.units.map(unit => ({ id: unit.id, topics: ['均值'], prerequisites: [], role: '解释概念', limitations: [] })) };
     else if (system.startsWith('bundle-plan-review-v1')) result = { candidateDigest: context.candidateDigest, verdict: 'accept', checks: ['goal','coverage','order','coherence'].map(dimension => ({ dimension, status: 'pass' })), findings: [], summary: '完整覆盖。' };
-    else { outlines++; result = { sections: (outlines === 1 ? [valid.sections[0]] : valid.sections).map(section => ({ ...section, requirementIds: ['r1'], dependsOn: [], handoff: '各节互补。' })) }; }
+    else { outlines++; result = { sections: (outlines === 1 ? [valid.sections[0]] : valid.sections).map(section => ({ ...section, requirementIds: ['r1'], dependsOn: [], handoff: '各节互补。' })) };
+      result.teachingPlan={version:1,throughline:'理解均值并运用。',concepts:[{id:'t1',title:'均值',objective:'计算与解释均值',prerequisites:[],unitIds:input.units.map(u=>u.id),placements:result.sections.map((_,i)=>({section:i+1,role:i?'apply':'introduce',advance:i?'在新数据中计算':'理解定义',difficultPoint:'',check:'能解释计算结果'}))}],examples:[]}; }
     return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(result) }, finish_reason: 'stop' }] }));
   });
   assert.equal(calls, 5); assert.equal(outlines, 2);
