@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { join, dirname, resolve } from 'node:path';
+import { mkdtemp, rm, realpath } from 'node:fs/promises';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { runModel, buildMessages, validateResult } from '../server/harness.mjs';
 import { createGenerationRecord, readGenerationRecords } from '../server/generation-records.mjs';
@@ -84,7 +84,10 @@ test('bundle planning executes intent, material analysis, relationships and sema
 });
 
 test('planning persists before failure, resumes accepted analyses after restart, and invalidates a changed task', async () => {
-  const system = await mkdtemp(join(tmpdir(), 'candlelight-plan-test-'));
+  // FileLibrary passes canonical roots to generation records. CI temporary
+  // directories may be aliases, so give this direct fixture the same contract.
+  const temporaryRoot = await realpath(tmpdir());
+  const system = await mkdtemp(join(temporaryRoot, 'candlelight-plan-test-'));
   try {
     const request = input(25), first = provider(request, { 'bundle-outline-v2': () => new Response('{}', { status: 401 }) });
     const record = await createGenerationRecord(system, request, config.model, first.fetch);
@@ -105,7 +108,7 @@ test('planning persists before failure, resumes accepted analyses after restart,
     assert.ok(!JSON.stringify(saved).includes(config.apiKey));
     const changed = await createGenerationRecord(system, { ...request, intent: '只整理概念，不解题' }, config.model, second.fetch);
     assert.equal(changed.checkpoint, undefined); await changed.finish('cancelled');
-  } finally { assert.equal(dirname(resolve(system)), resolve(tmpdir())); await rm(system, { recursive: true, force: true }); }
+  } finally { assert.equal(dirname(await realpath(system)), temporaryRoot); await rm(system, { recursive: true, force: true }); }
 });
 
 test('planner diagnostics identify missing, unknown and forward references without hardcoded repair answers', () => {
